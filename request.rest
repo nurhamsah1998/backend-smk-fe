@@ -1,0 +1,77 @@
+GET http://localhost:5000/siswa
+
+###
+
+POST http://localhost:5000/register-siswa
+Content-Type: application/json
+
+{
+      "name": "2222222",
+      "nisn": "11111111d",
+      "password":"2222222",
+      "noHP": "081213221343",
+      "jurusanId":"bbe64d3a-58b4-42f9-81d5-d0b4b8431c30"
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+###
+/// post jurusan siswa
+POST http://localhost:5000/jurusan
+Content-Type: application/json
+
+{
+    "nama":"all"
+}
+
+###
+/// get jurusan siswa
+GET http://localhost:5000/jurusan
+###
+/// delete jurusan siswa
+DELETE  http://localhost:5000/jurusan/1e1fbd1b-a083-4669-8755-8ed02757f3c8
+###
+/// update jurusan siswa
+PATCH   http://localhost:5000/jurusan/273b169d-6c8f-4538-8052-315f2cabb4bc
+Content-Type: application/json
+
+{
+    "name":"tukang ngomel"
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+###
+/// post tagihan siswa
+POST http://localhost:5000/tagihan
+Content-Type: application/json
+
+{
+      "name": "pembayaran adasdasdasdasdasd",
+      "description": "LAB praktek",
+      "school_force": 2022,
+      "amount": 450000,
+      "jurusanId": "45323520-8479-4de4-9060-92d50d71dc8a"
+}
+
+###
+/// get tagihan siswa
+GET http://localhost:5000/tagihan
+###
+/// delete tagihan siswa
+DELETE  http://localhost:5000/tagihan/8d2500b6-6420-4b5f-b4c4-6bcb002669ec
+###
+/// update tagihan siswa
+PATCH   http://localhost:5000/tagihan/22a88ee5-ef42-4c7b-a307-d60a7cb19b28
+Content-Type: application/json
+
+{
+    "name":"PembayarncSPP",
+    "description":"bayra spp ketika hujan",
+    "major_id":"47b54a65-e0c5-48bc-8d80-241a9fdcae15"
+}
