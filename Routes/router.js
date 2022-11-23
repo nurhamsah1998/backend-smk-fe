@@ -1,12 +1,27 @@
-import { getJurusan, postJurusan, deleteJurusan, updateJurusan } from "../Controller/jurusanController.js";
-import { getTagihan, updateTagihan, deleteTagihan, postTagihan } from "../Controller/tagihanController.js";
-import { getSiswa, siswaRegister } from "../Controller/siswaController.js";
+import {
+  getJurusan,
+  postJurusan,
+  deleteJurusan,
+  updateJurusan,
+} from "../Controller/jurusanController.js";
+import {
+  getTagihan,
+  updateTagihan,
+  deleteTagihan,
+  postTagihan,
+} from "../Controller/tagihanController.js";
+import {
+  getSiswa,
+  siswaRegister,
+  siswaLogin,
+} from "../Controller/siswaController.js";
 import express from "express";
 
 const router = express.Router();
 
 router.get("/siswa", getSiswa);
 router.post("/register-siswa", siswaRegister);
+router.post("/login-siswa", siswaLogin);
 /// JURUSAN ///
 router.get("/jurusan", getJurusan);
 router.post("/jurusan", postJurusan);

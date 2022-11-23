@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import database from "../Configuration/database.js";
+import { jurusan } from "./jurusan.js";
 
 const { DataTypes } = Sequelize;
 
@@ -43,3 +44,6 @@ export const siswaAuth = database.define(
     freezeTableName: true,
   }
 );
+
+jurusan.hasOne(siswaAuth);
+siswaAuth.belongsTo(jurusan);

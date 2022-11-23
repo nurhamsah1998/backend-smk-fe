@@ -6,11 +6,20 @@ POST http://localhost:5000/register-siswa
 Content-Type: application/json
 
 {
-      "name": "2222222",
-      "nisn": "11111111d",
-      "password":"2222222",
+      "nama": "nurhamsah",
+      "nisn": "1111111111",
+      "password":"1111111111",
       "noHP": "081213221343",
-      "jurusanId":"bbe64d3a-58b4-42f9-81d5-d0b4b8431c30"
+      "jurusanId":"cc277e85-245b-4e98-8188-c91cfd88b805"
+}
+###
+
+POST http://localhost:5000/login-siswa
+Content-Type: application/json
+
+{
+      "nisn": "1111111111",
+      "password":"1111111111"
 }
 
 
