@@ -17,10 +17,11 @@ export const siswaRegister = async (req, res) => {
   const { nama, nisn, password, noHP, jurusanId } = req.body;
   const salt = await bcrypt.genSalt();
   const securePassword = await bcrypt.hash(password, salt);
+  const secureNisn = await bcrypt.hash(nisn, salt);
   try {
     const response = await siswaAuth.create({
       nama: nama,
-      nisn: nisn,
+      nisn: secureNisn,
       password: securePassword,
       noHP: noHP,
       angkatan: new Date().getFullYear(),
