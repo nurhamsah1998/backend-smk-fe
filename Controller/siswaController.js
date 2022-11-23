@@ -30,9 +30,7 @@ export const siswaRegister = async (req, res) => {
   } catch (error) {
     console.log(error);
     if (error.name.includes("SequelizeUniqueConstraintError"))
-      return res
-        .status(403)
-        .json({ msg: "Nomor NISN sudah terdaftar didatabase kami" });
+      return res.status(403).json({ msg: "Nomor NISN sudah terdaftar" });
   }
 };
 
@@ -72,9 +70,9 @@ export const siswaLogin = async (req, res) => {
         expiresIn: "7d",
       }
     );
-    console.log(accessToken, "===");
-    res.json({ accessToken });
+    res.json({ msg: "Login berhasil", accessToken });
   } catch (error) {
     console.log(error);
+    res.status(404).json({ msg: "akun tidak ditemukan" });
   }
 };

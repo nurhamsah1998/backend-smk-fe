@@ -3,7 +3,6 @@ import { jurusan } from "../Models/jurusan.js";
 export const getJurusan = async (req, res) => {
   try {
     const response = await jurusan.findAll();
-    if (response.length <= 0) return res.json({ msg: "Tidak ada data yang ditampilkan." });
     res.status(200).json(response);
   } catch (error) {
     console.log(error);
@@ -29,7 +28,8 @@ export const deleteJurusan = async (req, res) => {
       },
     });
     console.log(response);
-    if (response === 0) return res.status(404).json({ msg: "id tidak ditemukan" });
+    if (response === 0)
+      return res.status(404).json({ msg: "id tidak ditemukan" });
     res.status(201).json({ msg: "Jurusan berhasil dihapus." });
   } catch (error) {
     console.log(error);
@@ -43,7 +43,8 @@ export const updateJurusan = async (req, res) => {
         id: req.params.id,
       },
     });
-    if (response[0] === 0) return res.status(404).json({ msg: "id tidak ditemukan" });
+    if (response[0] === 0)
+      return res.status(404).json({ msg: "id tidak ditemukan" });
     res.status(201).json({ msg: "Jurusan berhasil update." });
   } catch (error) {
     console.log(error);
