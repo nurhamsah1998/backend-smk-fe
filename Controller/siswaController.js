@@ -19,6 +19,7 @@ export const siswaRegister = async (req, res) => {
   const securePassword = await bcrypt.hash(password, salt);
   const secureNisn = await bcrypt.hash(nisn, salt);
   try {
+    const compareNisn = bcrypt.compare(req.body.nisn);
     const response = await siswaAuth.create({
       nama: nama,
       nisn: secureNisn,
