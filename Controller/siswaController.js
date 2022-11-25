@@ -57,22 +57,31 @@ export const siswaRegister = async (req, res) => {
 
 export const siswaLogin = async (req, res) => {
   try {
-    const siswa = await siswaAuth.findAll({
-      where: {
-        nisn: req.body.nisn,
-      },
+    const NISN = await siswaAuth.findAll();
+    const toStringify = JSON.stringify(NISN);
+    const toArray = JSON.parse(toStringify);
+    const decrypt = toArray.map((i) => {
+      const DecryptNISN = CryptoJS.AES.decrypt(
+        i.nisn,
+        process.env.SECRET_ENCRYPT
+      );
+      const originalText = DecryptNISN.toString(CryptoJS.enc.Utf8);
+      return { ...i, nisn: originalText };
     });
+    const isNisinHasRegister = decrypt.find((i) => i.nisn === req.body.nisn);
+    if (!isNisinHasRegister)
+      return res.status(400).json({ msg: "AKUN TIDAK DITEMUKAN" });
     const isMatchPassword = await bcrypt.compare(
       req.body.password,
-      siswa[0].password
+      isNisinHasRegister.password
     );
     if (!isMatchPassword)
       return res.status(400).json({ msg: "Periksa password anda" });
-    const idSiswa = siswa[0].id;
-    const namaSiswa = siswa[0].name;
-    const nisnSiswa = siswa[0].nisn;
-    const tahunAngkatanSiswa = siswa[0].angkatan;
-    const idJurusanSiswa = siswa[0].jurusanId;
+    const idSiswa = isNisinHasRegister.id;
+    const namaSiswa = isNisinHasRegister.name;
+    const nisnSiswa = isNisinHasRegister.nisn;
+    const tahunAngkatanSiswa = isNisinHasRegister.angkatan;
+    const idJurusanSiswa = isNisinHasRegister.jurusanId;
     const namaJurusanSiswa = await jurusan.findOne({
       where: {
         id: idJurusanSiswa,
@@ -94,6 +103,6 @@ export const siswaLogin = async (req, res) => {
     res.json({ msg: "Login berhasil", accessToken });
   } catch (error) {
     console.log(error);
-    res.status(404).json({ msg: "akun tidak ditemukan" });
+    res.status(404).json({ msg: "internal server error 500" });
   }
 };
