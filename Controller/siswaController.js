@@ -2,6 +2,7 @@ import { siswaAuth } from "../Models/siswa.js";
 import bcrypt from "bcrypt";
 import { jurusan } from "../Models/jurusan.js";
 import jwt from "jsonwebtoken";
+import CryptoJS from "crypto-js";
 
 export const getSiswa = async (req, res) => {
   try {
@@ -17,12 +18,30 @@ export const siswaRegister = async (req, res) => {
   const { nama, nisn, password, noHP, jurusanId } = req.body;
   const salt = await bcrypt.genSalt();
   const securePassword = await bcrypt.hash(password, salt);
-  const secureNisn = await bcrypt.hash(nisn, salt);
+  const EncryptNISN = CryptoJS.AES.encrypt(
+    nisn,
+    process.env.SECRET_ENCRYPT
+  ).toString();
   try {
-    const compareNisn = bcrypt.compare(req.body.nisn);
-    const response = await siswaAuth.create({
+    const NISN = await siswaAuth.findAll({
+      attributes: ["nisn"],
+    });
+    const toStringify = JSON.stringify(NISN);
+    const toArray = JSON.parse(toStringify);
+    const decrypt = toArray.map((i) => {
+      const DecryptNISN = CryptoJS.AES.decrypt(
+        i.nisn,
+        process.env.SECRET_ENCRYPT
+      );
+      const originalText = DecryptNISN.toString(CryptoJS.enc.Utf8);
+      return { nisn: originalText };
+    });
+    const isNisinHasRegister = decrypt.find((i) => i.nisn === req.body.nisn);
+    if (isNisinHasRegister)
+      return res.status(400).json({ msg: "NISN telah terdaftar" });
+    await siswaAuth.create({
       nama: nama,
-      nisn: secureNisn,
+      nisn: EncryptNISN,
       password: securePassword,
       noHP: noHP,
       angkatan: new Date().getFullYear(),
