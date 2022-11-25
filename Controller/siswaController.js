@@ -14,6 +14,23 @@ export const getSiswa = async (req, res) => {
     console.log(error);
   }
 };
+export const getSiswaProfile = async (req, res) => {
+  const decodedTokenFromClient = jwt.decode(
+    req.headers.authorization.replace("Bearer ", "")
+  );
+  try {
+    const response = await siswaAuth.findOne({
+      attributes: { exclude: ["password", "nisn"] },
+      where: {
+        id: decodedTokenFromClient.idSiswa,
+      },
+    });
+    res.json(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const siswaRegister = async (req, res) => {
   const { nama, nisn, password, noHP, jurusanId } = req.body;
   const salt = await bcrypt.genSalt();

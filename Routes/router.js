@@ -4,6 +4,7 @@ import {
   deleteJurusan,
   updateJurusan,
 } from "../Controller/jurusanController.js";
+import { verifyToken } from "../middleWare/verifyToken.js";
 import {
   getTagihan,
   updateTagihan,
@@ -12,6 +13,7 @@ import {
 } from "../Controller/tagihanController.js";
 import {
   getSiswa,
+  getSiswaProfile,
   siswaRegister,
   siswaLogin,
 } from "../Controller/siswaController.js";
@@ -20,6 +22,7 @@ import express from "express";
 const router = express.Router();
 
 router.get("/siswa", getSiswa);
+router.get("/profile", verifyToken, getSiswaProfile);
 router.post("/register-siswa", siswaRegister);
 router.post("/login-siswa", siswaLogin);
 /// JURUSAN ///

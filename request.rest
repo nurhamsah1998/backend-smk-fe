@@ -2,6 +2,12 @@ GET http://localhost:5000/siswa
 
 ###
 
+GET http://localhost:5000/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZFNpc3dhIjoiYzUwZjRmNjItNzRkMy00NDM2LTk0YTYtMzdiYTQ0MzExYzYxIiwibmlzblNpc3dhIjoiMzQ0NTM0NDUzNDUzNDUzNCIsInRhaHVuQW5na2F0YW5TaXN3YSI6IjIwMjIiLCJuYW1hSnVydXNhblNpc3dhIjpudWxsLCJpYXQiOjE2NjkzODA1NDMsImV4cCI6MTY2OTk4NTM0M30.K0mrDRVo8y1dx05FzjtdA_rFQc9zU27nadZYS6Cs6bU
+
+
+###
+
 POST http://localhost:5000/register-siswa
 Content-Type: application/json
 
@@ -18,7 +24,7 @@ POST http://localhost:5000/login-siswa
 Content-Type: application/json
 
 {
-      "nisn": "1111111111",
+      "nisn": "999999999",
       "password":"1111111111"
 }
 
@@ -35,7 +41,7 @@ POST http://localhost:5000/jurusan
 Content-Type: application/json
 
 {
-    "nama":"AKUNTANSIN"
+    "nama":"ALL"
 }
 
 ###
