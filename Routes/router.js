@@ -4,6 +4,12 @@ import {
   deleteJurusan,
   updateJurusan,
 } from "../Controller/jurusanController.js";
+import {
+  staffRegister,
+  getStaff,
+  staffLogin,
+  getStaffProfile,
+} from "../Controller/staffController.js";
 import { verifyToken } from "../middleWare/verifyToken.js";
 import {
   getTagihan,
@@ -16,15 +22,18 @@ import {
   getSiswaProfile,
   siswaRegister,
   siswaLogin,
+  siswaUpdate,
 } from "../Controller/siswaController.js";
+
 import express from "express";
 
 const router = express.Router();
-
+/// SISWA
 router.get("/siswa", getSiswa);
-router.get("/profile", verifyToken, getSiswaProfile);
+router.get("/siswa-profile", verifyToken, getSiswaProfile);
 router.post("/register-siswa", siswaRegister);
 router.post("/login-siswa", siswaLogin);
+router.patch("/siswa-profile-update/:id", verifyToken, siswaUpdate);
 /// JURUSAN ///
 router.get("/jurusan", getJurusan);
 router.post("/jurusan", postJurusan);
@@ -35,5 +44,10 @@ router.get("/tagihan", getTagihan);
 router.patch("/tagihan/:id", updateTagihan);
 router.delete("/tagihan/:id", deleteTagihan);
 router.post("/tagihan", postTagihan);
+/// STAF ///
+router.post("/staff-register", staffRegister);
+router.post("/staff-login", staffLogin);
+router.get("/staff", getStaff);
+router.get("/staff-profile", verifyToken, getStaffProfile);
 
 export default router;

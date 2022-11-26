@@ -25,7 +25,9 @@ export const getSiswaProfile = async (req, res) => {
         id: decodedTokenFromClient.idSiswa,
       },
     });
-    res.json(response);
+    const toStringify = JSON.stringify(response);
+    const toParse = JSON.parse(toStringify);
+    res.json({ ...toParse, nisnSiswa: decodedTokenFromClient.nisnSiswa });
   } catch (error) {
     console.log(error);
   }
@@ -122,4 +124,13 @@ export const siswaLogin = async (req, res) => {
     console.log(error);
     res.status(404).json({ msg: "internal server error 500" });
   }
+};
+
+export const siswaUpdate = async (req, res) => {
+  await siswaAuth.update(req.body, {
+    where: {
+      id: req.params.id,
+    },
+  });
+  res.status(200).json({ msg: "update success" });
 };

@@ -25,8 +25,8 @@ export const siswaAuth = database.define(
       defaultValue: "",
     },
     status: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      type: DataTypes.STRING,
+      defaultValue: "checking",
     },
     angkatan: {
       type: DataTypes.STRING,

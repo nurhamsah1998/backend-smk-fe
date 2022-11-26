@@ -15,10 +15,10 @@ const messageServerStart = `Server start on port ${port}.`;
 
 try {
   await database.authenticate();
-  await jurusan.sync();
-  await tagihan.sync();
-  await siswaAuth.sync();
-  await stafAuth.sync();
+  // await jurusan.sync();
+  // await tagihan.sync();
+  // await siswaAuth.sync();
+  // await stafAuth.sync();
   console.log("DATABASE CONNECTED");
 } catch (error) {
   console.log(error);

@@ -18,6 +18,7 @@ export const stafAuth = database.define(
     username: {
       type: DataTypes.STRING,
       defaultValue: "",
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
@@ -26,6 +27,9 @@ export const stafAuth = database.define(
     role: {
       type: DataTypes.STRING,
       defaultValue: "PPDB",
+    },
+    noHP: {
+      type: DataTypes.BIGINT,
     },
   },
   {

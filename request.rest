@@ -2,8 +2,8 @@ GET http://localhost:5000/siswa
 
 ###
 
-GET http://localhost:5000/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZFNpc3dhIjoiYzUwZjRmNjItNzRkMy00NDM2LTk0YTYtMzdiYTQ0MzExYzYxIiwibmlzblNpc3dhIjoiMzQ0NTM0NDUzNDUzNDUzNCIsInRhaHVuQW5na2F0YW5TaXN3YSI6IjIwMjIiLCJuYW1hSnVydXNhblNpc3dhIjpudWxsLCJpYXQiOjE2NjkzODA1NDMsImV4cCI6MTY2OTk4NTM0M30.K0mrDRVo8y1dx05FzjtdA_rFQc9zU27nadZYS6Cs6bU
+GET http://localhost:5000/siswa-profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZFNpc3dhIjoiZTI3MzRmMTctYTIwOS00MGZiLThlMDktNmJiYzdhZWY4YzQyIiwibmlzblNpc3dhIjoiMTExMTExMTEyMiIsInRhaHVuQW5na2F0YW5TaXN3YSI6IjIwMjIiLCJuYW1hSnVydXNhblNpc3dhIjpudWxsLCJpYXQiOjE2Njk0MjU1NzIsImV4cCI6MTY3MDAzMDM3Mn0.aHitOOWr1d0mOW7Q9Ch73jRJRScJ9BZGTj7X5NNEEE0
 
 
 ###
@@ -17,6 +17,15 @@ Content-Type: application/json
       "password":"1111111111",
       "noHP": "081213221343",
       "jurusanId":"cc277e85-245b-4e98-8188-c91cfd88b805"
+}
+###
+###
+
+PATCH  http://localhost:5000/siswa-profile-update/7129910d-20dc-4960-b008-94734f6b1465
+Content-Type: application/json
+
+{
+      "status": "checked"
 }
 ###
 
@@ -90,3 +99,36 @@ Content-Type: application/json
     "description":"bayra spp ketika hujan",
     "major_id":"47b54a65-e0c5-48bc-8d80-241a9fdcae15"
 }
+
+////////////////////////////////////////////////////////////////////////////////
+/// STAFF
+###
+
+POST http://localhost:5000/staff-register
+Content-Type: application/json
+
+{
+      "nama": "pak candara",
+      "username": "canbdar@123",
+      "password":"111",
+      "noHP": "081213221343"
+    
+}
+###
+
+POST http://localhost:5000/staff-login
+Content-Type: application/json
+
+{
+      "username": "canbdar@123",
+      "password":"111"
+    
+}
+###
+
+GET http://localhost:5000/staff
+###
+
+GET http://localhost:5000/staff-profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZFN0YWZmIjoiYTNiYzVkMzgtZmVkNC00ODVmLWE0NWItYjc5YjlkNDI1Y2Y2IiwibmFtYVN0YWZmIjoicGFrIGNhbmRhcmEiLCJ1c2VybmFtZVN0YWZmIjoiY2FuYmRhckAxMjMiLCJpYXQiOjE2Njk0MzEyMTQsImV4cCI6MTY3MDAzNjAxNH0.RTD8PxJM9nsG-uEE6c1pVw5saFfxEkkfJqoT0Sz0F2s
+
