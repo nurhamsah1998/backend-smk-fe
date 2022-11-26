@@ -37,6 +37,13 @@ export const staffRegister = async (req, res) => {
   //     process.env.SECRET_ENCRYPT
   //   ).toString();
   try {
+    const uniqueUsername = await stafAuth.findOne({
+      where: {
+        username: req.body.username,
+      },
+    });
+    if (uniqueUsername)
+      return res.status(403).json({ msg: "Username / email sudah terdaftar" });
     // const NISN = await stafAuth.findAll({
     //   attributes: ["nisn"],
     // });
@@ -89,7 +96,6 @@ export const staffLogin = async (req, res) => {
         username: req.body.username,
       },
     });
-    console.log(staff, "oop");
     const isMatchPassword = await bcrypt.compare(
       req.body.password,
       staff[0].password
