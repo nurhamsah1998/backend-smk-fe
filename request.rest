@@ -120,8 +120,8 @@ POST http://localhost:5000/staff-login
 Content-Type: application/json
 
 {
-      "username": "canbdar@123",
-      "password":"111"
+      "username": "s2s@mailinator.com",
+      "password":"s2s@mailinator.com"
     
 }
 ###

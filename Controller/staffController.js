@@ -105,11 +105,13 @@ export const staffLogin = async (req, res) => {
     const idStaff = staff[0].id;
     const namaStaff = staff[0].nama;
     const usernameStaff = staff[0].username;
+    const roleStaff = staff[0].role;
     const accessToken = jwt.sign(
       {
         idStaff,
         namaStaff,
         usernameStaff,
+        roleStaff,
       },
       process.env.ACCESS_TOKEN,
       {
