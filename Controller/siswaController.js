@@ -35,6 +35,8 @@ export const getSiswaProfile = async (req, res) => {
 
 export const siswaRegister = async (req, res) => {
   const { nama, nisn, password, noHP, jurusanId } = req.body;
+  if (nisn === "" || password === "")
+    return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
   // const salt = await bcrypt.genSalt();
   // const securePassword = await bcrypt.hash(password, salt);
   // const EncryptNISN = CryptoJS.AES.encrypt(

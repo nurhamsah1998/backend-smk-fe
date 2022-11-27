@@ -30,6 +30,8 @@ export const getStaffProfile = async (req, res) => {
 
 export const staffRegister = async (req, res) => {
   const { nama, username, password, noHP, role } = req.body;
+  if (username === "" || password === "")
+    return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
   const salt = await bcrypt.genSalt();
   const securePassword = await bcrypt.hash(password, salt);
   //   const EncryptNISN = CryptoJS.AES.encrypt(
