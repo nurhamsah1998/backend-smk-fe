@@ -1,11 +1,10 @@
 import { Sequelize } from "sequelize";
 import database from "../Configuration/database.js";
-import { jurusan } from "./jurusan.js";
 
 const { DataTypes } = Sequelize;
 
-export const tagihan = database.define(
-  "tagihan",
+export const invoice = database.define(
+  "invoice",
   {
     id: {
       primaryKey: true,
@@ -42,8 +41,3 @@ export const tagihan = database.define(
     freezeTableName: true,
   }
 );
-
-// tagihan.hasOne(jurusan, { foreignKey: "id" });
-// tagihan.belongsTo(jurusan, { foreignKey: "major_id" });
-jurusan.hasOne(tagihan);
-tagihan.belongsTo(jurusan);

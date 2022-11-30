@@ -2,6 +2,7 @@ import { siswaAuth } from "../Models/siswa.js";
 import bcrypt from "bcrypt";
 import { jurusan } from "../Models/jurusan.js";
 import jwt from "jsonwebtoken";
+import { uid } from "uid";
 import CryptoJS from "crypto-js";
 
 export const getSiswa = async (req, res) => {
@@ -20,53 +21,64 @@ export const getSiswaProfile = async (req, res) => {
   );
   try {
     const response = await siswaAuth.findOne({
-      attributes: { exclude: ["password", "nisn"] },
+      attributes: { exclude: ["password", "username"] },
       where: {
         id: decodedTokenFromClient.idSiswa,
       },
     });
     const toStringify = JSON.stringify(response);
     const toParse = JSON.parse(toStringify);
-    res.json({ ...toParse, nisnSiswa: decodedTokenFromClient.nisnSiswa });
+    res.json({ ...toParse, username: decodedTokenFromClient.username });
   } catch (error) {
     console.log(error);
   }
 };
 
 export const siswaRegister = async (req, res) => {
-  const { nama, nisn, password, noHP, jurusanId } = req.body;
-  if (nisn === "" || password === "")
+  const { nama, username, password, noHP, jurusanId, kelas, kode_siswa } =
+    req.body;
+  if (username === "" || password === "")
     return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
   // const salt = await bcrypt.genSalt();
   // const securePassword = await bcrypt.hash(password, salt);
   // const EncryptNISN = CryptoJS.AES.encrypt(
-  //   nisn,
+  //   username,
   //   process.env.SECRET_ENCRYPT
   // ).toString();
   try {
     // const NISN = await siswaAuth.findAll({
-    //   attributes: ["nisn"],
+    //   attributes: ["username"],
     // });
     // const toStringify = JSON.stringify(NISN);
     // const toArray = JSON.parse(toStringify);
     // const decrypt = toArray.map((i) => {
     //   const DecryptNISN = CryptoJS.AES.decrypt(
-    //     i.nisn,
+    //     i.username,
     //     process.env.SECRET_ENCRYPT
     //   );
     //   const originalText = DecryptNISN.toString(CryptoJS.enc.Utf8);
-    //   return { nisn: originalText };
+    //   return { username: originalText };
     // });
-    // const isNisinHasRegister = decrypt.find((i) => i.nisn === req.body.nisn);
+    // const isNisinHasRegister = decrypt.find((i) => i.username === req.body.username);
     // if (isNisinHasRegister)
     //   return res.status(400).json({ msg: "NISN telah terdaftar" });
+    const findJurusan = await jurusan.findOne({
+      where: {
+        id: jurusanId,
+      },
+    });
+    const length = await siswaAuth.findAndCountAll();
     await siswaAuth.create({
       nama: nama,
-      nisn: nisn,
+      username: username,
       password: password,
       noHP: noHP,
       angkatan: new Date().getFullYear(),
       jurusanId: jurusanId,
+      kelas: kelas,
+      kode_siswa: `${findJurusan.nama}${new Date().getFullYear()}SISWA${
+        length.count
+      }`,
     });
     res.status(201).json({ msg: "Pendaftaran berhasil" });
   } catch (error) {
@@ -83,13 +95,13 @@ export const siswaLogin = async (req, res) => {
     // const toArray = JSON.parse(toStringify);
     // const decrypt = toArray.map((i) => {
     //   const DecryptNISN = CryptoJS.AES.decrypt(
-    //     i.nisn,
+    //     i.username,
     //     process.env.SECRET_ENCRYPT
     //   );
     //   const originalText = DecryptNISN.toString(CryptoJS.enc.Utf8);
-    //   return { ...i, nisn: originalText };
+    //   return { ...i, username: originalText };
     // });
-    // const isNisinHasRegister = decrypt.find((i) => i.nisn === req.body.nisn);
+    // const isNisinHasRegister = decrypt.find((i) => i.username === req.body.username);
     // if (!isNisinHasRegister)
     //   return res.status(400).json({ msg: "AKUN TIDAK DITEMUKAN" });
     // const isMatchPassword = await bcrypt.compare(
@@ -100,7 +112,7 @@ export const siswaLogin = async (req, res) => {
     //   return res.status(400).json({ msg: "Periksa password anda" });
     const findSiswa = await siswaAuth.findAll({
       where: {
-        nisn: req.body.nisn,
+        username: req.body.username,
       },
     });
 
@@ -109,12 +121,12 @@ export const siswaLogin = async (req, res) => {
     console.log(findSiswa[0], "===");
     const idSiswa = findSiswa[0].id;
     const namaSiswa = findSiswa[0].name;
-    const nisnSiswa = findSiswa[0].nisn;
+    const username = findSiswa[0].username;
     const accessToken = jwt.sign(
       {
         idSiswa,
         namaSiswa,
-        nisnSiswa,
+        username,
       },
       process.env.ACCESS_TOKEN,
       {

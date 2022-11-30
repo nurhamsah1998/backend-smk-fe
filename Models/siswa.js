@@ -16,7 +16,11 @@ export const siswaAuth = database.define(
       type: DataTypes.STRING,
       defaultValue: "",
     },
-    nisn: {
+    kode_siswa: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    username: {
       type: DataTypes.STRING,
       unique: true,
     },
@@ -29,6 +33,10 @@ export const siswaAuth = database.define(
       defaultValue: "checking",
     },
     angkatan: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    kelas: {
       type: DataTypes.STRING,
       defaultValue: "",
     },

@@ -17,7 +17,7 @@ try {
   await database.authenticate();
   // await jurusan.sync();
   // await tagihan.sync();
-  // await siswaAuth.sync();
+  // await siswaAuth.sync({ force: true });
   // await stafAuth.sync();
   console.log("DATABASE CONNECTED");
 } catch (error) {

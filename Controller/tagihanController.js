@@ -4,9 +4,10 @@ import { jurusan } from "../Models/jurusan.js";
 export const getTagihan = async (req, res) => {
   try {
     const response = await tagihan.findAll({
-      include: [{ model: jurusan }],
+      include: { model: jurusan },
     });
-    if (response.length <= 0) return res.json({ msg: "Tidak ada data yang ditampilkan." });
+    if (response.length <= 0)
+      return res.json({ msg: "Tidak ada data yang ditampilkan." });
     res.status(200).json(response);
   } catch (error) {
     console.log(error);
@@ -14,15 +15,25 @@ export const getTagihan = async (req, res) => {
 };
 
 export const postTagihan = async (req, res) => {
-  const { nama, deskripsi, angkatan, total, jurusanId } = req.body;
+  const { nama, deskripsi, angkatan, total, periode, jurusanId, kelas } =
+    req.body;
+  // const jsonPeriode = JSON.parse(periode);
   try {
+    const findJurusan = await jurusan.findOne({
+      where: {
+        id: jurusanId,
+      },
+    });
     await tagihan.create({
       nama: nama,
       deskripsi: deskripsi,
       angkatan: angkatan,
       total: total,
       jurusanId: jurusanId,
+      periode: periode,
+      kode_tagihan: `${angkatan}${findJurusan.nama}${kelas}`,
     });
+    console.log(periode, "===");
     res.status(201).json({ msg: "Tagihan berhasil dibuat." });
   } catch (error) {
     console.log(error);
@@ -49,7 +60,8 @@ export const updateTagihan = async (req, res) => {
         id: req.params.id,
       },
     });
-    if (response[0] === 0) return res.status(404).json({ msg: "id tidak ditemukan" });
+    if (response[0] === 0)
+      return res.status(404).json({ msg: "id tidak ditemukan" });
     res.status(201).json({ msg: "Tagihan berhasil update." });
   } catch (error) {
     console.log(error);

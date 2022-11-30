@@ -76,11 +76,30 @@ POST http://localhost:5000/tagihan
 Content-Type: application/json
 
 {
-      "name": "pembayaran adasdasdasdasdasd",
+      "name": "Spp",
       "description": "LAB praktek",
-      "school_force": 2022,
-      "amount": 450000,
-      "jurusanId": "45323520-8479-4de4-9060-92d50d71dc8a"
+      "total": 450000,
+      "kelas":"02",
+      "angkatan":"2022",
+      "periode":[
+            {
+                  "bulan":"Juli",
+                  "total":20000,
+                  "code":"JUL2022TKJ02"
+            },
+            {
+                  "bulan":"Agustus",
+                  "total":20000,
+                  "code":"AUG2022TKJ02"
+            },
+            {
+                  "bulan":"September",
+                  "total":20000,
+                  "code":"SEP2022TKJ02"
+            }
+      ],
+      "jurusanId":"b726fd40-dd53-4f21-be1d-6e5cd19ce435"
+    
 }
 
 ###
