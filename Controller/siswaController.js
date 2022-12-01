@@ -118,13 +118,27 @@ export const siswaLogin = async (req, res) => {
 
     if (!findSiswa[0].password.includes(req.body.password))
       return res.status(400).json({ msg: "Periksa password anda" });
-    console.log(findSiswa[0], "===");
+
+    const findJurusan = await jurusan.findOne({
+      where: {
+        id: findSiswa[0].jurusanId,
+      },
+    });
+    if (!findJurusan)
+      return res
+        .status(404)
+        .json({ msg: "Error 500. JurusanId tidak ditemukan" });
     const idSiswa = findSiswa[0].id;
     const namaSiswa = findSiswa[0].name;
     const username = findSiswa[0].username;
+    const angkatan = findSiswa[0].angkatan;
+    const kelas = findSiswa[0].kelas;
+    const namaJurusan = findJurusan.nama;
+    const kode_tagihan = `${angkatan}${namaJurusan}${kelas}`;
     const accessToken = jwt.sign(
       {
         idSiswa,
+        kode_tagihan,
         namaSiswa,
         username,
       },

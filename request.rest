@@ -84,17 +84,17 @@ Content-Type: application/json
       "periode":[
             {
                   "bulan":"Juli",
-                  "total":20000,
+                  "total":10000,
                   "code":"JUL2022TKJ02"
             },
             {
                   "bulan":"Agustus",
-                  "total":20000,
+                  "total":10000,
                   "code":"AUG2022TKJ02"
             },
             {
                   "bulan":"September",
-                  "total":20000,
+                  "total":10000,
                   "code":"SEP2022TKJ02"
             }
       ],

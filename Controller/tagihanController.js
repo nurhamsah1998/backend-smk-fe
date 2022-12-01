@@ -1,10 +1,30 @@
 import { tagihan } from "../Models/tagihan.js";
 import { jurusan } from "../Models/jurusan.js";
+import jwt from "jsonwebtoken";
 
 export const getTagihan = async (req, res) => {
   try {
     const response = await tagihan.findAll({
       include: { model: jurusan },
+    });
+    if (response.length <= 0)
+      return res.json({ msg: "Tidak ada data yang ditampilkan." });
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getTagihanBySiswa = async (req, res) => {
+  const kode_tagihan = jwt.decode(
+    req.headers.authorization.replace("Bearer ", "")
+  );
+  try {
+    const response = await tagihan.findAll({
+      include: { model: jurusan },
+      where: {
+        kode_tagihan: kode_tagihan.kode_tagihan,
+      },
     });
     if (response.length <= 0)
       return res.json({ msg: "Tidak ada data yang ditampilkan." });
