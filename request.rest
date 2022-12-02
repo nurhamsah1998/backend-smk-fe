@@ -76,7 +76,7 @@ POST http://localhost:5000/tagihan
 Content-Type: application/json
 
 {
-      "name": "Spp",
+      "name": "gt",
       "description": "LAB praktek",
       "total": 450000,
       "kelas":"02",

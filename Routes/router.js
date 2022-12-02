@@ -44,7 +44,7 @@ router.patch("/jurusan/:id", updateJurusan);
 router.get("/tagihan", getTagihan);
 router.patch("/tagihan/:id", updateTagihan);
 router.delete("/tagihan/:id", deleteTagihan);
-router.post("/tagihan", postTagihan);
+router.post("/tagihan", verifyToken, postTagihan);
 router.get("/tagihan-siswa", verifyToken, getTagihanBySiswa);
 /// STAF ///
 router.post("/staff-register", staffRegister);

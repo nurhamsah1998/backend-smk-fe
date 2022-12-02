@@ -7,8 +7,6 @@ export const getTagihan = async (req, res) => {
     const response = await tagihan.findAll({
       include: { model: jurusan },
     });
-    if (response.length <= 0)
-      return res.json({ msg: "Tidak ada data yang ditampilkan." });
     res.status(200).json(response);
   } catch (error) {
     console.log(error);
@@ -26,8 +24,6 @@ export const getTagihanBySiswa = async (req, res) => {
         kode_tagihan: kode_tagihan.kode_tagihan,
       },
     });
-    if (response.length <= 0)
-      return res.json({ msg: "Tidak ada data yang ditampilkan." });
     res.status(200).json(response);
   } catch (error) {
     console.log(error);
@@ -51,6 +47,7 @@ export const postTagihan = async (req, res) => {
       total: total,
       jurusanId: jurusanId,
       periode: periode,
+      kelas: kelas,
       kode_tagihan: `${angkatan}${findJurusan.nama}${kelas}`,
     });
     console.log(periode, "===");

@@ -84,7 +84,7 @@ export const siswaRegister = async (req, res) => {
   } catch (error) {
     console.log(error);
     if (error.name.includes("SequelizeUniqueConstraintError"))
-      return res.status(403).json({ msg: "Nomor NISN sudah terdaftar" });
+      return res.status(403).json({ msg: "Username sudah terdaftar" });
   }
 };
 
