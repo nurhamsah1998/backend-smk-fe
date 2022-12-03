@@ -22,6 +22,7 @@ export const getSiswaProfile = async (req, res) => {
   try {
     const response = await siswaAuth.findOne({
       attributes: { exclude: ["password", "username"] },
+      include: [{ model: jurusan }],
       where: {
         id: decodedTokenFromClient.idSiswa,
       },
