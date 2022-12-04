@@ -7,6 +7,7 @@ import { jurusan } from "./Models/jurusan.js";
 import { tagihan } from "./Models/tagihan.js";
 import { siswaAuth } from "./Models/siswa.js";
 import { stafAuth } from "./Models/staf.js";
+import { invoice } from "./Models/invoice.js";
 
 dotEnv.config();
 const app = express();
@@ -17,7 +18,8 @@ try {
   await database.authenticate();
   // await jurusan.sync();
   // await tagihan.sync();
-  // await siswaAuth.sync({ force: true });
+  // await siswaAuth.sync();
+  // await invoice.sync();
   // await stafAuth.sync();
   console.log("DATABASE CONNECTED");
 } catch (error) {

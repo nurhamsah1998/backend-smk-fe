@@ -14,27 +14,17 @@ export const invoice = database.define(
     kode_tagihan: {
       type: DataTypes.STRING,
     },
+    invoice: {
+      type: DataTypes.STRING,
+    },
     nama: {
       type: DataTypes.STRING,
     },
-    deskripsi: {
-      type: DataTypes.STRING,
-    },
-    kelas: {
-      type: DataTypes.STRING,
-    },
-    jurusanId: {
-      type: DataTypes.STRING,
-    },
-    angkatan: {
+    total: {
       type: DataTypes.INTEGER,
     },
-    total: {
-      type: DataTypes.BIGINT,
-    },
-    periode: {
-      type: DataTypes.JSON,
-      defaultValue: false,
+    note: {
+      type: DataTypes.STRING,
     },
   },
   {

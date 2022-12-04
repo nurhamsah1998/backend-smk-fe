@@ -3,9 +3,64 @@ import bcrypt from "bcrypt";
 import { jurusan } from "../Models/jurusan.js";
 import jwt from "jsonwebtoken";
 import { uid } from "uid";
-import CryptoJS from "crypto-js";
+import { Op } from "sequelize";
 
 export const getSiswa = async (req, res) => {
+  const page = parseInt(req.query.page) || 0;
+  const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search || "";
+  const offside = limit * page;
+  const totalRows = await siswaAuth.count({
+    where: {
+      [Op.or]: [
+        {
+          nama: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+        {
+          username: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+      ],
+    },
+  });
+  const totalPage = Math.ceil(totalRows / limit);
+  const data = await siswaAuth.findAll({
+    where: {
+      [Op.or]: [
+        {
+          nama: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+        {
+          username: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+      ],
+    },
+    limit: limit,
+    offset: offside,
+    order: [["id", "DESC"]],
+    include: [{ model: jurusan }],
+  });
+  try {
+    const response = {
+      data: data,
+      totalPage: totalPage,
+      limit: limit,
+      totalRows: totalRows,
+      page: page,
+    };
+    res.json(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const getSiswaByCode = async (req, res) => {
   try {
     const response = await siswaAuth.findAll({
       include: [{ model: jurusan }],
@@ -15,6 +70,7 @@ export const getSiswa = async (req, res) => {
     console.log(error);
   }
 };
+
 export const getSiswaProfile = async (req, res) => {
   const decodedTokenFromClient = jwt.decode(
     req.headers.authorization.replace("Bearer ", "")
