@@ -23,9 +23,15 @@ export const getSiswa = async (req, res) => {
             [Op.like]: "%" + search + "%",
           },
         },
+        {
+          kode_siswa: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
       ],
     },
   });
+
   const totalPage = Math.ceil(totalRows / limit);
   const data = await siswaAuth.findAll({
     where: {
@@ -37,6 +43,11 @@ export const getSiswa = async (req, res) => {
         },
         {
           username: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+        {
+          kode_siswa: {
             [Op.like]: "%" + search + "%",
           },
         },

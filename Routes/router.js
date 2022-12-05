@@ -34,7 +34,8 @@ router.get("/siswa", getSiswa);
 router.get("/siswa-profile", verifyToken, getSiswaProfile);
 router.post("/register-siswa", siswaRegister);
 router.post("/login-siswa", siswaLogin);
-router.patch("/siswa-profile-update/:id", verifyToken, siswaUpdate);
+router.patch("/siswa/:id", verifyToken, siswaUpdate);
+// router.patch("/siswa/:id", verifyToken, siswaUpdate);
 /// JURUSAN ///
 router.get("/jurusan", getJurusan);
 router.post("/jurusan", postJurusan);

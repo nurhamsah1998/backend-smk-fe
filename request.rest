@@ -1,4 +1,4 @@
-GET http://localhost:5000/siswa
+GET http://localhost:5000/siswa?search=TKJ2022SISWA14
 
 ###
 
@@ -21,11 +21,12 @@ Content-Type: application/json
 ###
 ###
 
-PATCH  http://localhost:5000/siswa-profile-update/7129910d-20dc-4960-b008-94734f6b1465
+PATCH  http://localhost:5000/siswa-profile-update/d12fdc6f-d496-49de-bf6f-1a77b6d90a8d
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZFN0YWZmIjoiNzE3ZjU4MmQtOTAzZC00MDE0LWIzMzMtMTRjMTMxMDgyYmMxIiwibmFtYVN0YWZmIjoiUGFuaXRpYSBQUERCIiwidXNlcm5hbWVTdGFmZiI6InBwZGJAcHBkYi5jb20iLCJyb2xlU3RhZmYiOiJQUERCIiwiaWF0IjoxNjcwMTM0OTkyLCJleHAiOjE2NzA3Mzk3OTJ9.Vfj3iLo7_OegFCNBdsBF35QamQ-oEeT7QlfJC2kmo_c
 Content-Type: application/json
 
 {
-      "status": "checked"
+      "status": "accepted"
 }
 ###
 

@@ -1,13 +1,60 @@
 import { tagihan } from "../Models/tagihan.js";
 import { jurusan } from "../Models/jurusan.js";
 import jwt from "jsonwebtoken";
+import { Op } from "sequelize";
 
 export const getTagihan = async (req, res) => {
+  const page = parseInt(req.query.page) || 0;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = limit * page;
+  const search = req.query.search || "";
+  const totalRows = await tagihan.count({
+    where: {
+      [Op.or]: [
+        {
+          kode_tagihan: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+        {
+          nama: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+      ],
+    },
+  });
+
+  const totalPage = Math.ceil(totalRows / limit);
+  const data = await tagihan.findAll({
+    where: {
+      [Op.or]: [
+        {
+          kode_tagihan: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+        {
+          nama: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+      ],
+    },
+    limit: limit,
+    offset: offset,
+    include: [{ model: jurusan }],
+    order: [["id", "DESC"]],
+  });
   try {
-    const response = await tagihan.findAll({
-      include: { model: jurusan },
-    });
-    res.status(200).json(response);
+    const response = {
+      data: data,
+      totalPage: totalPage,
+      limit: limit,
+      totalRows: totalRows,
+      page: page,
+    };
+    res.json(response);
   } catch (error) {
     console.log(error);
   }
