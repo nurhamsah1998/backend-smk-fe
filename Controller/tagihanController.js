@@ -76,6 +76,43 @@ export const getTagihanBySiswa = async (req, res) => {
     console.log(error);
   }
 };
+export const getTagihanByKode = async (req, res) => {
+  try {
+    const response = await tagihan.findAll({
+      include: { model: jurusan },
+      where: {
+        kode_tagihan: req.params.kode_tagihan,
+      },
+    });
+    const payment = [{ kode_bulan: "NOV01TKJ2022" }];
+    const stringFrist = JSON.stringify(response);
+    const parseThen = JSON.parse(stringFrist);
+    const seoarateJson = parseThen.map((i) => ({
+      ...i,
+      periode: i.periode ? JSON.parse(i?.periode) : false,
+    }));
+    const result = seoarateJson?.map((i) => ({
+      ...i,
+      periode: i?.periode
+        ? i?.periode?.map((x) => {
+            const findIsSuccessPaid = payment?.find(
+              (y) => y?.kode_bulan === x?.kode_bulan
+            );
+            if (findIsSuccessPaid) {
+              return { ...x, isPaid: true };
+            }
+            if (!findIsSuccessPaid) {
+              return { ...x, isPaid: false };
+            }
+            return findIsSuccessPaid;
+          })
+        : false,
+    }));
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 export const postTagihan = async (req, res) => {
   const { nama, deskripsi, angkatan, total, periode, jurusanId, kelas } =

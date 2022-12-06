@@ -17,6 +17,7 @@ import {
   deleteTagihan,
   postTagihan,
   getTagihanBySiswa,
+  getTagihanByKode,
 } from "../Controller/tagihanController.js";
 import {
   getSiswa,
@@ -43,6 +44,7 @@ router.delete("/jurusan/:id", deleteJurusan);
 router.patch("/jurusan/:id", updateJurusan);
 /// TAGIHAN ///
 router.get("/tagihan", getTagihan);
+router.get("/tagihan/:kode_tagihan", getTagihanByKode);
 router.patch("/tagihan/:id", updateTagihan);
 router.delete("/tagihan/:id", deleteTagihan);
 router.post("/tagihan", verifyToken, postTagihan);
