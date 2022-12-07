@@ -26,6 +26,7 @@ import {
   siswaLogin,
   siswaUpdate,
 } from "../Controller/siswaController.js";
+import { postInvoice } from "../Controller/InvoiceController.js";
 
 import express from "express";
 
@@ -54,5 +55,7 @@ router.post("/staff-register", staffRegister);
 router.post("/staff-login", staffLogin);
 router.get("/staff", getStaff);
 router.get("/staff-profile", verifyToken, getStaffProfile);
+/// STAF ///
+router.post("/invoice", verifyToken, postInvoice);
 
 export default router;

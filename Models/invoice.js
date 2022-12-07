@@ -13,6 +13,11 @@ export const invoice = database.define(
     },
     kode_tagihan: {
       type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    kode_pembayaran: {
+      type: DataTypes.STRING,
+      defaultValue: "",
     },
     invoice: {
       type: DataTypes.STRING,
@@ -20,7 +25,13 @@ export const invoice = database.define(
     nama: {
       type: DataTypes.STRING,
     },
+    petugas: {
+      type: DataTypes.STRING,
+    },
     total: {
+      type: DataTypes.INTEGER,
+    },
+    uang_diterima: {
       type: DataTypes.INTEGER,
     },
     note: {

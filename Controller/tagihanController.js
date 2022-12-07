@@ -1,5 +1,6 @@
 import { tagihan } from "../Models/tagihan.js";
 import { jurusan } from "../Models/jurusan.js";
+import { invoice } from "../Models/invoice.js";
 import jwt from "jsonwebtoken";
 import { Op } from "sequelize";
 
@@ -76,15 +77,22 @@ export const getTagihanBySiswa = async (req, res) => {
     console.log(error);
   }
 };
+
 export const getTagihanByKode = async (req, res) => {
   try {
+    const responseInvoice = await invoice.findAll({
+      where: {
+        kode_tagihan: req.query.kode_tagihan,
+      },
+    });
+    const stringInvoice = JSON.stringify(responseInvoice);
+    const parseInvoice = JSON.parse(stringInvoice);
     const response = await tagihan.findAll({
       include: { model: jurusan },
       where: {
         kode_tagihan: req.params.kode_tagihan,
       },
     });
-    const payment = [{ kode_bulan: "NOV01TKJ2022" }];
     const stringFrist = JSON.stringify(response);
     const parseThen = JSON.parse(stringFrist);
     const seoarateJson = parseThen.map((i) => ({
@@ -95,8 +103,8 @@ export const getTagihanByKode = async (req, res) => {
       ...i,
       periode: i?.periode
         ? i?.periode?.map((x) => {
-            const findIsSuccessPaid = payment?.find(
-              (y) => y?.kode_bulan === x?.kode_bulan
+            const findIsSuccessPaid = parseInvoice?.find(
+              (y) => y?.kode_pembayaran === x?.kode_bulan
             );
             if (findIsSuccessPaid) {
               return { ...x, isPaid: true };

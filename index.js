@@ -19,7 +19,7 @@ try {
   // await jurusan.sync();
   // await tagihan.sync();
   // await siswaAuth.sync();
-  // await invoice.sync();
+  // await invoice.sync({ force: true });
   // await stafAuth.sync();
   console.log("DATABASE CONNECTED");
 } catch (error) {
