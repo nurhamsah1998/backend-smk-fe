@@ -107,7 +107,7 @@ export const getTagihanByKode = async (req, res) => {
               (y) => y?.kode_pembayaran === x?.kode_bulan
             );
             if (findIsSuccessPaid) {
-              return { ...x, isPaid: true };
+              return { ...x, invoice: findIsSuccessPaid, isPaid: true };
             }
             if (!findIsSuccessPaid) {
               return { ...x, isPaid: false };
