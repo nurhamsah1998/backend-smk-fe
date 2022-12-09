@@ -71,10 +71,13 @@ export const getSiswa = async (req, res) => {
     console.log(error);
   }
 };
-export const getSiswaByCode = async (req, res) => {
+export const getSiswaById = async (req, res) => {
   try {
-    const response = await siswaAuth.findAll({
+    const response = await siswaAuth.findOne({
       include: [{ model: jurusan }],
+      where: {
+        id: req.params.id,
+      },
     });
     res.json(response);
   } catch (error) {

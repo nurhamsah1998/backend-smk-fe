@@ -25,6 +25,7 @@ import {
   siswaRegister,
   siswaLogin,
   siswaUpdate,
+  getSiswaById,
 } from "../Controller/siswaController.js";
 import { postInvoice } from "../Controller/InvoiceController.js";
 
@@ -33,6 +34,7 @@ import express from "express";
 const router = express.Router();
 /// SISWA
 router.get("/siswa", getSiswa);
+router.get("/siswa/:id", verifyToken, getSiswaById);
 router.get("/siswa-profile", verifyToken, getSiswaProfile);
 router.post("/register-siswa", siswaRegister);
 router.post("/login-siswa", siswaLogin);
