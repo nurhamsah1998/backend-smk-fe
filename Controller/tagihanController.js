@@ -3,6 +3,7 @@ import { jurusan } from "../Models/jurusan.js";
 import { invoice } from "../Models/invoice.js";
 import jwt from "jsonwebtoken";
 import { Op } from "sequelize";
+import { uid } from "uid";
 
 export const getTagihan = async (req, res) => {
   const page = parseInt(req.query.page) || 0;
@@ -80,6 +81,7 @@ export const getTagihanBySiswa = async (req, res) => {
 
 export const getTagihanByKode = async (req, res) => {
   try {
+    /// Get data from invoice to compare with tagihan
     const responseInvoice = await invoice.findAll({
       where: {
         kode_tagihan: req.query.kode_tagihan,
@@ -87,6 +89,7 @@ export const getTagihanByKode = async (req, res) => {
     });
     const stringInvoice = JSON.stringify(responseInvoice);
     const parseInvoice = JSON.parse(stringInvoice);
+    /// Get data from tagihan to compare with invoice
     const response = await tagihan.findAll({
       include: { model: jurusan },
       where: {
@@ -95,11 +98,13 @@ export const getTagihanByKode = async (req, res) => {
     });
     const stringFrist = JSON.stringify(response);
     const parseThen = JSON.parse(stringFrist);
-    const seoarateJson = parseThen.map((i) => ({
+    const separateJson = parseThen.map((i) => ({
       ...i,
       periode: i.periode ? JSON.parse(i?.periode) : false,
     }));
-    const result = seoarateJson?.map((i) => ({
+
+    /// Logic here (comparing tagihan and invoice to separate who is paid and not paid)
+    const result = separateJson?.map((i) => ({
       ...i,
       periode: i?.periode
         ? i?.periode?.map((x) => {
@@ -114,6 +119,9 @@ export const getTagihanByKode = async (req, res) => {
             }
             return findIsSuccessPaid;
           })
+        : false,
+      [!i?.periode ? "cicilan" : "cicilan"]: !i?.periode
+        ? parseInvoice.filter((z) => z.kode_pembayaran === i.token_tagihan)
         : false,
     }));
     res.status(200).json(result);
@@ -141,6 +149,7 @@ export const postTagihan = async (req, res) => {
       periode: periode,
       kelas: kelas,
       kode_tagihan: `${angkatan}${findJurusan.nama}${kelas}`,
+      token_tagihan: `${uid(6).toUpperCase()}-${kelas}`,
     });
     console.log(periode, "===");
     res.status(201).json({ msg: "Tagihan berhasil dibuat." });

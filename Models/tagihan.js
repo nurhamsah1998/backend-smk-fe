@@ -15,6 +15,9 @@ export const tagihan = database.define(
     kode_tagihan: {
       type: DataTypes.STRING,
     },
+    token_tagihan: {
+      type: DataTypes.STRING,
+    },
     nama: {
       type: DataTypes.STRING,
     },
