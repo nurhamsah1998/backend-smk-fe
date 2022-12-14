@@ -105,7 +105,7 @@ Content-Type: application/json
 
 ###
 /// get tagihan siswa
-GET http://localhost:5000/tagihan
+GET http://localhost:5000/tagihan-permanent
 ###
 /// delete tagihan siswa
 DELETE  http://localhost:5000/tagihan/8d2500b6-6420-4b5f-b4c4-6bcb002669ec
