@@ -27,7 +27,10 @@ import {
   siswaUpdate,
   getSiswaById,
 } from "../Controller/siswaController.js";
-import { getTagihanFix } from "../Controller/tagihanFixController.js";
+import {
+  getTagihanFix,
+  getTagihanFixForStudent,
+} from "../Controller/tagihanFixController.js";
 import { postInvoice } from "../Controller/InvoiceController.js";
 
 import express from "express";
@@ -54,6 +57,7 @@ router.delete("/tagihan/:id", deleteTagihan);
 router.post("/tagihan", verifyToken, postTagihan);
 router.get("/tagihan-siswa", verifyToken, getTagihanBySiswa);
 router.get("/tagihan-permanent", getTagihanFix);
+router.get("/tagihan-permanent-siswa", getTagihanFixForStudent);
 /// STAF ///
 router.post("/staff-register", staffRegister);
 router.post("/staff-login", staffLogin);
