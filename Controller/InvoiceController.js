@@ -29,3 +29,12 @@ export const postInvoice = async (req, res) => {
     console.log(error);
   }
 };
+
+export const getInvoice = async (req, res) => {
+  const responseInvoice = await invoice.findAll({
+    where: {
+      kode_tagihan: req.query.kode_tagihan,
+    },
+  });
+  res.status(200).json(responseInvoice);
+};

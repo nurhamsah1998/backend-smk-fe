@@ -4,6 +4,7 @@ import {
   deleteJurusan,
   updateJurusan,
 } from "../Controller/jurusanController.js";
+import { getInvoice } from "../Controller/InvoiceController.js";
 import {
   staffRegister,
   getStaff,
@@ -30,6 +31,7 @@ import {
 import {
   getTagihanFix,
   getTagihanFixForStudent,
+  updateTagihanFix,
 } from "../Controller/tagihanFixController.js";
 import { postInvoice } from "../Controller/InvoiceController.js";
 
@@ -56,6 +58,7 @@ router.patch("/tagihan/:id", updateTagihan);
 router.delete("/tagihan/:id", deleteTagihan);
 router.post("/tagihan", verifyToken, postTagihan);
 router.get("/tagihan-siswa", verifyToken, getTagihanBySiswa);
+router.patch("/tagihan-permanent/:id", updateTagihanFix);
 router.get("/tagihan-permanent", getTagihanFix);
 router.get("/tagihan-permanent-siswa", getTagihanFixForStudent);
 /// STAF ///
@@ -63,7 +66,8 @@ router.post("/staff-register", staffRegister);
 router.post("/staff-login", staffLogin);
 router.get("/staff", getStaff);
 router.get("/staff-profile", verifyToken, getStaffProfile);
-/// STAF ///
+/// INVOICE ///
 router.post("/invoice", verifyToken, postInvoice);
+router.get("/invoice", verifyToken, getInvoice);
 
 export default router;

@@ -51,7 +51,7 @@ POST http://localhost:5000/jurusan
 Content-Type: application/json
 
 {
-    "nama":"AKT"
+    "nama":"ALL"
 }
 
 ###
