@@ -177,7 +177,7 @@ export const tagihanFix = database.define(
       defaultValue: false,
     },
     /// NAIK KELAS 3
-    k_industri: {
+    kunjungan_industri: {
       type: DataTypes.BIGINT,
       defaultValue: false,
     },

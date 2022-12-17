@@ -36,6 +36,18 @@ export const siswaAuth = database.define(
       type: DataTypes.STRING,
       defaultValue: "",
     },
+    nama_ayah: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    nama_ibu: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    alamat: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
     kelas: {
       type: DataTypes.STRING,
       defaultValue: "01",

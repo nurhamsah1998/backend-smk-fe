@@ -106,8 +106,17 @@ export const getSiswaProfile = async (req, res) => {
 };
 
 export const siswaRegister = async (req, res) => {
-  const { nama, username, password, noHP, jurusanId, kelas, kode_siswa } =
-    req.body;
+  const {
+    nama,
+    username,
+    password,
+    noHP,
+    jurusanId,
+    kelas,
+    alamat,
+    nama_ayah,
+    nama_ibu,
+  } = req.body;
   if (username === "" || password === "")
     return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
   // const salt = await bcrypt.genSalt();
@@ -141,6 +150,9 @@ export const siswaRegister = async (req, res) => {
     const length = await siswaAuth.findAndCountAll();
     await siswaAuth.create({
       nama: nama,
+      alamat: alamat,
+      nama_ayah: nama_ayah,
+      nama_ibu: nama_ibu,
       username: username,
       password: password,
       noHP: noHP,
