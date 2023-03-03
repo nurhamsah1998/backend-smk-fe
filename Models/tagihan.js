@@ -46,7 +46,5 @@ export const tagihan = database.define(
   }
 );
 
-// tagihan.hasOne(jurusan, { foreignKey: "id" });
-// tagihan.belongsTo(jurusan, { foreignKey: "major_id" });
 jurusan.hasOne(tagihan);
 tagihan.belongsTo(jurusan);
