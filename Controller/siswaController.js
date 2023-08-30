@@ -2,16 +2,33 @@ import { siswaAuth } from "../Models/siswa.js";
 import bcrypt from "bcrypt";
 import { jurusan } from "../Models/jurusan.js";
 import jwt from "jsonwebtoken";
-import { uid } from "uid";
+import { invoice } from "../Models/invoice.js";
 import { Op } from "sequelize";
+import { tagihanFix } from "../Models/tagihanFix.js";
 
 export const getSiswa = async (req, res) => {
-  const page = parseInt(req.query.page) || 0;
+  const page = parseInt(req.query.page) - 1 || 0;
   const limit = parseInt(req.query.limit) || 10;
   const search = req.query.search || "";
+  const angkatan = req.query.angkatan || "%";
+  const jurusanId = req.query.jurusanId || "%";
+  const kelas = req.query.kelas || "%";
+  const status = req.query.status || "%";
   const offside = limit * page;
   const totalRows = await siswaAuth.count({
     where: {
+      angkatan: {
+        [Op.like]: angkatan,
+      },
+      jurusanId: {
+        [Op.like]: jurusanId,
+      },
+      kelas: {
+        [Op.like]: kelas,
+      },
+      status: {
+        [Op.like]: status,
+      },
       [Op.or]: [
         {
           nama: {
@@ -25,6 +42,11 @@ export const getSiswa = async (req, res) => {
         },
         {
           kode_siswa: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+        {
+          userName: {
             [Op.like]: "%" + search + "%",
           },
         },
@@ -33,8 +55,21 @@ export const getSiswa = async (req, res) => {
   });
 
   const totalPage = Math.ceil(totalRows / limit);
-  const data = await siswaAuth.findAll({
+  let data = await siswaAuth.findAll({
+    raw: true,
     where: {
+      angkatan: {
+        [Op.like]: angkatan,
+      },
+      jurusanId: {
+        [Op.like]: jurusanId,
+      },
+      kelas: {
+        [Op.like]: kelas,
+      },
+      status: {
+        [Op.like]: status,
+      },
       [Op.or]: [
         {
           nama: {
@@ -48,6 +83,11 @@ export const getSiswa = async (req, res) => {
         },
         {
           kode_siswa: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+        {
+          userName: {
             [Op.like]: "%" + search + "%",
           },
         },
@@ -58,13 +98,49 @@ export const getSiswa = async (req, res) => {
     order: [["id", "DESC"]],
     include: [{ model: jurusan }],
   });
+  const invoiceHistory = await invoice.findAll({
+    raw: true,
+  });
+  const tagihanPermanent = await tagihanFix.findAll({
+    raw: true,
+  });
+
   try {
     const response = {
-      data: data,
+      data: data.map((item) => {
+        let currentTagihan = Object.values(
+          tagihanPermanent.find(
+            (current) => current.tahun_angkatan === Number(item.angkatan)
+          ) || {}
+        );
+        const totalBillAmount =
+          currentTagihan
+            .filter((current) => typeof current === "number")
+            .reduce((a, b) => a + b, 0) - Number(item.angkatan);
+        let totalPayment = invoiceHistory
+          .filter((amount) => amount.kode_tagihan === item.kode_siswa)
+          .map((total) => total.uang_diterima)
+          .reduce((a, b) => a + b, 0);
+        return {
+          ...item,
+          current_bill:
+            totalBillAmount - totalPayment < 0
+              ? 0
+              : totalBillAmount - totalPayment,
+          status_bill:
+            totalBillAmount - totalPayment < 0
+              ? "deposit"
+              : totalBillAmount - totalPayment > 0
+              ? "not_paid"
+              : totalPayment === 0
+              ? "not_paid_yet"
+              : "paid",
+        };
+      }),
       totalPage: totalPage,
       limit: limit,
       totalRows: totalRows,
-      page: page,
+      page: page + 1,
     };
     res.json(response);
   } catch (error) {
@@ -119,29 +195,7 @@ export const siswaRegister = async (req, res) => {
   } = req.body;
   if (username === "" || password === "")
     return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
-  // const salt = await bcrypt.genSalt();
-  // const securePassword = await bcrypt.hash(password, salt);
-  // const EncryptNISN = CryptoJS.AES.encrypt(
-  //   username,
-  //   process.env.SECRET_ENCRYPT
-  // ).toString();
   try {
-    // const NISN = await siswaAuth.findAll({
-    //   attributes: ["username"],
-    // });
-    // const toStringify = JSON.stringify(NISN);
-    // const toArray = JSON.parse(toStringify);
-    // const decrypt = toArray.map((i) => {
-    //   const DecryptNISN = CryptoJS.AES.decrypt(
-    //     i.username,
-    //     process.env.SECRET_ENCRYPT
-    //   );
-    //   const originalText = DecryptNISN.toString(CryptoJS.enc.Utf8);
-    //   return { username: originalText };
-    // });
-    // const isNisinHasRegister = decrypt.find((i) => i.username === req.body.username);
-    // if (isNisinHasRegister)
-    //   return res.status(400).json({ msg: "NISN telah terdaftar" });
     const findJurusan = await jurusan.findOne({
       where: {
         id: jurusanId,
