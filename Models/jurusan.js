@@ -14,6 +14,9 @@ export const jurusan = database.define(
     nama: {
       type: DataTypes.STRING,
     },
+    code: {
+      type: DataTypes.STRING,
+    },
   },
   {
     freezeTableName: true,

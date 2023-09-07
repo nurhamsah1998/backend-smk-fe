@@ -37,6 +37,9 @@ export const invoice = database.define(
     note: {
       type: DataTypes.STRING,
     },
+    kelas: {
+      type: DataTypes.STRING,
+    },
   },
   {
     freezeTableName: true,

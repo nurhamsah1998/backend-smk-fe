@@ -98,45 +98,10 @@ export const getSiswa = async (req, res) => {
     order: [["id", "DESC"]],
     include: [{ model: jurusan }],
   });
-  const invoiceHistory = await invoice.findAll({
-    raw: true,
-  });
-  const tagihanPermanent = await tagihanFix.findAll({
-    raw: true,
-  });
 
   try {
     const response = {
-      data: data.map((item) => {
-        let currentTagihan = Object.values(
-          tagihanPermanent.find(
-            (current) => current.tahun_angkatan === Number(item.angkatan)
-          ) || {}
-        );
-        const totalBillAmount =
-          currentTagihan
-            .filter((current) => typeof current === "number")
-            .reduce((a, b) => a + b, 0) - Number(item.angkatan);
-        let totalPayment = invoiceHistory
-          .filter((amount) => amount.kode_tagihan === item.kode_siswa)
-          .map((total) => total.uang_diterima)
-          .reduce((a, b) => a + b, 0);
-        return {
-          ...item,
-          current_bill:
-            totalBillAmount - totalPayment < 0
-              ? 0
-              : totalBillAmount - totalPayment,
-          status_bill:
-            totalBillAmount - totalPayment < 0
-              ? "deposit"
-              : totalBillAmount - totalPayment > 0
-              ? "not_paid"
-              : totalPayment === 0
-              ? "not_paid_yet"
-              : "paid",
-        };
-      }),
+      data: data,
       totalPage: totalPage,
       limit: limit,
       totalRows: totalRows,
@@ -156,6 +121,13 @@ export const getSiswaById = async (req, res) => {
       },
     });
     res.json(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const importAccount = async (req, res) => {
+  try {
+    console.log(req.files, "<=========");
   } catch (error) {
     console.log(error);
   }
@@ -192,6 +164,11 @@ export const siswaRegister = async (req, res) => {
     alamat,
     nama_ayah,
     nama_ibu,
+    gender,
+    status_bill,
+    current_bill,
+    code_jurusan,
+    kode_siswa,
   } = req.body;
   if (username === "" || password === "")
     return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
@@ -210,12 +187,15 @@ export const siswaRegister = async (req, res) => {
       username: username,
       password: password,
       noHP: noHP,
+      gender,
       angkatan: new Date().getFullYear(),
       jurusanId: jurusanId,
       kelas: kelas,
-      kode_siswa: `${findJurusan.nama}${new Date().getFullYear()}SISWA${
-        length.count
-      }`,
+      kode_siswa:
+        kode_siswa ||
+        `${code_jurusan}${new Date().getFullYear()}SISWA${length.count}`,
+      status_bill,
+      current_bill,
     });
     res.status(201).json({ msg: "Pendaftaran berhasil" });
   } catch (error) {
@@ -270,8 +250,8 @@ export const siswaLogin = async (req, res) => {
     const username = findSiswa[0].username;
     const angkatan = findSiswa[0].angkatan;
     const kelas = findSiswa[0].kelas;
-    const namaJurusan = findJurusan.nama;
-    const kode_tagihan = `${angkatan}${namaJurusan}${kelas}`;
+    const codeJurusan = findJurusan.code;
+    const kode_tagihan = `${angkatan}${codeJurusan}${kelas}`;
     const accessToken = jwt.sign(
       {
         idSiswa,

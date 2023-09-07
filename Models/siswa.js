@@ -14,6 +14,9 @@ export const siswaAuth = database.define(
     },
     nama: {
       type: DataTypes.STRING,
+    },
+    gender: {
+      type: DataTypes.STRING,
       defaultValue: "",
     },
     kode_siswa: {
@@ -52,9 +55,29 @@ export const siswaAuth = database.define(
       type: DataTypes.STRING,
       defaultValue: "01",
     },
+    sub_kelas: {
+      type: DataTypes.STRING,
+      defaultValue: "01",
+    },
     jurusanId: {
       type: DataTypes.STRING,
       defaultValue: "",
+    },
+    current_bill: {
+      type: DataTypes.BIGINT,
+      defaultValue: 0,
+    },
+    total_bill: {
+      type: DataTypes.BIGINT,
+      defaultValue: 0,
+    },
+    total_payment: {
+      type: DataTypes.BIGINT,
+      defaultValue: 0,
+    },
+    status_bill: {
+      type: DataTypes.STRING,
+      defaultValue: "not_paid_yet",
     },
     noHP: {
       type: DataTypes.BIGINT,

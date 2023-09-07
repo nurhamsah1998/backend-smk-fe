@@ -1,3 +1,5 @@
+import { literal } from "sequelize";
+import { siswaAuth } from "../Models/siswa.js";
 import { tagihanFix } from "../Models/tagihanFix.js";
 
 export const getTagihanFix = async (req, res) => {
@@ -17,6 +19,23 @@ export const getTagihanFix = async (req, res) => {
     console.log(error);
   }
 };
+export const getTotalTagihanFix = async (req, res) => {
+  try {
+    const response = await tagihanFix.findAll({
+      raw: true,
+      where: {
+        tahun_angkatan: req.query.tahun_angkatan,
+      },
+      attributes: {
+        exclude: ["tahun_angkatan", "createdAt", "updatedAt", "id"],
+      },
+    });
+    const total = Object.values(response[0] || {}).reduce((a, b) => a + b, 0);
+    res.status(200).json(total);
+  } catch (error) {
+    console.log(error);
+  }
+};
 export const getTagihanFixForStudent = async (req, res) => {
   try {
     const response = await tagihanFix.findAll({
@@ -32,10 +51,21 @@ export const getTagihanFixForStudent = async (req, res) => {
 };
 
 export const updateTagihanFix = async (req, res) => {
+  await siswaAuth.increment(
+    { current_bill: req.body.extra.freq_bill },
+    {
+      where: {
+        angkatan: req.body.tahun_angkatan,
+      },
+    }
+  );
+  delete req.body.extra;
+
   await tagihanFix.update(req.body, {
     where: {
       id: req.params.id,
     },
   });
+
   res.status(200).json({ msg: "update success" });
 };

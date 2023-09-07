@@ -27,10 +27,12 @@ import {
   siswaLogin,
   siswaUpdate,
   getSiswaById,
+  importAccount,
 } from "../Controller/siswaController.js";
 import {
   getTagihanFix,
   getTagihanFixForStudent,
+  getTotalTagihanFix,
   updateTagihanFix,
 } from "../Controller/tagihanFixController.js";
 import { postInvoice } from "../Controller/InvoiceController.js";
@@ -43,6 +45,7 @@ router.get("/siswa", getSiswa);
 router.get("/siswa/:id", verifyToken, getSiswaById);
 router.get("/siswa-profile", verifyToken, getSiswaProfile);
 router.post("/register-siswa", siswaRegister);
+router.post("/import-akun-siswa", importAccount);
 router.post("/login-siswa", siswaLogin);
 router.patch("/siswa/:id", verifyToken, siswaUpdate);
 // router.patch("/siswa/:id", verifyToken, siswaUpdate);
@@ -60,6 +63,7 @@ router.post("/tagihan", verifyToken, postTagihan);
 router.get("/tagihan-siswa", verifyToken, getTagihanBySiswa);
 router.patch("/tagihan-permanent/:id", updateTagihanFix);
 router.get("/tagihan-permanent", getTagihanFix);
+router.get("/total-tagihan-permanent", getTotalTagihanFix);
 router.get("/tagihan-permanent-siswa", getTagihanFixForStudent);
 /// STAF ///
 router.post("/staff-register", staffRegister);

@@ -38,3 +38,11 @@ export const getInvoice = async (req, res) => {
   });
   res.status(200).json(responseInvoice);
 };
+export const getTotalInvoice = async (req, res) => {
+  const responseInvoice = await invoice.findAll({
+    where: {
+      kode_tagihan: req.query.kode_tagihan,
+    },
+  });
+  res.status(200).json(responseInvoice);
+};
