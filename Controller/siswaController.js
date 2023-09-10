@@ -2,8 +2,10 @@ import { siswaAuth } from "../Models/siswa.js";
 import bcrypt from "bcrypt";
 import { jurusan } from "../Models/jurusan.js";
 import jwt from "jsonwebtoken";
-import { invoice } from "../Models/invoice.js";
+import { uid } from "uid";
 import { Op } from "sequelize";
+import exeljs from "exceljs";
+import fs from "fs/promises";
 import { tagihanFix } from "../Models/tagihanFix.js";
 
 export const getSiswa = async (req, res) => {
@@ -126,10 +128,209 @@ export const getSiswaById = async (req, res) => {
   }
 };
 export const importAccount = async (req, res) => {
+  const currentYear = new Date().getFullYear();
+  const listSiswa = await siswaAuth.findAll({ raw: true });
+  const listJurusan = await jurusan.findAll({ raw: true });
+  const response = await tagihanFix.findAll({
+    raw: true,
+    where: {
+      tahun_angkatan: currentYear,
+    },
+    attributes: {
+      exclude: ["tahun_angkatan", "createdAt", "updatedAt", "id"],
+    },
+  });
+  const total = Object.values(response[0] || {}).reduce((a, b) => a + b, 0);
+
   try {
-    console.log(req.files, "<=========");
+    /// https://github.com/exceljs/exceljs/issues/960#issuecomment-1698549072
+    let errorValidation = [];
+    let errorInjectUsernameToDB = [];
+    let errorSameUsernameInFile = [];
+    let boxUsernames = [];
+    let errorInjectJurusanToDB = [];
+    let injectDataToDB = [];
+    let currentuserName;
+    const { Workbook } = exeljs;
+    const wb = new Workbook();
+    await wb.xlsx
+      .readFile("./Assets/upload/" + req.file.filename)
+      .then((res) => {
+        const workSheet = wb.getWorksheet();
+        const totalColumn = workSheet.actualColumnCount;
+        const totalRow = workSheet.actualRowCount;
+        for (
+          let indexColumn = 1;
+          indexColumn < totalColumn + 1;
+          indexColumn++
+        ) {
+          for (let indexRow = 1; indexRow < totalRow + 1; indexRow++) {
+            if (
+              workSheet.getColumn(indexColumn).letter === "A" ||
+              workSheet.getColumn(indexColumn).letter === "B" ||
+              workSheet.getColumn(indexColumn).letter === "C" ||
+              workSheet.getColumn(indexColumn).letter === "D"
+            ) {
+              if (
+                workSheet
+                  .getColumn(indexColumn)
+                  .values.indexOf(
+                    workSheet.getColumn(indexColumn).values[indexRow]
+                  ) === -1
+              ) {
+                errorValidation.push({
+                  column: indexRow,
+                  row: workSheet.getColumn(indexColumn).letter,
+                });
+              }
+            }
+            /// VALIDATION USER NAME
+            if (workSheet.getColumn(indexColumn).letter === "B") {
+              const isAlreadyExistAccount = listSiswa.find(
+                (username) =>
+                  username.username ===
+                  workSheet.getColumn(indexColumn).values[indexRow]
+              );
+
+              if (
+                isAlreadyExistAccount &&
+                Boolean(
+                  workSheet.getColumn(indexColumn).values[indexRow] !==
+                    "username"
+                )
+              ) {
+                errorInjectUsernameToDB.push({
+                  row: workSheet.getColumn(indexColumn).letter,
+                  column: indexRow,
+                  username: isAlreadyExistAccount.username,
+                  reason: "Already exist",
+                });
+              }
+              // if (
+              //   currentuserName ===
+              //   workSheet.getColumn(indexColumn).values[indexRow]
+              // ) {
+              //   errorSameUsernameInFile.push({
+              //     row: workSheet.getColumn(indexColumn).letter,
+              //     column: indexRow,
+              //     username: workSheet.getColumn(indexColumn).values[indexRow],
+              //     reason: "Must be unique",
+              //   });
+              //   console.log(
+              //     currentuserName ===
+              //       workSheet.getColumn(indexColumn).values[indexRow],
+              //     "<---"
+              //   );
+              // }
+              // boxUsernames.push(
+              //   workSheet.getColumn(indexColumn).values[indexRow]
+              // );
+            }
+            if (workSheet.getColumn(indexColumn).letter === "D") {
+              const jurusanNotValid = listJurusan.find(
+                (jurusan) =>
+                  jurusan.kode_jurusan ===
+                  workSheet.getColumn(indexColumn).values[indexRow]
+              );
+              if (
+                !jurusanNotValid &&
+                Boolean(
+                  workSheet.getColumn(indexColumn).values[indexRow] !==
+                    "kode_jurusan"
+                )
+              ) {
+                errorInjectJurusanToDB.push({
+                  row: workSheet.getColumn(indexColumn).letter,
+                  column: indexRow,
+                  kode_jurusan:
+                    workSheet.getColumn(indexColumn).values[indexRow],
+                  reason: "Jurusan tidak valid",
+                });
+              }
+            }
+          }
+        }
+      });
+    fs.r;
+    if (Boolean(errorValidation.length)) {
+      res
+        .status(406)
+        .json({ code: "error_validation", message: errorValidation });
+      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+        console.log(error);
+      });
+      return;
+    }
+    if (Boolean(errorInjectUsernameToDB.length)) {
+      res.status(406).json({
+        code: "error_inject_username",
+        message: errorInjectUsernameToDB,
+      });
+      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+        console.log(error);
+      });
+      return;
+    }
+    // if (Boolean(errorSameUsernameInFile.length))
+    //   return res.status(406).json({
+    //     code: "error_inject_username_unique",
+    //     message: errorSameUsernameInFile,
+    //   });
+    if (Boolean(errorInjectJurusanToDB.length)) {
+      res.status(406).json({
+        code: "error_inject_jurusan",
+        message: errorInjectJurusanToDB,
+      });
+      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+        console.log(error);
+      });
+      return;
+    }
+
+    await wb.xlsx
+      .readFile("./Assets/upload/" + req.file.filename)
+      .then((res) => {
+        const workSheet = wb.getWorksheet();
+        const totalRow = workSheet.actualRowCount;
+        for (let indexColumn = 1; indexColumn < totalRow + 1; indexColumn++) {
+          if (indexColumn !== 1) {
+            injectDataToDB.push({
+              nama: workSheet.getRow(indexColumn).values[1],
+              username: workSheet.getRow(indexColumn).values[2],
+              password: workSheet.getRow(indexColumn).values[3],
+              jurusanId: listJurusan.find(
+                (item) =>
+                  item.kode_jurusan === workSheet.getRow(indexColumn).values[4]
+              ).id,
+              noHP: workSheet.getRow(indexColumn).values[5] || "",
+              alamat: workSheet.getRow(indexColumn).values[6] || "",
+              nama_ayah: workSheet.getRow(indexColumn).values[7] || "",
+              nama_ibu: workSheet.getRow(indexColumn).values[8] || "",
+              gender: workSheet.getRow(indexColumn).values[9] || "",
+              current_bill: total,
+              status_bill: "not_paid_yet",
+              angkatan: currentYear,
+              kode_siswa: `CODE-${uid(7).toUpperCase()}`,
+              status: "accepted",
+              kelas: "01",
+              sub_kelas: "01",
+            });
+          }
+        }
+      });
+    console.log(injectDataToDB);
+    await siswaAuth.bulkCreate(injectDataToDB);
+    res.status(200).json({ massega: "Create SUccess" });
   } catch (error) {
     console.log(error);
+    res.status(406).json({
+      message:
+        "Server Error. Periksa username siswa dan pastikan tidak ada yang sama. Username harus UNIQUE. Atau hubungi pihak developer, Nurhamsah : 081213221343",
+      code: "server",
+    });
+    fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+      console.log(error);
+    });
   }
 };
 
@@ -278,4 +479,38 @@ export const siswaUpdate = async (req, res) => {
     },
   });
   res.status(200).json({ msg: "update success" });
+};
+export const bulkStatusSiswaUpdate = async (req, res) => {
+  const ids = req.params.ids.split(",");
+  console.log(req.body, "<--------------");
+  let errorInject = false;
+  let listErrorInject = [];
+  try {
+    for (let index = 0; index < req.body.users.length; index++) {
+      const updateSIswa = await siswaAuth.update(
+        {
+          status: req.body.status,
+        },
+        {
+          where: {
+            id: req.body.users[index].id,
+          },
+        }
+      );
+      if (!Boolean(updateSIswa[0])) {
+        errorInject = true;
+        listErrorInject.push(req.body.users[index]);
+      }
+    }
+    if (Boolean(errorInject))
+      return res
+        .status(406)
+        .json({ msg: "Update Error", message: listErrorInject });
+    res.status(200).json({
+      msg: `${req.body.users.length} Siswa berhasil diupdate`,
+      message: req.body.users,
+    });
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error", reason: error });
+  }
 };

@@ -28,6 +28,7 @@ import {
   siswaUpdate,
   getSiswaById,
   importAccount,
+  bulkStatusSiswaUpdate,
 } from "../Controller/siswaController.js";
 import {
   getTagihanFix,
@@ -36,17 +37,35 @@ import {
   updateTagihanFix,
 } from "../Controller/tagihanFixController.js";
 import { postInvoice } from "../Controller/InvoiceController.js";
-
+import multer from "multer";
 import express from "express";
+import path from "path";
 
 const router = express.Router();
+const storage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    /// https://stackoverflow.com/a/70855427/18038473
+    callback(null, "./Assets/upload");
+  },
+  filename: (req, file, callback) => {
+    callback(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage });
 /// SISWA
 router.get("/siswa", getSiswa);
 router.get("/siswa/:id", verifyToken, getSiswaById);
 router.get("/siswa-profile", verifyToken, getSiswaProfile);
 router.post("/register-siswa", siswaRegister);
-router.post("/import-akun-siswa", importAccount);
+router.post("/import-akun-siswa", upload.single("xlsx"), importAccount);
 router.post("/login-siswa", siswaLogin);
+router.patch(
+  /// https://stackoverflow.com/a/15129057/18038473
+  "/bulk-siswa-update/:ids",
+  verifyToken,
+  bulkStatusSiswaUpdate
+);
 router.patch("/siswa/:id", verifyToken, siswaUpdate);
 // router.patch("/siswa/:id", verifyToken, siswaUpdate);
 /// JURUSAN ///

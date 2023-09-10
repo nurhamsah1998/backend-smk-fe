@@ -17,7 +17,7 @@ const messageServerStart = `Server start on port ${port}.`;
 
 try {
   await database.authenticate();
-  // await jurusan.sync();
+  // await jurusan.sync({ force: true });
   // await tagihan.sync();
   // await siswaAuth.sync({ force: true });
   // await invoice.sync({ force: true });

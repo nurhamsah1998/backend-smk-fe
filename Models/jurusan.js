@@ -14,7 +14,7 @@ export const jurusan = database.define(
     nama: {
       type: DataTypes.STRING,
     },
-    code: {
+    kode_jurusan: {
       type: DataTypes.STRING,
     },
   },
