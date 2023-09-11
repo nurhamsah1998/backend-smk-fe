@@ -13,95 +13,144 @@ export const getSiswa = async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const search = req.query.search || "";
   const angkatan = req.query.angkatan || "%";
+  const currentBill = req.query.current_bill || "";
   const jurusanId = req.query.jurusanId || "%";
   const kelas = req.query.kelas || "%";
   const status = req.query.status || "%";
   const offside = limit * page;
-  const totalRows = await siswaAuth.count({
-    where: {
-      angkatan: {
-        [Op.like]: angkatan,
-      },
-      jurusanId: {
-        [Op.like]: jurusanId,
-      },
-      kelas: {
-        [Op.like]: kelas,
-      },
-      status: {
-        [Op.like]: status,
-      },
-      [Op.or]: [
-        {
-          nama: {
-            [Op.like]: "%" + search + "%",
-          },
-        },
-        {
-          username: {
-            [Op.like]: "%" + search + "%",
-          },
-        },
-        {
-          kode_siswa: {
-            [Op.like]: "%" + search + "%",
-          },
-        },
-        {
-          userName: {
-            [Op.like]: "%" + search + "%",
-          },
-        },
-      ],
-    },
-  });
-
-  const totalPage = Math.ceil(totalRows / limit);
-  let data = await siswaAuth.findAll({
-    raw: true,
-    where: {
-      angkatan: {
-        [Op.like]: angkatan,
-      },
-      jurusanId: {
-        [Op.like]: jurusanId,
-      },
-      kelas: {
-        [Op.like]: kelas,
-      },
-      status: {
-        [Op.like]: status,
-      },
-      [Op.or]: [
-        {
-          nama: {
-            [Op.like]: "%" + search + "%",
-          },
-        },
-        {
-          username: {
-            [Op.like]: "%" + search + "%",
-          },
-        },
-        {
-          kode_siswa: {
-            [Op.like]: "%" + search + "%",
-          },
-        },
-        {
-          userName: {
-            [Op.like]: "%" + search + "%",
-          },
-        },
-      ],
-    },
-    limit: limit,
-    offset: offside,
-    order: [["id", "DESC"]],
-    include: [{ model: jurusan }],
-  });
-
   try {
+    const totalRows = await siswaAuth.count({
+      where: {
+        current_bill: {
+          [Op.or]: {
+            [currentBill === "not_paid"
+              ? Op.gt
+              : currentBill === "paid" || currentBill === "not_paid_yet"
+              ? Op.eq
+              : currentBill === "deposit"
+              ? Op.lt
+              : Op.gt]: currentBill === "" ? -1 : 0,
+            [currentBill === "" ||
+            currentBill === "not_paid_yet" ||
+            currentBill === "deposit"
+              ? Op.lt
+              : Op.gt]: 0,
+          },
+        },
+        status_bill: {
+          [Op.like]:
+            currentBill === "not_paid_yet"
+              ? "not_paid_yet"
+              : currentBill === "paid"
+              ? "paid"
+              : "%",
+        },
+        angkatan: {
+          [Op.like]: angkatan,
+        },
+        jurusanId: {
+          [Op.like]: jurusanId,
+        },
+        kelas: {
+          [Op.like]: kelas,
+        },
+        status: {
+          [Op.like]: status,
+        },
+        [Op.or]: [
+          {
+            nama: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
+            username: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
+            kode_siswa: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
+            userName: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+        ],
+      },
+    });
+
+    const totalPage = Math.ceil(totalRows / limit);
+    let data = await siswaAuth.findAll({
+      raw: true,
+      where: {
+        current_bill: {
+          [Op.or]: {
+            [currentBill === "not_paid"
+              ? Op.gt
+              : currentBill === "paid" || currentBill === "not_paid_yet"
+              ? Op.eq
+              : currentBill === "deposit"
+              ? Op.lt
+              : Op.gt]: currentBill === "" ? -1 : 0,
+            [currentBill === "" ||
+            currentBill === "not_paid_yet" ||
+            currentBill === "deposit"
+              ? Op.lt
+              : Op.gt]: 0,
+          },
+        },
+        status_bill: {
+          [Op.like]:
+            currentBill === "not_paid_yet"
+              ? "not_paid_yet"
+              : currentBill === "paid"
+              ? "paid"
+              : "%",
+        },
+        angkatan: {
+          [Op.like]: angkatan,
+        },
+        jurusanId: {
+          [Op.like]: jurusanId,
+        },
+        kelas: {
+          [Op.like]: kelas,
+        },
+        status: {
+          [Op.like]: status,
+        },
+        [Op.or]: [
+          {
+            nama: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
+            username: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
+            kode_siswa: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
+            userName: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+        ],
+      },
+      limit: limit,
+      offset: offside,
+      order: [["id", "DESC"]],
+      include: [{ model: jurusan }],
+    });
+
     const response = {
       data: data,
       totalPage: totalPage,
