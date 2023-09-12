@@ -29,6 +29,7 @@ import {
   getSiswaById,
   importAccount,
   bulkStatusSiswaUpdate,
+  bulkStatusKelasSiswa,
 } from "../Controller/siswaController.js";
 import {
   getTagihanFix,
@@ -62,11 +63,18 @@ router.post("/import-akun-siswa", upload.single("xlsx"), importAccount);
 router.post("/login-siswa", siswaLogin);
 router.patch(
   /// https://stackoverflow.com/a/15129057/18038473
+
   "/bulk-siswa-update/:ids",
   verifyToken,
   bulkStatusSiswaUpdate
 );
 router.patch("/siswa/:id", verifyToken, siswaUpdate);
+/// https://stackoverflow.com/a/15129057/18038473
+router.patch(
+  "/status-kelas/:current_jurusan/:current_sub_kelas/:current_kelas",
+  verifyToken,
+  bulkStatusKelasSiswa
+);
 // router.patch("/siswa/:id", verifyToken, siswaUpdate);
 /// JURUSAN ///
 router.get("/jurusan", getJurusan);

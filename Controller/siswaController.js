@@ -16,6 +16,7 @@ export const getSiswa = async (req, res) => {
   const currentBill = req.query.current_bill || "";
   const jurusanId = req.query.jurusanId || "%";
   const kelas = req.query.kelas || "%";
+  const subKelas = req.query.sub_kelas || "%";
   const status = req.query.status || "%";
   const offside = limit * page;
   try {
@@ -53,6 +54,9 @@ export const getSiswa = async (req, res) => {
         },
         kelas: {
           [Op.like]: kelas,
+        },
+        sub_kelas: {
+          [Op.like]: subKelas,
         },
         status: {
           [Op.like]: status,
@@ -118,6 +122,9 @@ export const getSiswa = async (req, res) => {
         },
         kelas: {
           [Op.like]: kelas,
+        },
+        sub_kelas: {
+          [Op.like]: subKelas,
         },
         status: {
           [Op.like]: status,
@@ -529,9 +536,41 @@ export const siswaUpdate = async (req, res) => {
   });
   res.status(200).json({ msg: "update success" });
 };
+export const bulkStatusKelasSiswa = async (req, res) => {
+  let errorInject = false;
+  let listErrorInject = [];
+  try {
+    for (let index = 0; index < req.body.users.length; index++) {
+      const updateSIswa = await siswaAuth.update(
+        {
+          kelas: req.body.newKelas,
+          jurusanId: req.body.newJurusanId,
+          sub_kelas: req.body.newSubKelas,
+        },
+        {
+          where: {
+            id: req.body.users[index].id,
+          },
+        }
+      );
+      if (!Boolean(updateSIswa[0])) {
+        errorInject = true;
+        listErrorInject.push(req.body.users[index]);
+      }
+    }
+    if (Boolean(errorInject))
+      return res
+        .status(406)
+        .json({ msg: "Update Error", message: listErrorInject });
+    res.status(200).json({
+      msg: `${req.body.users.length} Siswa berhasil diupdate`,
+      message: req.body.users,
+    });
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error", reason: error });
+  }
+};
 export const bulkStatusSiswaUpdate = async (req, res) => {
-  const ids = req.params.ids.split(",");
-  console.log(req.body, "<--------------");
   let errorInject = false;
   let listErrorInject = [];
   try {
