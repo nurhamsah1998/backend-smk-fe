@@ -381,7 +381,7 @@ export const importAccount = async (req, res) => {
     console.log(error);
     res.status(406).json({
       message:
-        "Server Error. Periksa username siswa dan pastikan tidak ada yang sama. Username harus UNIQUE. Atau hubungi pihak developer, Nurhamsah : 081213221343",
+        "Server Error. Periksa username siswa dan pastikan tidak ada yang sama. Username harus UNIQUE. Atau hubungi pihak developer",
       code: "server",
     });
     fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
