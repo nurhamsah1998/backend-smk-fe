@@ -380,8 +380,7 @@ export const importAccount = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(406).json({
-      message:
-        "Server Error. Periksa username siswa dan pastikan tidak ada yang sama. Username harus UNIQUE. Atau hubungi pihak developer",
+      message: "Server Error. Terjadi kesalahan",
       code: "server",
     });
     fs.unlink("./Assets/upload/" + req.file.filename, (error) => {

@@ -41,6 +41,7 @@ import { postInvoice } from "../Controller/InvoiceController.js";
 import multer from "multer";
 import express from "express";
 import path from "path";
+import { downloadTemplateImportSiswa } from "../Controller/download.js";
 
 const router = express.Router();
 const storage = multer.diskStorage({
@@ -100,5 +101,8 @@ router.get("/staff-profile", verifyToken, getStaffProfile);
 /// INVOICE ///
 router.post("/invoice", verifyToken, postInvoice);
 router.get("/invoice", verifyToken, getInvoice);
+
+/// DOWNLOAD
+router.get("/download/template-import-siswa", downloadTemplateImportSiswa);
 
 export default router;
