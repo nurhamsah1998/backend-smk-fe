@@ -9,6 +9,7 @@ import { siswaAuth } from "./Models/siswa.js";
 import { stafAuth } from "./Models/staf.js";
 import { invoice } from "./Models/invoice.js";
 import { tagihanFix } from "./Models/tagihanFix.js";
+import { logActivity } from "./Models/logActivity.js";
 
 dotEnv.config();
 const app = express();
@@ -23,6 +24,7 @@ try {
   // await invoice.sync({ force: true });
   // await stafAuth.sync();
   // await tagihanFix.sync();
+  // await logActivity.sync({force:true});
   console.log("DATABASE CONNECTED");
 } catch (error) {
   console.log(error);

@@ -1,6 +1,10 @@
 import { literal } from "sequelize";
 import { siswaAuth } from "../Models/siswa.js";
 import { tagihanFix } from "../Models/tagihanFix.js";
+import {
+  getUserInfoToken,
+  recordActivity,
+} from "../Configuration/supportFunction.js";
 
 export const getTagihanFix = async (req, res) => {
   try {
@@ -51,21 +55,31 @@ export const getTagihanFixForStudent = async (req, res) => {
 };
 
 export const updateTagihanFix = async (req, res) => {
-  await siswaAuth.increment(
-    { current_bill: req.body.extra.freq_bill },
-    {
+  try {
+    await siswaAuth.increment(
+      { current_bill: req.body.extra.freq_bill },
+      {
+        where: {
+          angkatan: req.body.tahun_angkatan,
+        },
+      }
+    );
+    delete req.body.extra;
+
+    await tagihanFix.update(req.body, {
       where: {
-        angkatan: req.body.tahun_angkatan,
+        id: req.params.id,
       },
-    }
-  );
-  delete req.body.extra;
-
-  await tagihanFix.update(req.body, {
-    where: {
-      id: req.params.id,
-    },
-  });
-
-  res.status(200).json({ msg: "update success" });
+    });
+    recordActivity({
+      action: "Mengubah Tagihan",
+      author: getUserInfoToken(
+        req.headers.authorization.replace("Bearer ", "")
+      ),
+      data: req.body.history,
+    });
+    res.status(200).json({ msg: "update success" });
+  } catch (error) {
+    console.log(error);
+  }
 };

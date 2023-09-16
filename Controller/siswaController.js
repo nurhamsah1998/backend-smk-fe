@@ -7,6 +7,10 @@ import { Op } from "sequelize";
 import exeljs from "exceljs";
 import fs from "fs/promises";
 import { tagihanFix } from "../Models/tagihanFix.js";
+import {
+  getUserInfoToken,
+  recordActivity,
+} from "../Configuration/supportFunction.js";
 
 export const getSiswa = async (req, res) => {
   const page = parseInt(req.query.page) - 1 || 0;
@@ -435,7 +439,7 @@ export const siswaRegister = async (req, res) => {
       },
     });
     const length = await siswaAuth.findAndCountAll();
-    await siswaAuth.create({
+    const body = {
       nama: nama,
       alamat: alamat,
       nama_ayah: nama_ayah,
@@ -452,6 +456,15 @@ export const siswaRegister = async (req, res) => {
         `${code_jurusan}${new Date().getFullYear()}SISWA${length.count}`,
       status_bill,
       current_bill,
+    };
+    console.log(req.headers, "SUPAH");
+    await siswaAuth.create(body);
+    recordActivity({
+      action: "Menambah Siswa Perorangan",
+      data: body,
+      author: getUserInfoToken(
+        req.headers.authorization.replace("Bearer ", "")
+      ),
     });
     res.status(201).json({ msg: "Pendaftaran berhasil" });
   } catch (error) {
