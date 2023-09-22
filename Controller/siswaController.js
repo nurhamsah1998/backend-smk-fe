@@ -24,6 +24,7 @@ export const getSiswa = async (req, res) => {
   const status = req.query.status || "%";
   const offside = limit * page;
   try {
+    const totalData = await siswaAuth.count();
     const totalRows = await siswaAuth.count({
       where: {
         current_bill: {
@@ -167,6 +168,7 @@ export const getSiswa = async (req, res) => {
       totalPage: totalPage,
       limit: limit,
       totalRows: totalRows,
+      totalData,
       page: page + 1,
     };
     res.json(response);
@@ -206,11 +208,8 @@ export const importAccount = async (req, res) => {
     /// https://github.com/exceljs/exceljs/issues/960#issuecomment-1698549072
     let errorValidation = [];
     let errorInjectUsernameToDB = [];
-    let errorSameUsernameInFile = [];
-    let boxUsernames = [];
     let errorInjectJurusanToDB = [];
     let injectDataToDB = [];
-    let currentuserName;
     const { Workbook } = exeljs;
     const wb = new Workbook();
     await wb.xlsx
@@ -229,7 +228,9 @@ export const importAccount = async (req, res) => {
               workSheet.getColumn(indexColumn).letter === "A" ||
               workSheet.getColumn(indexColumn).letter === "B" ||
               workSheet.getColumn(indexColumn).letter === "C" ||
-              workSheet.getColumn(indexColumn).letter === "D"
+              workSheet.getColumn(indexColumn).letter === "D" ||
+              workSheet.getColumn(indexColumn).letter === "E" ||
+              workSheet.getColumn(indexColumn).letter === "F"
             ) {
               if (
                 workSheet
@@ -266,25 +267,6 @@ export const importAccount = async (req, res) => {
                   reason: "Already exist",
                 });
               }
-              // if (
-              //   currentuserName ===
-              //   workSheet.getColumn(indexColumn).values[indexRow]
-              // ) {
-              //   errorSameUsernameInFile.push({
-              //     row: workSheet.getColumn(indexColumn).letter,
-              //     column: indexRow,
-              //     username: workSheet.getColumn(indexColumn).values[indexRow],
-              //     reason: "Must be unique",
-              //   });
-              //   console.log(
-              //     currentuserName ===
-              //       workSheet.getColumn(indexColumn).values[indexRow],
-              //     "<---"
-              //   );
-              // }
-              // boxUsernames.push(
-              //   workSheet.getColumn(indexColumn).values[indexRow]
-              // );
             }
             if (workSheet.getColumn(indexColumn).letter === "D") {
               const jurusanNotValid = listJurusan.find(
@@ -311,7 +293,6 @@ export const importAccount = async (req, res) => {
           }
         }
       });
-    fs.r;
     if (Boolean(errorValidation.length)) {
       res
         .status(406)
@@ -331,11 +312,6 @@ export const importAccount = async (req, res) => {
       });
       return;
     }
-    // if (Boolean(errorSameUsernameInFile.length))
-    //   return res.status(406).json({
-    //     code: "error_inject_username_unique",
-    //     message: errorSameUsernameInFile,
-    //   });
     if (Boolean(errorInjectJurusanToDB.length)) {
       res.status(406).json({
         code: "error_inject_jurusan",
@@ -354,6 +330,11 @@ export const importAccount = async (req, res) => {
         const totalRow = workSheet.actualRowCount;
         for (let indexColumn = 1; indexColumn < totalRow + 1; indexColumn++) {
           if (indexColumn !== 1) {
+            console.log(
+              `sub_kelas=${workSheet.getRow(indexColumn).values[5]}|kelas=${
+                workSheet.getRow(indexColumn).values[6]
+              }`
+            );
             injectDataToDB.push({
               nama: workSheet.getRow(indexColumn).values[1],
               username: workSheet.getRow(indexColumn).values[2],
@@ -362,23 +343,22 @@ export const importAccount = async (req, res) => {
                 (item) =>
                   item.kode_jurusan === workSheet.getRow(indexColumn).values[4]
               ).id,
-              noHP: workSheet.getRow(indexColumn).values[5] || "",
-              alamat: workSheet.getRow(indexColumn).values[6] || "",
-              nama_ayah: workSheet.getRow(indexColumn).values[7] || "",
-              nama_ibu: workSheet.getRow(indexColumn).values[8] || "",
-              gender: workSheet.getRow(indexColumn).values[9] || "",
+              sub_kelas: workSheet.getRow(indexColumn).values[5] || "",
+              kelas: workSheet.getRow(indexColumn).values[6] || "",
+              noHP: workSheet.getRow(indexColumn).values[7] || "",
+              alamat: workSheet.getRow(indexColumn).values[8] || "",
+              nama_ayah: workSheet.getRow(indexColumn).values[9] || "",
+              nama_ibu: workSheet.getRow(indexColumn).values[10] || "",
+              gender: workSheet.getRow(indexColumn).values[11] || "",
               current_bill: total,
               status_bill: "not_paid_yet",
               angkatan: currentYear,
               kode_siswa: `CODE-${uid(7).toUpperCase()}`,
               status: "accepted",
-              kelas: "01",
-              sub_kelas: "01",
             });
           }
         }
       });
-    console.log(injectDataToDB);
     await siswaAuth.bulkCreate(injectDataToDB);
     res.status(200).json({ massega: "Create SUccess" });
   } catch (error) {
@@ -457,7 +437,6 @@ export const siswaRegister = async (req, res) => {
       status_bill,
       current_bill,
     };
-    console.log(req.headers, "SUPAH");
     await siswaAuth.create(body);
     recordActivity({
       action: "Menambah Siswa Perorangan",
