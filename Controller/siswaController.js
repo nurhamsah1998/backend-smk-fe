@@ -210,6 +210,7 @@ export const importAccount = async (req, res) => {
     let errorInjectUsernameToDB = [];
     let errorInjectJurusanToDB = [];
     let injectDataToDB = [];
+    let isNoData = false;
     const { Workbook } = exeljs;
     const wb = new Workbook();
     await wb.xlsx
@@ -218,6 +219,9 @@ export const importAccount = async (req, res) => {
         const workSheet = wb.getWorksheet();
         const totalColumn = workSheet.actualColumnCount;
         const totalRow = workSheet.actualRowCount;
+        if (totalRow === 1) {
+          isNoData = true;
+        }
         for (
           let indexColumn = 1;
           indexColumn < totalColumn + 1;
@@ -293,6 +297,17 @@ export const importAccount = async (req, res) => {
           }
         }
       });
+    if (Boolean(isNoData)) {
+      res.status(406).json({
+        code: "error_validation_no_data",
+        message: "File tidak boleh kosong! setidaknya masukan 1 baris data!",
+      });
+      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+        console.log(error);
+      });
+      return;
+    }
+
     if (Boolean(errorValidation.length)) {
       res
         .status(406)

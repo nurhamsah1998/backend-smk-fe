@@ -1,8 +1,21 @@
 import { stafAuth } from "../Models/staf.js";
 import bcrypt from "bcrypt";
+import { invoice } from "../Models/invoice.js";
 import jwt from "jsonwebtoken";
 import CryptoJS from "crypto-js";
 
+// export const dashboardStaffReport = async (req, res) => {
+//   try {
+//     const response = await invoice.findAll({
+//       where:{
+//         createdAt
+//       }
+//     })
+//     res.json(response);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 export const getStaff = async (req, res) => {
   try {
     const response = await stafAuth.findAll();
