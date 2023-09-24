@@ -12,9 +12,10 @@ export const postInvoice = async (req, res) => {
     kode_pembayaran,
     uang_diterima,
     note,
+    kelas,
   } = req.body;
   try {
-    await invoice.create({
+    const body = {
       nama: nama,
       total: total,
       petugas: petugas,
@@ -22,9 +23,11 @@ export const postInvoice = async (req, res) => {
       kode_tagihan: kode_tagihan,
       kode_pembayaran: kode_pembayaran,
       uang_diterima: uang_diterima,
+      kelas,
       invoice: `INV-${uid(7).toUpperCase()}`,
-    });
-    res.status(201).json({ msg: "Transaksi berhasil" });
+    };
+    const data = await invoice.create(body);
+    res.status(201).json({ msg: "Transaksi berhasil", data: data });
   } catch (error) {
     console.log(error);
   }
