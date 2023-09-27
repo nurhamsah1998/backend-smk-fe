@@ -3,19 +3,31 @@ import bcrypt from "bcrypt";
 import { invoice } from "../Models/invoice.js";
 import jwt from "jsonwebtoken";
 import CryptoJS from "crypto-js";
+import moment from "moment/moment.js";
+import { Op } from "sequelize";
 
-// export const dashboardStaffReport = async (req, res) => {
-//   try {
-//     const response = await invoice.findAll({
-//       where:{
-//         createdAt
-//       }
-//     })
-//     res.json(response);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
+export const dashboardStaffReport = async (req, res) => {
+  try {
+    const student_amount = await invoice.findAll({
+      where: {
+        createdAt: {
+          [Op.between]: [
+            /// https://stackoverflow.com/a/12970385/18038473
+            moment(moment().startOf("day")).format("YYYY-MM-DD H:mm:ss"),
+            moment(moment().endOf("day")).format("YYYY-MM-DD H:mm:ss"),
+          ],
+        },
+      },
+    });
+    res.json({
+      data: {
+        today_profit: student_amount,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 export const getStaff = async (req, res) => {
   try {
     const response = await stafAuth.findAll();

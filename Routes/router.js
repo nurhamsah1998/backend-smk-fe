@@ -10,6 +10,7 @@ import {
   getStaff,
   staffLogin,
   getStaffProfile,
+  dashboardStaffReport,
 } from "../Controller/staffController.js";
 import { verifyToken } from "../middleWare/verifyToken.js";
 import {
@@ -104,5 +105,8 @@ router.get("/invoice", verifyToken, getInvoice);
 
 /// DOWNLOAD
 router.get("/download/template-import-siswa", downloadTemplateImportSiswa);
+
+/// DASHBOARD REPOST
+router.get("/dashboard-report", verifyToken, dashboardStaffReport);
 
 export default router;
