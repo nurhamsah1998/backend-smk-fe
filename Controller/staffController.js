@@ -5,10 +5,11 @@ import jwt from "jsonwebtoken";
 import CryptoJS from "crypto-js";
 import moment from "moment/moment.js";
 import { Op } from "sequelize";
+import { siswaAuth } from "../Models/siswa.js";
 
 export const dashboardStaffReport = async (req, res) => {
   try {
-    const student_amount = await invoice.findAll({
+    const student_amount = await invoice.sum("uang_diterima", {
       where: {
         createdAt: {
           [Op.between]: [
@@ -19,9 +20,25 @@ export const dashboardStaffReport = async (req, res) => {
         },
       },
     });
+    const totalStudentHasPay = await invoice.count({
+      where: {
+        createdAt: {
+          [Op.between]: [
+            /// https://stackoverflow.com/a/12970385/18038473
+            moment(moment().startOf("day")).format("YYYY-MM-DD H:mm:ss"),
+            moment(moment().endOf("day")).format("YYYY-MM-DD H:mm:ss"),
+          ],
+        },
+      },
+    });
+    const totalStudent = await siswaAuth.count();
     res.json({
       data: {
-        today_profit: student_amount,
+        today_profit: {
+          amount: student_amount || 0,
+          total_student: totalStudentHasPay || 0,
+        },
+        total_student: totalStudent || 0,
       },
     });
   } catch (error) {

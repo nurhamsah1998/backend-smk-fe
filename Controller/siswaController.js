@@ -424,15 +424,11 @@ export const siswaRegister = async (req, res) => {
     current_bill,
     code_jurusan,
     kode_siswa,
+    isAdminCreation,
   } = req.body;
   if (username === "" || password === "")
     return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
   try {
-    const findJurusan = await jurusan.findOne({
-      where: {
-        id: jurusanId,
-      },
-    });
     const length = await siswaAuth.findAndCountAll();
     const body = {
       nama: nama,
@@ -453,13 +449,15 @@ export const siswaRegister = async (req, res) => {
       current_bill,
     };
     await siswaAuth.create(body);
-    recordActivity({
-      action: "Menambah Siswa Perorangan",
-      data: body,
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
-    });
+    if (isAdminCreation) {
+      recordActivity({
+        action: "Menambah Siswa Perorangan",
+        data: body,
+        author: getUserInfoToken(
+          req.headers.authorization.replace("Bearer ", "")
+        ),
+      });
+    }
     res.status(201).json({ msg: "Pendaftaran berhasil" });
   } catch (error) {
     console.log(error);
