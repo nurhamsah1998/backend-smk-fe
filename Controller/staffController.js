@@ -2,7 +2,6 @@ import { stafAuth } from "../Models/staf.js";
 import bcrypt from "bcrypt";
 import { invoice } from "../Models/invoice.js";
 import jwt from "jsonwebtoken";
-import CryptoJS from "crypto-js";
 import moment from "moment/moment.js";
 import { Op } from "sequelize";
 import { siswaAuth } from "../Models/siswa.js";
