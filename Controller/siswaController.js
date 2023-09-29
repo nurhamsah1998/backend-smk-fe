@@ -358,8 +358,8 @@ export const importAccount = async (req, res) => {
                 (item) =>
                   item.kode_jurusan === workSheet.getRow(indexColumn).values[4]
               ).id,
-              sub_kelas: workSheet.getRow(indexColumn).values[5] || "",
-              kelas: workSheet.getRow(indexColumn).values[6] || "",
+              sub_kelas: workSheet.getRow(indexColumn).values[5] || 1,
+              kelas: workSheet.getRow(indexColumn).values[6] || 10,
               noHP: workSheet.getRow(indexColumn).values[7] || "",
               alamat: workSheet.getRow(indexColumn).values[8] || "",
               nama_ayah: workSheet.getRow(indexColumn).values[9] || "",

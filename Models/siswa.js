@@ -53,11 +53,11 @@ export const siswaAuth = database.define(
     },
     kelas: {
       type: DataTypes.STRING,
-      defaultValue: "01",
+      defaultValue: "10",
     },
     sub_kelas: {
       type: DataTypes.STRING,
-      defaultValue: "01",
+      defaultValue: "1",
     },
     jurusanId: {
       type: DataTypes.STRING,
