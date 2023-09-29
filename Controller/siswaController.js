@@ -379,7 +379,8 @@ export const importAccount = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(406).json({
-      message: "Server Error. Terjadi kesalahan",
+      message:
+        "Server Error. Terjadi kesalahan, atau cek list username pastikan harus Uniq atau Berbeda",
       code: "server",
     });
     fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
@@ -533,12 +534,17 @@ export const siswaLogin = async (req, res) => {
 };
 
 export const siswaUpdate = async (req, res) => {
-  await siswaAuth.update(req.body, {
-    where: {
-      id: req.params.id,
-    },
-  });
-  res.status(200).json({ msg: "update success" });
+  try {
+    console.log(req.body, "<=====");
+    await siswaAuth.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    });
+    res.status(200).json({ msg: "update success" });
+  } catch (error) {
+    res.status(403).json({ msg: "Internal server error !" });
+  }
 };
 export const bulkStatusKelasSiswa = async (req, res) => {
   let errorInject = false;

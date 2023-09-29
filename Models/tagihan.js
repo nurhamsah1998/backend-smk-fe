@@ -46,5 +46,5 @@ export const tagihan = database.define(
   }
 );
 
-// jurusan.hasOne(tagihan);
-// tagihan.belongsTo(jurusan);
+jurusan.hasOne(tagihan);
+tagihan.belongsTo(jurusan);

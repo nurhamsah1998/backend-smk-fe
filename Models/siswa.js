@@ -88,5 +88,5 @@ export const siswaAuth = database.define(
   }
 );
 
-// jurusan.hasOne(siswaAuth);
-// siswaAuth.belongsTo(jurusan);
+jurusan.hasOne(siswaAuth);
+siswaAuth.belongsTo(jurusan);
