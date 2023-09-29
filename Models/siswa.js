@@ -53,7 +53,7 @@ export const siswaAuth = database.define(
     },
     kelas: {
       type: DataTypes.STRING,
-      defaultValue: "1",
+      defaultValue: "10",
     },
     sub_kelas: {
       type: DataTypes.STRING,
