@@ -19,12 +19,12 @@ const messageServerStart = `Server start on port ${port}.`;
 try {
   await database.authenticate();
   // await jurusan.sync({ force: true });
-  // await tagihan.sync();
+  // await tagihan.sync({ force: true });
   // await siswaAuth.sync({ force: true });
   // await invoice.sync({ force: true });
-  // await stafAuth.sync();
-  // await tagihanFix.sync();
-  // await logActivity.sync({force:true});
+  // await stafAuth.sync({ force: true });
+  // await tagihanFix.sync({ force: true });
+  // await logActivity.sync({ force: true });
   console.log("DATABASE CONNECTED");
 } catch (error) {
   console.log(error);
