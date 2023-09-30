@@ -41,6 +41,36 @@ export const getInvoice = async (req, res) => {
   });
   res.status(200).json(responseInvoice);
 };
+export const getAllInvoice = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) - 1 || 0;
+    const limit = parseInt(req.query.limit) || 10;
+    const offside = limit * page;
+    const totalData = await invoice.count();
+    const totalRow = await invoice.count({
+      limit: limit,
+      offset: offside,
+      order: [["id", "DESC"]],
+    });
+    const totalPage = Math.ceil(totalRow / limit);
+
+    const responseInvoice = await invoice.findAll({
+      limit: limit,
+      offset: offside,
+      order: [["id", "DESC"]],
+    });
+    res.status(200).json({
+      data: responseInvoice,
+      totalRows: totalRow,
+      totalPage: totalPage,
+      limit: limit,
+      page: page + 1,
+      totalData,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 export const getTotalInvoice = async (req, res) => {
   const responseInvoice = await invoice.findAll({
     where: {

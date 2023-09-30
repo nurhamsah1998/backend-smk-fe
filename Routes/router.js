@@ -4,7 +4,7 @@ import {
   deleteJurusan,
   updateJurusan,
 } from "../Controller/jurusanController.js";
-import { getInvoice } from "../Controller/InvoiceController.js";
+import { getAllInvoice, getInvoice } from "../Controller/InvoiceController.js";
 import {
   staffRegister,
   getStaff,
@@ -102,6 +102,7 @@ router.get("/staff-profile", verifyToken, getStaffProfile);
 /// INVOICE ///
 router.post("/invoice", verifyToken, postInvoice);
 router.get("/invoice", verifyToken, getInvoice);
+router.get("/get-all-invoice", verifyToken, getAllInvoice);
 
 /// DOWNLOAD
 router.get("/download/template-import-siswa", downloadTemplateImportSiswa);
