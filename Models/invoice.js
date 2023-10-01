@@ -40,6 +40,12 @@ export const invoice = database.define(
     kelas: {
       type: DataTypes.STRING,
     },
+    sub_kelas: {
+      type: DataTypes.STRING,
+    },
+    jurusan: {
+      type: DataTypes.STRING,
+    },
   },
   {
     freezeTableName: true,
