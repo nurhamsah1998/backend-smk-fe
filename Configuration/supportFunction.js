@@ -16,4 +16,12 @@ const recordActivity = async ({ action, data, author }) => {
 const getUserInfoToken = (token) => {
   return jwt.decode(token);
 };
-export { recordActivity, getUserInfoToken };
+const FormatCurrency = (params) => {
+  const resultAfterFormating = Number(params).toLocaleString("en-ID", {
+    style: "currency",
+    currency: "IDR",
+  });
+  const toRp = resultAfterFormating.replace("IDR", "Rp");
+  return toRp;
+};
+export { recordActivity, getUserInfoToken, FormatCurrency };

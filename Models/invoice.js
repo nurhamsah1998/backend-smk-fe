@@ -28,8 +28,8 @@ export const invoice = database.define(
     petugas: {
       type: DataTypes.STRING,
     },
-    total: {
-      type: DataTypes.INTEGER,
+    tahun_angkatan: {
+      type: DataTypes.STRING,
     },
     uang_diterima: {
       type: DataTypes.INTEGER,

@@ -16,6 +16,7 @@ export const postInvoice = async (req, res) => {
     kelas,
     jurusan,
     sub_kelas,
+    tahun_angkatan,
   } = req.body;
   try {
     const body = {
@@ -29,6 +30,7 @@ export const postInvoice = async (req, res) => {
       jurusan,
       sub_kelas,
       kelas,
+      tahun_angkatan,
       invoice: `INV-${uid(7).toUpperCase()}`,
     };
     const data = await invoice.create(body);

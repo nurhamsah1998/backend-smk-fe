@@ -42,7 +42,11 @@ import { postInvoice } from "../Controller/InvoiceController.js";
 import multer from "multer";
 import express from "express";
 import path from "path";
-import { downloadTemplateImportSiswa } from "../Controller/download.js";
+import {
+  downloadFileExelTransaction,
+  downloadTemplateImportSiswa,
+  downloadTransaction,
+} from "../Controller/download.js";
 
 const router = express.Router();
 const storage = multer.diskStorage({
@@ -106,6 +110,8 @@ router.get("/get-all-invoice", verifyToken, getAllInvoice);
 
 /// DOWNLOAD
 router.get("/download/template-import-siswa", downloadTemplateImportSiswa);
+router.get("/download/report-transaction", verifyToken, downloadTransaction);
+router.get("/download/report-transaction/:token", downloadFileExelTransaction);
 
 /// DASHBOARD REPOST
 router.get("/dashboard-report", verifyToken, dashboardStaffReport);
