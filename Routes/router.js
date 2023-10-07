@@ -41,11 +41,11 @@ import {
 import { postInvoice } from "../Controller/InvoiceController.js";
 import multer from "multer";
 import express from "express";
-import path from "path";
 import {
   downloadFileExelTransaction,
   downloadTemplateImportSiswa,
   downloadTransaction,
+  downloadStudentBill,
 } from "../Controller/download.js";
 
 const router = express.Router();
@@ -111,6 +111,7 @@ router.get("/get-all-invoice", verifyToken, getAllInvoice);
 /// DOWNLOAD
 router.get("/download/template-import-siswa", downloadTemplateImportSiswa);
 router.get("/download/report-transaction", verifyToken, downloadTransaction);
+router.get("/download/report-bill", verifyToken, downloadStudentBill);
 router.get("/download/report-transaction/:token", downloadFileExelTransaction);
 
 /// DASHBOARD REPOST

@@ -82,11 +82,6 @@ export const getSiswa = async (req, res) => {
               [Op.like]: "%" + search + "%",
             },
           },
-          {
-            userName: {
-              [Op.like]: "%" + search + "%",
-            },
-          },
         ],
       },
     });
@@ -210,6 +205,7 @@ export const importAccount = async (req, res) => {
     let errorInjectUsernameToDB = [];
     let errorInjectJurusanToDB = [];
     let injectDataToDB = [];
+    let duplicateSameUserName = [];
     let isNoData = false;
     const { Workbook } = exeljs;
     const wb = new Workbook();
@@ -219,6 +215,7 @@ export const importAccount = async (req, res) => {
         const workSheet = wb.getWorksheet();
         const totalColumn = workSheet.actualColumnCount;
         const totalRow = workSheet.actualRowCount;
+        let listUserName = [];
         if (totalRow === 1) {
           isNoData = true;
         }
@@ -251,12 +248,16 @@ export const importAccount = async (req, res) => {
             }
             /// VALIDATION USER NAME
             if (workSheet.getColumn(indexColumn).letter === "B") {
+              if (indexRow !== 1) {
+                duplicateSameUserName.push(
+                  workSheet.getColumn(indexColumn).values[indexRow]
+                );
+              }
               const isAlreadyExistAccount = listSiswa.find(
                 (username) =>
                   username.username ===
-                  workSheet.getColumn(indexColumn).values[indexRow]
+                  workSheet.getColumn(indexColumn).values[indexRow].toString()
               );
-
               if (
                 isAlreadyExistAccount &&
                 Boolean(
@@ -276,7 +277,9 @@ export const importAccount = async (req, res) => {
               const jurusanNotValid = listJurusan.find(
                 (jurusan) =>
                   jurusan.kode_jurusan ===
-                  workSheet.getColumn(indexColumn).values[indexRow]
+                  workSheet
+                    .getColumn(indexColumn)
+                    .values[indexRow].toUpperCase()
               );
               if (
                 !jurusanNotValid &&
@@ -297,6 +300,24 @@ export const importAccount = async (req, res) => {
           }
         }
       });
+    /// https://stackoverflow.com/a/49215411/18038473
+    let findDuplicate = [
+      ...new Set(
+        duplicateSameUserName.filter(
+          (item, index) => duplicateSameUserName.indexOf(item) !== index
+        )
+      ),
+    ];
+    if (Boolean(findDuplicate.length)) {
+      res.status(406).json({
+        code: "error_validation_no_data",
+        message: `Gagal upload file. Username harus unique/berbeda. Username ${findDuplicate.join()} telah banyak digunakan, coba cari yang lainnya`,
+      });
+      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+        console.log(error);
+      });
+      return;
+    }
     if (Boolean(isNoData)) {
       res.status(406).json({
         code: "error_validation_no_data",
@@ -356,10 +377,12 @@ export const importAccount = async (req, res) => {
               password: workSheet.getRow(indexColumn).values[3],
               jurusanId: listJurusan.find(
                 (item) =>
-                  item.kode_jurusan === workSheet.getRow(indexColumn).values[4]
+                  item.kode_jurusan ===
+                  workSheet.getRow(indexColumn).values[4].toUpperCase()
               ).id,
-              sub_kelas: workSheet.getRow(indexColumn).values[5] || 1,
-              kelas: workSheet.getRow(indexColumn).values[6] || 10,
+              sub_kelas:
+                workSheet.getRow(indexColumn).values[5].toString() || 1,
+              kelas: workSheet.getRow(indexColumn).values[6].toString() || 10,
               noHP: workSheet.getRow(indexColumn).values[7] || "",
               alamat: workSheet.getRow(indexColumn).values[8] || "",
               nama_ayah: workSheet.getRow(indexColumn).values[9] || "",
