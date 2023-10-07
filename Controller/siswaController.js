@@ -558,7 +558,6 @@ export const siswaLogin = async (req, res) => {
 
 export const siswaUpdate = async (req, res) => {
   try {
-    console.log(req.body, "<=====");
     await siswaAuth.update(req.body, {
       where: {
         id: req.params.id,
