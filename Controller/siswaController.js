@@ -73,6 +73,16 @@ export const getSiswa = async (req, res) => {
             },
           },
           {
+            nama_ayah: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
+            nama_ibu: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
             username: {
               [Op.like]: "%" + search + "%",
             },
@@ -136,17 +146,22 @@ export const getSiswa = async (req, res) => {
             },
           },
           {
+            nama_ayah: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
+            nama_ibu: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
             username: {
               [Op.like]: "%" + search + "%",
             },
           },
           {
             kode_siswa: {
-              [Op.like]: "%" + search + "%",
-            },
-          },
-          {
-            userName: {
               [Op.like]: "%" + search + "%",
             },
           },
@@ -492,26 +507,6 @@ export const siswaRegister = async (req, res) => {
 
 export const siswaLogin = async (req, res) => {
   try {
-    // const NISN = await siswaAuth.findAll();
-    // const toStringify = JSON.stringify(NISN);
-    // const toArray = JSON.parse(toStringify);
-    // const decrypt = toArray.map((i) => {
-    //   const DecryptNISN = CryptoJS.AES.decrypt(
-    //     i.username,
-    //     process.env.SECRET_ENCRYPT
-    //   );
-    //   const originalText = DecryptNISN.toString(CryptoJS.enc.Utf8);
-    //   return { ...i, username: originalText };
-    // });
-    // const isNisinHasRegister = decrypt.find((i) => i.username === req.body.username);
-    // if (!isNisinHasRegister)
-    //   return res.status(400).json({ msg: "AKUN TIDAK DITEMUKAN" });
-    // const isMatchPassword = await bcrypt.compare(
-    //   req.body.password,
-    //   isNisinHasRegister.password
-    // );
-    // if (!isMatchPassword)
-    //   return res.status(400).json({ msg: "Periksa password anda" });
     const findSiswa = await siswaAuth.findAll({
       where: {
         username: req.body.username,

@@ -85,12 +85,12 @@ export const downloadTransaction = async (req, res) => {
       {
         header: "Kelas",
         key: "kelas",
-        width: 32,
+        width: 15,
       },
       {
         header: "Angkatan",
         key: "tahun_angkatan",
-        width: 32,
+        width: 15,
       },
       {
         header: "Tunai",
@@ -100,11 +100,16 @@ export const downloadTransaction = async (req, res) => {
       {
         header: "No. Invoice",
         key: "invoice",
-        width: 32,
+        width: 20,
       },
       {
         header: "Keterangan",
         key: "kode_pembayaran",
+        width: 32,
+      },
+      {
+        header: "Tanggal",
+        key: "createdAt",
         width: 32,
       },
     ];
@@ -118,6 +123,9 @@ export const downloadTransaction = async (req, res) => {
         uang_diterima: FormatCurrency(dataInvoice[index].uang_diterima),
         invoice: dataInvoice[index].invoice,
         kode_pembayaran: dataInvoice[index].kode_pembayaran,
+        createdAt: moment(dataInvoice[index].createdAt).format(
+          "Do MMM YYY hh:mm a"
+        ),
       });
       worksheet.getCell(`A${index + 2}`).alignment = {
         vertical: "middle",
@@ -153,6 +161,10 @@ export const downloadTransaction = async (req, res) => {
       bold: true,
     };
     worksheet.getCell("G1").font = {
+      size: 13,
+      bold: true,
+    };
+    worksheet.getCell("H1").font = {
       size: 13,
       bold: true,
     };
@@ -313,7 +325,7 @@ export const downloadStudentBill = async (req, res) => {
       worksheet.addRow({
         no: index + 1,
         nama: data[index].nama,
-        kelas: `${data[index].kelas} ${data[index]["jurusan.nama"]} ${data[index].sub_kelas}`,
+        kelas: `${data[index].kelas} ${data[index]["jurusan.kode_jurusan"]} ${data[index].sub_kelas}`,
         angkatan: data[index].angkatan,
         gender: data[index].gender,
         total_payment: FormatCurrency(data[index].total_payment),
