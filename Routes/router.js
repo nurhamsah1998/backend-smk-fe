@@ -39,6 +39,7 @@ import {
   updateTagihanFix,
 } from "../Controller/tagihanFixController.js";
 import { postInvoice } from "../Controller/InvoiceController.js";
+import { getActivity } from "../Controller/logActivity.js";
 import multer from "multer";
 import express from "express";
 import {
@@ -116,5 +117,8 @@ router.get("/download/report-transaction/:token", downloadFileExelTransaction);
 
 /// DASHBOARD REPOST
 router.get("/dashboard-report", verifyToken, dashboardStaffReport);
+
+/// DEV
+router.get("/log", verifyToken, getActivity);
 
 export default router;
