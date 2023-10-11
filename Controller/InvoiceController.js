@@ -3,6 +3,10 @@ import jwt from "jsonwebtoken";
 import { uid } from "uid";
 import { Op } from "sequelize";
 import moment from "moment";
+import {
+  getUserInfoToken,
+  recordActivity,
+} from "../Configuration/supportFunction.js";
 
 export const postInvoice = async (req, res) => {
   const {
@@ -34,6 +38,13 @@ export const postInvoice = async (req, res) => {
       invoice: `INV-${uid(7).toUpperCase()}`,
     };
     const data = await invoice.create(body);
+    recordActivity({
+      action: "Transaksi",
+      author: getUserInfoToken(
+        req.headers.authorization.replace("Bearer ", "")
+      ),
+      data,
+    });
     res.status(201).json({ msg: "Transaksi berhasil", data: data });
   } catch (error) {
     console.log(error);

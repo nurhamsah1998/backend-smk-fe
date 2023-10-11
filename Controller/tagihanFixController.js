@@ -1,4 +1,3 @@
-import { literal } from "sequelize";
 import { siswaAuth } from "../Models/siswa.js";
 import { tagihanFix } from "../Models/tagihanFix.js";
 import {
@@ -7,9 +6,17 @@ import {
 } from "../Configuration/supportFunction.js";
 
 export const getTagihanFix = async (req, res) => {
+  const limit = parseInt(req.query.limit) || 3;
+  const page = parseInt(req.query.page) - 1 || 0;
   try {
-    const response = await tagihanFix.findAll();
-    const stringify = JSON.stringify(response);
+    const totalRows = await tagihanFix.count();
+    const totalPage = Math.ceil(totalRows / limit);
+    const listTagihan = await tagihanFix.findAll({
+      limit,
+      offset: limit * page,
+      order: [["createdAt", "ASC"]],
+    });
+    const stringify = JSON.stringify(listTagihan);
     const parsefy = JSON.parse(stringify);
     /// stackoverflow-START
     /// question : https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value
@@ -18,7 +25,13 @@ export const getTagihanFix = async (req, res) => {
       (a, b) => a.tahun_angkatan - b.tahun_angkatan
     );
     /// stackoverflow-END
-    res.status(200).json(educationYearsSort);
+    const response = {
+      data: educationYearsSort,
+      totalPage,
+      limit,
+      page: page + 1,
+    };
+    res.status(200).json(response);
   } catch (error) {
     console.log(error);
   }
@@ -71,6 +84,7 @@ export const updateTagihanFix = async (req, res) => {
         id: req.params.id,
       },
     });
+
     recordActivity({
       action: "Mengubah Tagihan",
       author: getUserInfoToken(
