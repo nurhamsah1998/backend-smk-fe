@@ -97,3 +97,28 @@ export const updateTagihanFix = async (req, res) => {
     console.log(error);
   }
 };
+export const createTagihanFix = async (req, res) => {
+  try {
+    const currentTahunAngkatan = await tagihanFix.findAll({
+      attributes: ["tahun_angkatan"],
+      raw: true,
+    });
+    const findBigestYear = currentTahunAngkatan
+      .sort((a, b) => b.tahun_angkatan - a.tahun_angkatan)
+      .shift();
+    const body = {
+      tahun_angkatan: Number(findBigestYear.tahun_angkatan) + 1,
+    };
+    await tagihanFix.create(body);
+    recordActivity({
+      action: "Menambah Tagihan",
+      author: getUserInfoToken(
+        req.headers.authorization.replace("Bearer ", "")
+      ),
+      data: body,
+    });
+    res.status(200).json({ msg: "create success" });
+  } catch (error) {
+    console.log(error);
+  }
+};

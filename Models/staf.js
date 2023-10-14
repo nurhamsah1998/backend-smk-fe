@@ -26,7 +26,7 @@ export const stafAuth = database.define(
     },
     role: {
       type: DataTypes.STRING,
-      defaultValue: "PPDB",
+      defaultValue: "ANONIM",
     },
     noHP: {
       type: DataTypes.BIGINT,
