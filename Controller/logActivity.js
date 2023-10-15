@@ -24,6 +24,7 @@ export const getActivity = async (req, res) => {
         }
       : {};
     const totalRows = await logActivity.count({ where: { ...whereCondition } });
+    const totalData = await logActivity.count();
     const totalPage = Math.ceil(totalRows / limit);
     const logList = await logActivity.findAll({
       where: { ...whereCondition },
@@ -41,7 +42,8 @@ export const getActivity = async (req, res) => {
       totalPage,
       page: page + 1,
       limit,
-      totalData: totalRows,
+      totalRows,
+      totalData,
     };
     res.status(200).json(response);
   } catch (error) {
