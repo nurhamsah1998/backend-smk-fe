@@ -120,20 +120,6 @@ export const staffRegister = async (req, res) => {
 
 export const staffLogin = async (req, res) => {
   try {
-    // const NISN = await stafAuth.findAll();
-    // const toStringify = JSON.stringify(NISN);
-    // const toArray = JSON.parse(toStringify);
-    // const decrypt = toArray.map((i) => {
-    //   const DecryptNISN = CryptoJS.AES.decrypt(
-    //     i.nisn,
-    //     process.env.SECRET_ENCRYPT
-    //   );
-    //   const originalText = DecryptNISN.toString(CryptoJS.enc.Utf8);
-    //   return { ...i, nisn: originalText };
-    // });
-    // const isNisinHasRegister = decrypt.find((i) => i.nisn === req.body.nisn);
-    // if (!isNisinHasRegister)
-    //   return res.status(400).json({ msg: "AKUN TIDAK DITEMUKAN" });
     const staff = await stafAuth.findAll({
       where: {
         username: req.body.username,

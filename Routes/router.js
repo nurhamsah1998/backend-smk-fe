@@ -54,7 +54,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 /// SISWA
-router.get("/siswa", getSiswa);
+router.get("/siswa", verifyToken, getSiswa);
 router.get("/siswa/:id", verifyToken, getSiswaById);
 router.get("/siswa-profile", verifyToken, getSiswaProfile);
 router.post("/register-siswa", siswaRegister);
