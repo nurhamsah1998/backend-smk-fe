@@ -4,7 +4,6 @@ import database from "./Configuration/database.js";
 import dotEnv from "dotenv";
 import cors from "cors";
 import { jurusan } from "./Models/jurusan.js";
-import { tagihan } from "./Models/tagihan.js";
 import { siswaAuth } from "./Models/siswa.js";
 import { stafAuth } from "./Models/staf.js";
 import { invoice } from "./Models/invoice.js";
@@ -19,7 +18,6 @@ const messageServerStart = `Server start on port ${port}.`;
 try {
   await database.authenticate();
   // await jurusan.sync({ force: true });
-  // await tagihan.sync({ force: true });
   // await siswaAuth.sync({ force: true });
   // await invoice.sync({ force: true });
   // await stafAuth.sync({ force: true });

@@ -14,14 +14,6 @@ import {
 } from "../Controller/staffController.js";
 import { verifyToken } from "../middleWare/verifyToken.js";
 import {
-  getTagihan,
-  updateTagihan,
-  deleteTagihan,
-  postTagihan,
-  getTagihanBySiswa,
-  getTagihanByKode,
-} from "../Controller/tagihanController.js";
-import {
   getSiswa,
   getSiswaProfile,
   siswaRegister,
@@ -44,7 +36,6 @@ import { getActivity } from "../Controller/logActivity.js";
 import multer from "multer";
 import express from "express";
 import {
-  downloadFileExelTransaction,
   downloadTemplateImportSiswa,
   downloadTransaction,
   downloadStudentBill,
@@ -95,12 +86,6 @@ router.post("/jurusan", verifyToken, postJurusan);
 router.delete("/jurusan/:id", verifyToken, deleteJurusan);
 router.patch("/jurusan/:id", verifyToken, updateJurusan);
 /// TAGIHAN ///
-router.get("/tagihan", verifyToken, getTagihan);
-router.get("/tagihan/:kode_tagihan", verifyToken, getTagihanByKode);
-router.patch("/tagihan/:id", verifyToken, updateTagihan);
-router.delete("/tagihan/:id", verifyToken, deleteTagihan);
-router.post("/tagihan", verifyToken, postTagihan);
-router.get("/tagihan-siswa", verifyToken, getTagihanBySiswa);
 router.patch("/tagihan-permanent/:id", verifyToken, updateTagihanFix);
 router.post("/tagihan-permanent", verifyToken, createTagihanFix);
 router.get("/tagihan-permanent", verifyToken, getTagihanFix);
@@ -120,7 +105,6 @@ router.get("/get-all-invoice", verifyToken, getAllInvoice);
 router.get("/download/template-import-siswa", downloadTemplateImportSiswa);
 router.get("/download/report-transaction", verifyToken, downloadTransaction);
 router.get("/download/report-bill", verifyToken, downloadStudentBill);
-router.get("/download/report-transaction/:token", downloadFileExelTransaction);
 
 /// DASHBOARD REPOST
 router.get("/dashboard-report", verifyToken, dashboardStaffReport);

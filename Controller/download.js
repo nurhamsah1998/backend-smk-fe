@@ -8,6 +8,8 @@ import exeljs from "exceljs";
 import { FormatCurrency } from "../Configuration/supportFunction.js";
 import { uid } from "uid";
 
+moment.locale("id");
+
 export const downloadTemplateImportSiswa = async (req, res) => {
   try {
     await res.download(
@@ -68,52 +70,130 @@ export const downloadTransaction = async (req, res) => {
       offset: offside,
       order: [["id", "DESC"]],
     });
+    const isUserHasFilter =
+      Boolean(req.query.kelas) ||
+      Boolean(req.query.jurusan) ||
+      Boolean(req.query.sub_kelas);
+    const specifictFilter = ` ${isUserHasFilter ? "(" : ""} ${
+      Boolean(req.query.kelas) ? `Kelas ${req.query.kelas}` : ""
+    } ${Boolean(req.query.jurusan) ? `Jurusan ${req.query.jurusan}` : ""} ${
+      Boolean(req.query.sub_kelas) ? `${req.query.sub_kelas}` : ""
+    } ${isUserHasFilter ? ")" : ""}`;
     const Workbook = new exeljs.Workbook();
     const worksheet = Workbook.addWorksheet("My Sheet");
 
-    worksheet.columns = [
+    const columns = [
       {
         header: "No",
         key: "no",
         width: 6,
+        size: 13,
+        bold: true,
+        alphabet: "A",
       },
       {
         header: "Nama siswa",
         key: "nama",
         width: 35,
+        size: 13,
+        bold: true,
+        alphabet: "B",
       },
       {
         header: "Kelas",
         key: "kelas",
         width: 15,
+        size: 13,
+        bold: true,
+        alphabet: "C",
       },
       {
         header: "Angkatan",
         key: "tahun_angkatan",
         width: 15,
+        size: 13,
+        bold: true,
+        alphabet: "D",
       },
       {
         header: "Tunai",
         key: "uang_diterima",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "E",
       },
       {
         header: "No. Invoice",
         key: "invoice",
         width: 20,
+        size: 13,
+        bold: true,
+        alphabet: "F",
       },
       {
         header: "Keterangan",
         key: "kode_pembayaran",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "G",
       },
       {
         header: "Tanggal",
         key: "createdAt",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "H",
       },
     ];
-
+    /// https://stackoverflow.com/a/71738770/18038473
+    worksheet.mergeCells("A1:H1");
+    worksheet.getRow(1).height = 50;
+    worksheet.getCell(
+      "A1"
+    ).value = `LAPORAN TRANSAKSI SISWA ${specifictFilter}`;
+    worksheet.getCell("A1").alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
+    worksheet.getCell(`A1`).font = {
+      size: 15,
+      bold: true,
+    };
+    worksheet.getRow(2).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "2980ba" },
+    };
+    let header = [];
+    let key = [];
+    for (let index = 0; index < columns.length; index++) {
+      key.push({ key: columns[index].key, width: columns[index].width });
+      header.push(columns[index].header);
+      worksheet.getCell(`${columns[index].alphabet}2`).font = {
+        size: 13,
+        bold: true,
+      };
+    }
+    worksheet.getRow(2).values = header;
+    worksheet.columns = key;
+    worksheet.getCell("A2").alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
+    for (let index = 0; index < columns.length; index++) {
+      worksheet.getCell(`${columns[index].alphabet}2`).font = {
+        size: columns[index].size,
+        bold: columns[index].bold,
+        color: { argb: "ffffff" },
+      };
+      worksheet.getCell(`${columns[index].alphabet}2`).alignment = {
+        vertical: "middle",
+      };
+    }
+    worksheet.getRow(2).height = 25;
     for (let index = 0; index < dataInvoice.length; index++) {
       worksheet.addRow({
         no: index + 1,
@@ -124,57 +204,21 @@ export const downloadTransaction = async (req, res) => {
         invoice: dataInvoice[index].invoice,
         kode_pembayaran: dataInvoice[index].kode_pembayaran,
         createdAt: moment(dataInvoice[index].createdAt).format(
-          "Do MMM YYY hh:mm a"
+          "Do MMMM YYYY hh:mm a"
         ),
       });
-      worksheet.getCell(`A${index + 2}`).alignment = {
+      worksheet.getCell(`A${index + 3}`).alignment = {
         vertical: "middle",
         horizontal: "center",
       };
     }
-    worksheet.getCell("A1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("A1").alignment = {
-      vertical: "middle",
-      horizontal: "center",
-    };
-    worksheet.getCell("B1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("C1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("D1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("E1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("F1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("G1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("H1").font = {
-      size: 13,
-      bold: true,
-    };
 
     const fileName = `transaksi-${moment().format(
       "MMMM-Do-YYYY-h-mm-ss"
     )}_${uid(7).toUpperCase()}.xlsx`;
     const folderPlace = `./Assets/download/${fileName}`;
     await Workbook.xlsx.writeFile(folderPlace);
-    await res.status(200).json({ data: fileName });
+    await res.download(path.resolve(`./Assets/download/${fileName}`));
   } catch (error) {
     console.log(error);
   }
@@ -191,6 +235,12 @@ export const downloadStudentBill = async (req, res) => {
   const status = req.query.status || "%";
   const offside = limit * page;
   try {
+    const jurusanById = await jurusan.findOne({
+      raw: true,
+      where: {
+        id: jurusanId,
+      },
+    });
     const data = await siswaAuth.findAll({
       raw: true,
       where: {
@@ -259,68 +309,159 @@ export const downloadStudentBill = async (req, res) => {
     const Workbook = new exeljs.Workbook();
     const worksheet = Workbook.addWorksheet("My Sheet");
 
-    worksheet.columns = [
+    const columns = [
       {
         header: "No",
         key: "no",
         width: 6,
+        size: 13,
+        bold: true,
+        alphabet: "A",
       },
       {
         header: "Nama siswa",
         key: "nama",
         width: 35,
+        size: 13,
+        bold: true,
+        alphabet: "B",
       },
       {
         header: "Gender",
         key: "gender",
         width: 10,
+        size: 13,
+        bold: true,
+        alphabet: "C",
       },
       {
         header: "Kelas",
         key: "kelas",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "D",
       },
       {
         header: "Angkatan",
         key: "angkatan",
         width: 15,
+        size: 13,
+        bold: true,
+        alphabet: "E",
       },
       {
         header: "Tagihan terbayar",
         key: "total_payment",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "F",
       },
       {
         header: "Status",
         key: "status_bill",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "G",
       },
       {
         header: "Kekurangan tagihan",
         key: "current_bill",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "H",
       },
       {
         header: "Nama Ayah",
         key: "nama_ayah",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "I",
       },
       {
         header: "Nama Ibu",
         key: "nama_ibu",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "J",
       },
       {
         header: "No. HP",
         key: "noHP",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "K",
       },
       {
         header: "Alamat",
         key: "alamat",
         width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "L",
       },
     ];
+    const isUserHasFilter =
+      Boolean(req.query.kelas) ||
+      Boolean(jurusanById?.nama) ||
+      Boolean(req.query.sub_kelas);
+    const specifictFilter = ` ${isUserHasFilter ? "(" : ""} ${
+      Boolean(req.query.kelas) ? `Kelas ${req.query.kelas}` : ""
+    } ${
+      Boolean(jurusanById?.nama) ? `Jurusan ${jurusanById?.kode_jurusan}` : ""
+    } ${Boolean(req.query.sub_kelas) ? `${req.query.sub_kelas}` : ""} ${
+      isUserHasFilter ? ")" : ""
+    }`;
+    /// https://stackoverflow.com/a/71738770/18038473
+    worksheet.mergeCells("A1:H1");
+    worksheet.getRow(1).height = 50;
+    worksheet.getCell("A1").value = `LAPORAN TAGIHAN SISWA ${specifictFilter}`;
+    worksheet.getCell("A1").alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
+    worksheet.getCell(`A1`).font = {
+      size: 15,
+      bold: true,
+    };
+    worksheet.getRow(2).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "2980ba" },
+    };
+    let header = [];
+    let key = [];
+    for (let index = 0; index < columns.length; index++) {
+      key.push({ key: columns[index].key, width: columns[index].width });
+      header.push(columns[index].header);
+      worksheet.getCell(`${columns[index].alphabet}2`).font = {
+        size: 13,
+        bold: true,
+      };
+    }
+    worksheet.getRow(2).values = header;
+    worksheet.columns = key;
+    worksheet.getCell("A2").alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
+    for (let index = 0; index < columns.length; index++) {
+      worksheet.getCell(`${columns[index].alphabet}2`).font = {
+        size: columns[index].size,
+        bold: columns[index].bold,
+        color: { argb: "ffffff" },
+      };
+      worksheet.getCell(`${columns[index].alphabet}2`).alignment = {
+        vertical: "middle",
+      };
+    }
+    worksheet.getRow(2).height = 25;
     for (let index = 0; index < data.length; index++) {
       worksheet.addRow({
         no: index + 1,
@@ -346,64 +487,11 @@ export const downloadStudentBill = async (req, res) => {
         noHP: data[index].noHP,
         alamat: data[index].alamat,
       });
-      worksheet.getCell(`A${index + 2}`).alignment = {
+      worksheet.getCell(`A${index + 3}`).alignment = {
         vertical: "middle",
         horizontal: "center",
       };
     }
-    worksheet.getCell("A1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("A1").alignment = {
-      vertical: "middle",
-      horizontal: "center",
-    };
-    worksheet.getCell("B1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("C1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("D1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("E1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("F1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("G1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("H1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("I1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("J1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("K1").font = {
-      size: 13,
-      bold: true,
-    };
-    worksheet.getCell("L1").font = {
-      size: 13,
-      bold: true,
-    };
-
     const fileName = `tagihan-${moment().format("MMMM-Do-YYYY-h-mm-ss")}_${uid(
       7
     ).toUpperCase()}.xlsx`;
