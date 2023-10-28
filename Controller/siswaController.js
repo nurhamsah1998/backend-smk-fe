@@ -246,7 +246,8 @@ export const importAccount = async (req, res) => {
               workSheet.getColumn(indexColumn).letter === "C" ||
               workSheet.getColumn(indexColumn).letter === "D" ||
               workSheet.getColumn(indexColumn).letter === "E" ||
-              workSheet.getColumn(indexColumn).letter === "F"
+              workSheet.getColumn(indexColumn).letter === "F" ||
+              workSheet.getColumn(indexColumn).letter === "G"
             ) {
               if (
                 workSheet
@@ -398,15 +399,15 @@ export const importAccount = async (req, res) => {
               sub_kelas:
                 workSheet.getRow(indexColumn).values[5].toString() || 1,
               kelas: workSheet.getRow(indexColumn).values[6].toString() || 10,
-              noHP: workSheet.getRow(indexColumn).values[7] || "",
-              alamat: workSheet.getRow(indexColumn).values[8] || "",
-              nama_ayah: workSheet.getRow(indexColumn).values[9] || "",
-              nama_ibu: workSheet.getRow(indexColumn).values[10] || "",
-              gender: workSheet.getRow(indexColumn).values[11] || "",
+              kode_siswa: workSheet.getRow(indexColumn).values[7],
+              noHP: workSheet.getRow(indexColumn).values[8] || "",
+              alamat: workSheet.getRow(indexColumn).values[9] || "",
+              nama_ayah: workSheet.getRow(indexColumn).values[10] || "",
+              nama_ibu: workSheet.getRow(indexColumn).values[11] || "",
+              gender: workSheet.getRow(indexColumn).values[12] || "",
               current_bill: total,
               status_bill: "not_paid_yet",
               angkatan: currentYear,
-              kode_siswa: `CODE-${uid(7).toUpperCase()}`,
               status: "accepted",
             });
           }
