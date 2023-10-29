@@ -81,7 +81,6 @@ export const downloadTransaction = async (req, res) => {
     } ${isUserHasFilter ? ")" : ""}`;
     const Workbook = new exeljs.Workbook();
     const worksheet = Workbook.addWorksheet("My Sheet");
-
     const columns = [
       {
         header: "No",
@@ -148,15 +147,29 @@ export const downloadTransaction = async (req, res) => {
         alphabet: "H",
       },
     ];
+    const dateStart = new Date(startDate);
+    const dateEnd = new Date(endDate);
+    const isSingleDate =
+      dateStart.getDate() === dateEnd.getDate() &&
+      dateStart.getMonth() === dateEnd.getMonth();
     /// https://stackoverflow.com/a/71738770/18038473
     worksheet.mergeCells("A1:H1");
-    worksheet.getRow(1).height = 50;
-    worksheet.getCell(
-      "A1"
-    ).value = `LAPORAN TRANSAKSI SISWA ${specifictFilter}`;
+    worksheet.getRow(1).height = 70;
+    worksheet.getCell("A1").value = `LAPORAN TRANSAKSI SISWA \n Tanggal : ${
+      Boolean(startDate !== "null")
+        ? moment(startDate).format("DD MMMM YYYY")
+        : "-"
+    } ${
+      !Boolean(isSingleDate) && Boolean(startDate !== "null")
+        ? `- ${moment(endDate).format("DD MMMM YYYY")}`
+        : ""
+    }  \n Kelas : ${Boolean(req.query.kelas) ? req.query.kelas : "-"} ${
+      Boolean(req.query.jurusan) ? req.query.jurusan : ""
+    } ${Boolean(req.query.sub_kelas) ? req.query.sub_kelas : ""}`;
     worksheet.getCell("A1").alignment = {
       vertical: "middle",
       horizontal: "center",
+      wrapText: true,
     };
     worksheet.getCell(`A1`).font = {
       size: 15,
@@ -411,17 +424,14 @@ export const downloadStudentBill = async (req, res) => {
       Boolean(req.query.kelas) ||
       Boolean(jurusanById?.nama) ||
       Boolean(req.query.sub_kelas);
-    const specifictFilter = ` ${isUserHasFilter ? "(" : ""} ${
-      Boolean(req.query.kelas) ? `Kelas ${req.query.kelas}` : ""
-    } ${
-      Boolean(jurusanById?.nama) ? `Jurusan ${jurusanById?.kode_jurusan}` : ""
-    } ${Boolean(req.query.sub_kelas) ? `${req.query.sub_kelas}` : ""} ${
-      isUserHasFilter ? ")" : ""
-    }`;
     /// https://stackoverflow.com/a/71738770/18038473
     worksheet.mergeCells("A1:H1");
-    worksheet.getRow(1).height = 50;
-    worksheet.getCell("A1").value = `LAPORAN TAGIHAN SISWA ${specifictFilter}`;
+    worksheet.getRow(1).height = 70;
+    worksheet.getCell("A1").value = `LAPORAN TAGIHAN SISWA \n Kelas : ${
+      Boolean(req.query.kelas) ? req.query.kelas : "-"
+    } ${Boolean(jurusanById?.nama) ? jurusanById?.kode_jurusan : ""} ${
+      Boolean(req.query.sub_kelas) ? req.query.sub_kelas : ""
+    }`;
     worksheet.getCell("A1").alignment = {
       vertical: "middle",
       horizontal: "center",
