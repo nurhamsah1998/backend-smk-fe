@@ -420,10 +420,24 @@ export const downloadStudentBill = async (req, res) => {
         alphabet: "L",
       },
     ];
-    const isUserHasFilter =
-      Boolean(req.query.kelas) ||
-      Boolean(jurusanById?.nama) ||
-      Boolean(req.query.sub_kelas);
+    const billStatus = [
+      {
+        name: "deposit",
+        title: "DEPOSIT",
+      },
+      {
+        name: "not_paid_yet",
+        title: "BELUM ADA TAGIHAN",
+      },
+      {
+        name: "paid",
+        title: "LUNAS",
+      },
+      {
+        name: "not_paid",
+        title: "BELUM LUNAS",
+      },
+    ];
     /// https://stackoverflow.com/a/71738770/18038473
     worksheet.mergeCells("A1:H1");
     worksheet.getRow(1).height = 70;
@@ -431,6 +445,10 @@ export const downloadStudentBill = async (req, res) => {
       Boolean(req.query.kelas) ? req.query.kelas : "-"
     } ${Boolean(jurusanById?.nama) ? jurusanById?.kode_jurusan : ""} ${
       Boolean(req.query.sub_kelas) ? req.query.sub_kelas : ""
+    } \n Status pembayaran : ${
+      Boolean(req.query.current_bill)
+        ? billStatus.find((item) => item.name === currentBill).title
+        : "-"
     }`;
     worksheet.getCell("A1").alignment = {
       vertical: "middle",

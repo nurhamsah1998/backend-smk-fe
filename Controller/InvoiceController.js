@@ -1,6 +1,4 @@
 import { invoice } from "../Models/invoice.js";
-import jwt from "jsonwebtoken";
-import { uid } from "uid";
 import { Op } from "sequelize";
 import moment from "moment";
 import {
@@ -22,6 +20,8 @@ export const postInvoice = async (req, res) => {
     sub_kelas,
     tahun_angkatan,
   } = req.body;
+  const date = new Date();
+  const totalInvoice = await invoice.count();
   try {
     const body = {
       nama: nama,
@@ -35,7 +35,11 @@ export const postInvoice = async (req, res) => {
       sub_kelas,
       kelas,
       tahun_angkatan,
-      invoice: `INV-${uid(7).toUpperCase()}`,
+      invoice: `${date.getFullYear()}${
+        date.getMonth() + 1
+      }${date.getDate()}${date.getHours()}${date.getMinutes()}${
+        totalInvoice + 1
+      }`,
     };
     const data = await invoice.create(body);
     recordActivity({
