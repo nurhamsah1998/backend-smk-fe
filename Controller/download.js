@@ -217,7 +217,7 @@ export const downloadTransaction = async (req, res) => {
         invoice: dataInvoice[index].invoice,
         kode_pembayaran: dataInvoice[index].kode_pembayaran,
         createdAt: moment(dataInvoice[index].createdAt).format(
-          "Do MMMM YYYY hh:mm a"
+          "Do MMMM YYYY H:mm"
         ),
       });
       worksheet.getCell(`A${index + 3}`).alignment = {

@@ -465,6 +465,7 @@ export const siswaRegister = async (req, res) => {
     code_jurusan,
     kode_siswa,
     isAdminCreation,
+    angkatan,
   } = req.body;
   if (username === "" || password === "")
     return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
@@ -479,7 +480,7 @@ export const siswaRegister = async (req, res) => {
       password: password,
       noHP: noHP,
       gender,
-      angkatan: new Date().getFullYear(),
+      angkatan: angkatan || new Date().getFullYear(),
       jurusanId: jurusanId,
       kelas: kelas,
       kode_siswa:
