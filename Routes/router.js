@@ -11,6 +11,7 @@ import {
   staffLogin,
   getStaffProfile,
   dashboardStaffReport,
+  staffProfileUpdate,
 } from "../Controller/staffController.js";
 import { verifyToken } from "../middleWare/verifyToken.js";
 import {
@@ -28,6 +29,7 @@ import {
   createTagihanFix,
   getTagihanFix,
   getTagihanFixForStudent,
+  getTahunAngkatan,
   getTotalTagihanFix,
   updateTagihanFix,
 } from "../Controller/tagihanFixController.js";
@@ -91,10 +93,12 @@ router.post("/tagihan-permanent", verifyToken, createTagihanFix);
 router.get("/tagihan-permanent", verifyToken, getTagihanFix);
 router.get("/total-tagihan-permanent", verifyToken, getTotalTagihanFix);
 router.get("/tagihan-permanent-siswa", verifyToken, getTagihanFixForStudent);
+router.get("/tahun-angkatan", verifyToken, getTahunAngkatan);
 /// STAF ///
 router.post("/staff-register", staffRegister);
 router.post("/staff-login", staffLogin);
 router.get("/staff", verifyToken, getStaff);
+router.patch("/staff/:id", verifyToken, staffProfileUpdate);
 router.get("/staff-profile", verifyToken, getStaffProfile);
 /// INVOICE ///
 router.post("/invoice", verifyToken, postInvoice);

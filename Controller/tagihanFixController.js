@@ -4,6 +4,7 @@ import {
   getUserInfoToken,
   recordActivity,
 } from "../Configuration/supportFunction.js";
+import { Op } from "sequelize";
 
 export const getTagihanFix = async (req, res) => {
   const limit = parseInt(req.query.limit) || 3;
@@ -14,7 +15,7 @@ export const getTagihanFix = async (req, res) => {
     const listTagihan = await tagihanFix.findAll({
       limit,
       offset: limit * page,
-      order: [["createdAt", "ASC"]],
+      order: [["tahun_angkatan", "ASC"]],
     });
     const stringify = JSON.stringify(listTagihan);
     const parsefy = JSON.parse(stringify);
@@ -61,6 +62,54 @@ export const getTagihanFixForStudent = async (req, res) => {
       },
     });
 
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const getTahunAngkatan = async (req, res) => {
+  const page = parseInt(req.query.page) - 1 || 0;
+  const limit = parseInt(req.query.limit) || 5;
+  const search = req.query.search || "";
+  const offside = limit * page;
+  const totalData = await tagihanFix.count();
+  try {
+    const totalRows = await tagihanFix.count({
+      /// https://stackoverflow.com/a/49053066/18038473
+      attributes: ["tahun_angkatan"],
+      where: {
+        [Op.or]: {
+          tahun_angkatan: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+      },
+    });
+    const data = await tagihanFix.findAll({
+      /// https://stackoverflow.com/a/49053066/18038473
+      attributes: ["tahun_angkatan"],
+      raw: true,
+      where: {
+        [Op.or]: {
+          tahun_angkatan: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+      },
+      limit: limit,
+      offset: offside,
+      /// https://stackoverflow.com/a/36260326/18038473
+      order: [["tahun_angkatan", "ASC"]],
+    });
+    const totalPage = Math.ceil(totalRows / limit);
+    const response = {
+      data: data,
+      totalPage: totalPage,
+      limit: limit,
+      totalRows: totalRows,
+      totalData,
+      page: page + 1,
+    };
     res.status(200).json(response);
   } catch (error) {
     console.log(error);

@@ -45,8 +45,55 @@ export const dashboardStaffReport = async (req, res) => {
   }
 };
 export const getStaff = async (req, res) => {
+  const page = parseInt(req.query.page) - 1 || 0;
+  const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search || "";
+  const totalData = await stafAuth.count();
+  const offside = limit * page;
+  const totalRows = await stafAuth.count({
+    where: {
+      [Op.or]: [
+        {
+          nama: {
+            [Op.like]: `%${search}%`,
+          },
+        },
+      ],
+    },
+    limit,
+    offside,
+    order: [["id", "DESC"]],
+  });
+  const totalPage = Math.ceil(totalRows / limit);
   try {
-    const response = await stafAuth.findAll();
+    const data = await stafAuth.findAll({
+      where: {
+        [Op.or]: [
+          {
+            nama: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+          {
+            username: {
+              [Op.like]: "%" + search + "%",
+            },
+          },
+        ],
+      },
+      attributes: { exclude: ["password"] },
+      limit,
+      offside,
+      order: [["id", "DESC"]],
+    });
+    const response = {
+      data: data,
+      totalPage: totalPage,
+      limit: limit,
+      totalRows: totalRows,
+      totalData,
+      page: page + 1,
+    };
     res.json(response);
   } catch (error) {
     console.log(error);
@@ -64,6 +111,22 @@ export const getStaffProfile = async (req, res) => {
       },
     });
     res.json(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const staffProfileUpdate = async (req, res) => {
+  const { role } = req.body;
+  try {
+    await stafAuth.update(
+      { role },
+      {
+        where: {
+          id: req.params.id,
+        },
+      }
+    );
+    res.status(200).json({ msg: "update success" });
   } catch (error) {
     console.log(error);
   }

@@ -445,6 +445,8 @@ export const downloadStudentBill = async (req, res) => {
       Boolean(req.query.kelas) ? req.query.kelas : "-"
     } ${Boolean(jurusanById?.nama) ? jurusanById?.kode_jurusan : ""} ${
       Boolean(req.query.sub_kelas) ? req.query.sub_kelas : ""
+    } ${
+      Boolean(req.query.angkatan) ? ` ${req.query.angkatan}` : ""
     } \n Status pembayaran : ${
       Boolean(req.query.current_bill)
         ? billStatus.find((item) => item.name === currentBill).title
