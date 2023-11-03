@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import moment from "moment/moment.js";
 import { Op } from "sequelize";
 import { siswaAuth } from "../Models/siswa.js";
+import { jurusan } from "../Models/jurusan.js";
 
 export const dashboardStaffReport = async (req, res) => {
   try {
@@ -42,6 +43,16 @@ export const dashboardStaffReport = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+  }
+};
+export const majorStudentSummary = async (req, res) => {
+  try {
+    const jurusanStudent = await jurusan.findAll({
+      include: siswaAuth,
+    });
+    res.status(200).json(jurusanStudent);
+  } catch (error) {
+    throw error;
   }
 };
 export const getStaff = async (req, res) => {

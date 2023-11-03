@@ -12,6 +12,7 @@ import {
   getStaffProfile,
   dashboardStaffReport,
   staffProfileUpdate,
+  majorStudentSummary,
 } from "../Controller/staffController.js";
 import { verifyToken } from "../middleWare/verifyToken.js";
 import {
@@ -112,6 +113,7 @@ router.get("/download/report-bill", verifyToken, downloadStudentBill);
 
 /// DASHBOARD REPOST
 router.get("/dashboard-report", verifyToken, dashboardStaffReport);
+router.get("/dashboard-major", majorStudentSummary);
 
 /// DEV
 router.get("/log", verifyToken, getActivity);
