@@ -60,7 +60,7 @@ export const siswaAuth = database.define(
       defaultValue: "1",
     },
     jurusanId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       defaultValue: "",
     },
     current_bill: {
@@ -88,5 +88,13 @@ export const siswaAuth = database.define(
   }
 );
 
-jurusan.hasOne(siswaAuth);
-siswaAuth.belongsTo(jurusan);
+jurusan.hasMany(siswaAuth, {
+  onDelete: "RESTRICT",
+  onUpdate: "RESTRICT",
+  foreignKey: "jurusanId",
+});
+siswaAuth.belongsTo(jurusan, {
+  onDelete: "RESTRICT",
+  onUpdate: "RESTRICT",
+  foreignKey: "jurusanId",
+});

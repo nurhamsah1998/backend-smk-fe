@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { invoice } from "../Models/invoice.js";
 import jwt from "jsonwebtoken";
 import moment from "moment/moment.js";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { siswaAuth } from "../Models/siswa.js";
 import { jurusan } from "../Models/jurusan.js";
 
@@ -32,6 +32,14 @@ export const dashboardStaffReport = async (req, res) => {
       },
     });
     const totalStudent = await siswaAuth.count();
+    const jurusanStudent = await jurusan.findAll({
+      attributes: {
+        include: [[Sequelize.fn("COUNT", "siswas"), "total"]],
+      },
+      group: ["jurusanId"],
+      /// https://stackoverflow.com/a/53119070/18038473
+      include: { model: siswaAuth },
+    });
     res.json({
       data: {
         today_profit: {
@@ -39,20 +47,11 @@ export const dashboardStaffReport = async (req, res) => {
           total_student: totalStudentHasPay || 0,
         },
         total_student: totalStudent || 0,
+        major_summary: jurusanStudent,
       },
     });
   } catch (error) {
     console.log(error);
-  }
-};
-export const majorStudentSummary = async (req, res) => {
-  try {
-    const jurusanStudent = await jurusan.findAll({
-      include: siswaAuth,
-    });
-    res.status(200).json(jurusanStudent);
-  } catch (error) {
-    throw error;
   }
 };
 export const getStaff = async (req, res) => {
@@ -123,7 +122,7 @@ export const getStaffProfile = async (req, res) => {
     });
     res.json(response);
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 export const staffProfileUpdate = async (req, res) => {

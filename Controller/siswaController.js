@@ -230,7 +230,6 @@ export const importAccount = async (req, res) => {
         const workSheet = wb.getWorksheet();
         const totalColumn = workSheet.actualColumnCount;
         const totalRow = workSheet.actualRowCount;
-        let listUserName = [];
         if (totalRow === 1) {
           isNoData = true;
         }
