@@ -103,7 +103,8 @@ export const getAllInvoice = async (req, res) => {
       },
       limit: limit,
       offset: offside,
-      order: [["id", "DESC"]],
+      /// https://stackoverflow.com/a/33145634/18038473
+      order: [["updatedAt", "DESC"]],
     });
     const totalPage = Math.ceil(totalRow / limit);
 
@@ -122,7 +123,8 @@ export const getAllInvoice = async (req, res) => {
       },
       limit: limit,
       offset: offside,
-      order: [["id", "DESC"]],
+      /// https://stackoverflow.com/a/33145634/18038473
+      order: [["updatedAt", "DESC"]],
     });
     res.status(200).json({
       data: dataInvoice,

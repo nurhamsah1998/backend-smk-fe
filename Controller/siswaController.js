@@ -418,7 +418,7 @@ export const importAccount = async (req, res) => {
     console.log(error);
     res.status(406).json({
       message:
-        "Server Error. Terjadi kesalahan, atau cek list username pastikan harus Uniq atau Berbeda",
+        "Internal server error periksa file anda dan pastikan list username harus uniq atau berbeda",
       code: "server",
     });
     fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
@@ -462,7 +462,6 @@ export const siswaRegister = async (req, res) => {
     status_bill,
     current_bill,
     code_jurusan,
-    kode_siswa,
     isAdminCreation,
     angkatan,
   } = req.body;
@@ -470,6 +469,11 @@ export const siswaRegister = async (req, res) => {
     return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
   try {
     const length = await siswaAuth.findAndCountAll();
+    const kodeSiswaGenerator = (arg) => {
+      const year = angkatan || String(new Date().getFullYear());
+      const total = "000".slice(0, 3 - String(arg).length);
+      return year + total + String(arg);
+    };
     const body = {
       nama: nama,
       alamat: alamat,
@@ -482,9 +486,7 @@ export const siswaRegister = async (req, res) => {
       angkatan: angkatan || new Date().getFullYear(),
       jurusanId: jurusanId,
       kelas: kelas,
-      kode_siswa:
-        kode_siswa ||
-        `${code_jurusan}${new Date().getFullYear()}SISWA${length.count}`,
+      kode_siswa: kodeSiswaGenerator(length.count),
       status_bill,
       current_bill,
     };
@@ -529,14 +531,9 @@ export const siswaLogin = async (req, res) => {
     const idSiswa = findSiswa[0].id;
     const namaSiswa = findSiswa[0].name;
     const username = findSiswa[0].username;
-    const angkatan = findSiswa[0].angkatan;
-    const kelas = findSiswa[0].kelas;
-    const codeJurusan = findJurusan.code;
-    const kode_tagihan = `${angkatan}${codeJurusan}${kelas}`;
     const accessToken = jwt.sign(
       {
         idSiswa,
-        kode_tagihan,
         namaSiswa,
         username,
       },

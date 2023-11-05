@@ -21,7 +21,7 @@ export const siswaAuth = database.define(
     },
     kode_siswa: {
       type: DataTypes.STRING,
-      defaultValue: "",
+      unique: true,
     },
     username: {
       type: DataTypes.STRING,
