@@ -418,7 +418,7 @@ export const importAccount = async (req, res) => {
     console.log(error);
     res.status(406).json({
       message:
-        "Internal server error periksa file anda dan pastikan list username harus uniq atau berbeda",
+        "Internal server error periksa file anda dan pastikan list username dan kode siswa harus uniq/berbeda",
       code: "server",
     });
     fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
@@ -461,14 +461,17 @@ export const siswaRegister = async (req, res) => {
     gender,
     status_bill,
     current_bill,
-    code_jurusan,
     isAdminCreation,
     angkatan,
   } = req.body;
   if (username === "" || password === "")
     return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
   try {
-    const length = await siswaAuth.findAndCountAll();
+    const length = await siswaAuth.findAndCountAll({
+      where: {
+        angkatan: angkatan || new Date().getFullYear(),
+      },
+    });
     const kodeSiswaGenerator = (arg) => {
       const year = angkatan || String(new Date().getFullYear());
       const total = "000".slice(0, 3 - String(arg).length);
@@ -486,7 +489,7 @@ export const siswaRegister = async (req, res) => {
       angkatan: angkatan || new Date().getFullYear(),
       jurusanId: jurusanId,
       kelas: kelas,
-      kode_siswa: kodeSiswaGenerator(length.count),
+      kode_siswa: kodeSiswaGenerator(length.count + 1),
       status_bill,
       current_bill,
     };
@@ -512,10 +515,20 @@ export const siswaLogin = async (req, res) => {
   try {
     const findSiswa = await siswaAuth.findAll({
       where: {
-        username: req.body.username,
+        [Op.or]: [
+          {
+            username: {
+              [Op.like]: req.body.username,
+            },
+          },
+          {
+            kode_siswa: {
+              [Op.like]: req.body.username,
+            },
+          },
+        ],
       },
     });
-
     if (!findSiswa[0].password.includes(req.body.password))
       return res.status(400).json({ msg: "Periksa password anda" });
 
