@@ -42,6 +42,12 @@ import {
   downloadTransaction,
   downloadStudentBill,
 } from "../Controller/download.js";
+import {
+  deleteCampaign,
+  getAllCampaign,
+  patchCampaign,
+  postCampaign,
+} from "../Controller/campaignController.js";
 
 const router = express.Router();
 const storage = multer.diskStorage({
@@ -100,6 +106,10 @@ router.post("/staff-login", staffLogin);
 router.get("/staff", verifyToken, getStaff);
 router.patch("/staff/:id", verifyToken, staffProfileUpdate);
 router.get("/staff-profile", verifyToken, getStaffProfile);
+router.post("/campaign", verifyToken, postCampaign);
+router.get("/campaign", verifyToken, getAllCampaign);
+router.patch("/campaign/:id", verifyToken, patchCampaign);
+router.delete("/campaign/:id", verifyToken, deleteCampaign);
 /// INVOICE ///
 router.post("/invoice", verifyToken, postInvoice);
 router.get("/invoice", verifyToken, getInvoice);

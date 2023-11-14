@@ -21,7 +21,24 @@ export const postInvoice = async (req, res) => {
     tahun_angkatan,
   } = req.body;
   const date = new Date();
-  const totalInvoice = await invoice.count();
+  const totalInvoice = await invoice.count({
+    where: {
+      createdAt: {
+        [Op.between]: [
+          /// https://stackoverflow.com/a/12970385/18038473
+          moment(moment().startOf("day")).format("YYYY-MM-DD H:mm:ss"),
+          moment(moment().endOf("day")).format("YYYY-MM-DD H:mm:ss"),
+        ],
+      },
+    },
+  });
+  const invoiceGenerator = (arg) => {
+    const codeTime = `${date.getFullYear()}${
+      date.getMonth() + 1
+    }${date.getDate()}`;
+    const total = "000".slice(0, 3 - String(arg).length);
+    return codeTime + total + String(arg);
+  };
   try {
     const body = {
       nama: nama,
@@ -35,11 +52,7 @@ export const postInvoice = async (req, res) => {
       sub_kelas,
       kelas,
       tahun_angkatan,
-      invoice: `${date.getFullYear()}${
-        date.getMonth() + 1
-      }${date.getDate()}${date.getHours()}${date.getMinutes()}${
-        totalInvoice + 1
-      }`,
+      invoice: invoiceGenerator(totalInvoice + 1),
     };
     const data = await invoice.create(body);
     recordActivity({
@@ -52,16 +65,23 @@ export const postInvoice = async (req, res) => {
     res.status(201).json({ msg: "Transaksi berhasil", data: data });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ msg: "Internal server error" });
   }
 };
 
 export const getInvoice = async (req, res) => {
-  const responseInvoice = await invoice.findAll({
-    where: {
-      kode_tagihan: req.query.kode_tagihan,
-    },
-  });
-  res.status(200).json(responseInvoice);
+  try {
+    const responseInvoice = await invoice.findAll({
+      where: {
+        kode_tagihan: req.query.kode_tagihan,
+      },
+      order: [["updatedAt", "DESC"]],
+    });
+    res.status(200).json(responseInvoice);
+  } catch (error) {
+    console.log(error);
+    res.status(404).json({ msg: "Internal server error" });
+  }
 };
 export const getAllInvoice = async (req, res) => {
   try {
@@ -140,10 +160,14 @@ export const getAllInvoice = async (req, res) => {
   }
 };
 export const getTotalInvoice = async (req, res) => {
-  const responseInvoice = await invoice.findAll({
-    where: {
-      kode_tagihan: req.query.kode_tagihan,
-    },
-  });
-  res.status(200).json(responseInvoice);
+  try {
+    const responseInvoice = await invoice.findAll({
+      where: {
+        kode_tagihan: req.query.kode_tagihan,
+      },
+    });
+    res.status(200).json(responseInvoice);
+  } catch (error) {
+    console.log(error);
+  }
 };

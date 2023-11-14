@@ -9,6 +9,8 @@ import { stafAuth } from "./Models/staf.js";
 import { invoice } from "./Models/invoice.js";
 import { tagihanFix } from "./Models/tagihanFix.js";
 import { logActivity } from "./Models/logActivity.js";
+import { campaign } from "./Models/campaign.js";
+import { responseCampaign } from "./Models/responseCampaign.js";
 
 dotEnv.config();
 const app = express();
@@ -23,6 +25,8 @@ try {
   // await stafAuth.sync({ force: true });
   // await tagihanFix.sync({ force: true });
   // await logActivity.sync({ force: true });
+  // await campaign.sync();
+  // await responseCampaign.sync();
   console.log("DATABASE CONNECTED");
 } catch (error) {
   console.log(error);
