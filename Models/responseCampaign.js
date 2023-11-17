@@ -19,9 +19,11 @@ export const responseCampaign = database.define(
     },
     siswa_id: {
       type: DataTypes.UUID,
+      defaultValue: "",
     },
     campaign_id: {
       type: DataTypes.UUID,
+      defaultValue: "",
     },
   },
   { freezeTableName: true }
@@ -30,20 +32,20 @@ export const responseCampaign = database.define(
 siswaAuth.hasOne(responseCampaign, {
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
-  primaryKey: "siswa_id",
+  foreignKey: "siswa_id",
 });
 responseCampaign.belongsTo(siswaAuth, {
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
-  primaryKey: "siswa_id",
+  foreignKey: "siswa_id",
 });
-campaign.hasOne(responseCampaign, {
+campaign.hasMany(responseCampaign, {
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
-  primaryKey: "campaign_id",
+  foreignKey: "campaign_id",
 });
 responseCampaign.belongsTo(campaign, {
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
-  primaryKey: "campaign_id",
+  foreignKey: "campaign_id",
 });

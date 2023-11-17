@@ -6,48 +6,99 @@ import moment from "moment/moment.js";
 import { Op, Sequelize } from "sequelize";
 import { siswaAuth } from "../Models/siswa.js";
 import { jurusan } from "../Models/jurusan.js";
+import { tagihanFix } from "../Models/tagihanFix.js";
 
 export const dashboardStaffReport = async (req, res) => {
   try {
-    const student_amount = await invoice.sum("uang_diterima", {
+    const student_amount_daily = await invoice.sum("uang_diterima", {
       where: {
         createdAt: {
           [Op.between]: [
             /// https://stackoverflow.com/a/12970385/18038473
-            moment(moment().startOf("day")).format("YYYY-MM-DD H:mm:ss"),
-            moment(moment().endOf("day")).format("YYYY-MM-DD H:mm:ss"),
+            moment().startOf("day").format("YYYY-MM-DD H:mm:ss"),
+            moment().endOf("day").format("YYYY-MM-DD H:mm:ss"),
           ],
         },
       },
     });
-    const totalStudentHasPay = await invoice.count({
+    const student_amount_monthly = await invoice.sum("uang_diterima", {
       where: {
         createdAt: {
           [Op.between]: [
             /// https://stackoverflow.com/a/12970385/18038473
-            moment(moment().startOf("day")).format("YYYY-MM-DD H:mm:ss"),
-            moment(moment().endOf("day")).format("YYYY-MM-DD H:mm:ss"),
+            moment().startOf("month").format("YYYY-MM-DD H:mm:ss"),
+            moment().endOf("month").format("YYYY-MM-DD H:mm:ss"),
           ],
         },
       },
     });
-    const totalStudent = await siswaAuth.count();
-    const jurusanStudent = await jurusan.findAll({
+    const student_amount_annual = await invoice.sum("uang_diterima", {
+      where: {
+        createdAt: {
+          [Op.between]: [
+            /// https://stackoverflow.com/a/12970385/18038473
+            moment().startOf("year").format("YYYY-MM-DD H:mm:ss"),
+            moment().endOf("year").format("YYYY-MM-DD H:mm:ss"),
+          ],
+        },
+      },
+    });
+    const totalStudentHasPayDaily = await invoice.count({
+      where: {
+        createdAt: {
+          [Op.between]: [
+            /// https://stackoverflow.com/a/12970385/18038473
+            moment().startOf("day").format("YYYY-MM-DD H:mm:ss"),
+            moment().endOf("day").format("YYYY-MM-DD H:mm:ss"),
+          ],
+        },
+      },
+    });
+    const totalStudentHasPayMonthly = await invoice.count({
+      where: {
+        createdAt: {
+          [Op.between]: [
+            /// https://stackoverflow.com/a/12970385/18038473
+            moment().startOf("month").format("YYYY-MM-DD H:mm:ss"),
+            moment().endOf("month").format("YYYY-MM-DD H:mm:ss"),
+          ],
+        },
+      },
+    });
+    const totalStudentHasPayAnnual = await invoice.count({
+      where: {
+        createdAt: {
+          [Op.between]: [
+            /// https://stackoverflow.com/a/12970385/18038473
+            moment().startOf("year").format("YYYY-MM-DD H:mm:ss"),
+            moment().endOf("year").format("YYYY-MM-DD H:mm:ss"),
+          ],
+        },
+      },
+    });
+    const bill = await tagihanFix.findOne({
+      raw: true,
+      where: {
+        tahun_angkatan: Number(moment().format("YYYY")),
+      },
       attributes: {
-        include: [[Sequelize.fn("COUNT", "siswas"), "total"]],
+        exclude: ["tahun_angkatan", "id", "createdAt", "updatedAt"],
       },
-      group: ["jurusanId"],
-      /// https://stackoverflow.com/a/53119070/18038473
-      include: { model: siswaAuth },
     });
+    const totalBill = Object.values(bill || {}).reduce((a, b) => a + b, 0);
     res.json({
       data: {
-        today_profit: {
-          amount: student_amount || 0,
-          total_student: totalStudentHasPay || 0,
+        profit: {
+          amount_daily: student_amount_daily || 0,
+          amount_monthly: student_amount_monthly || 0,
+          amount_annual: student_amount_annual || 0,
+          total_student_daily: totalStudentHasPayDaily || 0,
+          total_student_monthly: totalStudentHasPayMonthly || 0,
+          total_student_annual: totalStudentHasPayAnnual || 0,
         },
-        total_student: totalStudent || 0,
-        major_summary: jurusanStudent,
+        bill: {
+          total_bill_annual: Number(totalBill),
+        },
       },
     });
   } catch (error) {

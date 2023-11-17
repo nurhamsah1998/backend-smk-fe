@@ -45,9 +45,15 @@ import {
 import {
   deleteCampaign,
   getAllCampaign,
+  getCampaign,
   patchCampaign,
   postCampaign,
 } from "../Controller/campaignController.js";
+import {
+  deleteResponseCampaign,
+  getResponseCampaign,
+  postResponseCampaign,
+} from "../Controller/responseCampaignController.js";
 
 const router = express.Router();
 const storage = multer.diskStorage({
@@ -107,7 +113,11 @@ router.get("/staff", verifyToken, getStaff);
 router.patch("/staff/:id", verifyToken, staffProfileUpdate);
 router.get("/staff-profile", verifyToken, getStaffProfile);
 router.post("/campaign", verifyToken, postCampaign);
+router.post("/response-campaign", verifyToken, postResponseCampaign);
+router.delete("/response-campaign/:id", verifyToken, deleteResponseCampaign);
+router.get("/response-campaign", verifyToken, getResponseCampaign);
 router.get("/campaign", verifyToken, getAllCampaign);
+router.get("/campaign-me", verifyToken, getCampaign);
 router.patch("/campaign/:id", verifyToken, patchCampaign);
 router.delete("/campaign/:id", verifyToken, deleteCampaign);
 /// INVOICE ///

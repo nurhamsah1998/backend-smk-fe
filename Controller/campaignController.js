@@ -1,6 +1,10 @@
+import { Op } from "sequelize";
 import { getUserInfoToken } from "../Configuration/supportFunction.js";
 import { campaign } from "../Models/campaign.js";
 import { jurusan } from "../Models/jurusan.js";
+import { responseCampaign } from "../Models/responseCampaign.js";
+import { stafAuth } from "../Models/staf.js";
+import { siswaAuth } from "../Models/siswa.js";
 
 export const postCampaign = async (req, res) => {
   const {
@@ -13,6 +17,7 @@ export const postCampaign = async (req, res) => {
     title,
     is_response,
   } = req.body;
+
   try {
     const staffProfile = getUserInfoToken(
       req.headers.authorization.replace("Bearer ", "")
@@ -31,7 +36,7 @@ export const postCampaign = async (req, res) => {
       title,
       staff_id: staffProfile.idStaff,
       sub_kelas,
-      jurusan_id,
+      jurusan_id: Boolean(jurusan_id) ? jurusan_id : null,
       angkatan,
       is_response,
     });
@@ -86,7 +91,46 @@ export const getAllCampaign = async (req, res) => {
         staff_id: staffProfile.idStaff,
       },
       attributes: { exclude: ["staff_id"] },
-      include: [{ model: jurusan }],
+      include: [
+        { model: jurusan },
+        {
+          model: responseCampaign,
+          include: { model: siswaAuth, include: [{ model: jurusan }] },
+        },
+      ],
+    });
+    res.status(200).json({ data });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "Internal server error" });
+  }
+};
+export const getCampaign = async (req, res) => {
+  try {
+    const data = await campaign.findAll({
+      where: {
+        angkatan: {
+          [Op.like]: req.query.angkatan || "%",
+        },
+      },
+
+      include: [
+        {
+          model: jurusan,
+        },
+        {
+          model: responseCampaign,
+          include: [
+            {
+              model: siswaAuth,
+              include: [{ model: jurusan }],
+            },
+          ],
+        },
+        {
+          model: stafAuth,
+        },
+      ],
     });
     res.status(200).json({ data });
   } catch (error) {
@@ -96,9 +140,18 @@ export const getAllCampaign = async (req, res) => {
 };
 export const deleteCampaign = async (req, res) => {
   try {
-    await campaign.destroy({
+    const findCampaign = await campaign.findOne({
       where: {
         id: req.params.id,
+      },
+    });
+    if (!findCampaign) {
+      return res.status(404).json({ msg: "Gagal menghapus pengumuman" });
+    }
+
+    await campaign.destroy({
+      where: {
+        id: findCampaign.id,
       },
     });
     res.status(200).json({ msg: "Berhasil menghapus pengumuman" });

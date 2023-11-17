@@ -18,11 +18,11 @@ export const campaign = database.define(
       defaultValue: "",
     },
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(70),
       defaultValue: "",
     },
     text: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(800),
       defaultValue: "",
     },
     status: {
