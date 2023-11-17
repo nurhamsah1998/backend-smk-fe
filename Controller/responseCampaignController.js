@@ -25,7 +25,6 @@ export const postResponseCampaign = async (req, res) => {
         },
       },
     });
-    console.log(isAlreadyResponse, "<=--");
     if (isAlreadyResponse)
       return res
         .status(406)
