@@ -98,6 +98,7 @@ export const getAllCampaign = async (req, res) => {
           include: { model: siswaAuth, include: [{ model: jurusan }] },
         },
       ],
+      order: [["updatedAt", "DESC"]],
     });
     res.status(200).json({ data });
   } catch (error) {
@@ -131,6 +132,7 @@ export const getCampaign = async (req, res) => {
           model: stafAuth,
         },
       ],
+      order: [["updatedAt", "DESC"]],
     });
     res.status(200).json({ data });
   } catch (error) {
