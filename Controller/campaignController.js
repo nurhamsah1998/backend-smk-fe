@@ -28,7 +28,9 @@ export const postCampaign = async (req, res) => {
       },
     });
     if (totalCampaign === 5)
-      return res.status(406).json({ msg: "Maksimal 5 pengumuman" });
+      return res.status(406).json({
+        msg: "Gagal membuat. Setiap user admin hanya boleh membuat 5 pengumuman saja",
+      });
     await campaign.create({
       text,
       status,
