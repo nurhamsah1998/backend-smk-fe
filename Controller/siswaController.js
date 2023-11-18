@@ -413,7 +413,7 @@ export const importAccount = async (req, res) => {
         }
       });
     await siswaAuth.bulkCreate(injectDataToDB);
-    res.status(200).json({ massega: "Create SUccess" });
+    res.status(200).json({ massega: "Berhasil mengimport siswa" });
   } catch (error) {
     console.log(error);
     res.status(406).json({
@@ -569,7 +569,7 @@ export const siswaUpdate = async (req, res) => {
         id: req.params.id,
       },
     });
-    res.status(200).json({ msg: "update success" });
+    res.status(200).json({ msg: "Siswa berhasil diupdate" });
   } catch (error) {
     res.status(403).json({ msg: "Internal server error !" });
   }

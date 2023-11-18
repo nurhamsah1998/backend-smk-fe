@@ -26,8 +26,8 @@ export const postInvoice = async (req, res) => {
       createdAt: {
         [Op.between]: [
           /// https://stackoverflow.com/a/12970385/18038473
-          moment(moment().startOf("day")).format("YYYY-MM-DD H:mm:ss"),
-          moment(moment().endOf("day")).format("YYYY-MM-DD H:mm:ss"),
+          moment().startOf("day").format("YYYY-MM-DD H:mm:ss"),
+          moment().endOf("day").format("YYYY-MM-DD H:mm:ss"),
         ],
       },
     },
@@ -100,10 +100,8 @@ export const getAllInvoice = async (req, res) => {
           createdAt: {
             [Op.between]: [
               /// https://stackoverflow.com/a/12970385/18038473
-              moment(moment(startDate).startOf("day")).format(
-                "YYYY-MM-DD H:mm:ss"
-              ),
-              moment(moment(endDate).endOf("day")).format("YYYY-MM-DD H:mm:ss"),
+              moment(startDate).startOf("day").format("YYYY-MM-DD H:mm:ss"),
+              moment(endDate).endOf("day").format("YYYY-MM-DD H:mm:ss"),
             ],
           },
         }

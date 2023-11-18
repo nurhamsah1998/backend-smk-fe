@@ -141,7 +141,7 @@ export const updateTagihanFix = async (req, res) => {
       ),
       data: req.body.history,
     });
-    res.status(200).json({ msg: "update success" });
+    res.status(200).json({ msg: "Tagihan berhasil diubah" });
   } catch (error) {
     console.log(error);
   }
@@ -166,7 +166,7 @@ export const createTagihanFix = async (req, res) => {
       ),
       data: body,
     });
-    res.status(200).json({ msg: "create success" });
+    res.status(200).json({ msg: "Berhasil membuat tagihan baru" });
   } catch (error) {
     console.log(error);
   }

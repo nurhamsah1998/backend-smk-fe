@@ -187,7 +187,7 @@ export const staffProfileUpdate = async (req, res) => {
         },
       }
     );
-    res.status(200).json({ msg: "update success" });
+    res.status(200).json({ msg: "Staff berhasil diupdate" });
   } catch (error) {
     console.log(error);
   }
