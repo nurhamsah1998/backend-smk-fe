@@ -24,6 +24,10 @@ export const stafAuth = database.define(
       type: DataTypes.STRING,
       defaultValue: "",
     },
+    permissions: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     role: {
       type: DataTypes.STRING,
       defaultValue: "ANONIM",
