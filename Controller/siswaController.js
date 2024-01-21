@@ -1,14 +1,13 @@
 import { siswaAuth } from "../Models/siswa.js";
-import bcrypt from "bcrypt";
 import { jurusan } from "../Models/jurusan.js";
 import jwt from "jsonwebtoken";
-import { uid } from "uid";
 import { Op } from "sequelize";
 import exeljs from "exceljs";
 import fs from "fs/promises";
 import { tagihanFix } from "../Models/tagihanFix.js";
 import {
   getUserInfoToken,
+  permissionAccess,
   recordActivity,
 } from "../Configuration/supportFunction.js";
 
@@ -16,6 +15,7 @@ export const getSiswa = async (req, res) => {
   const page = parseInt(req.query.page) - 1 || 0;
   const limit = parseInt(req.query.limit) || 10;
   const search = req.query.search || "";
+  const type = req.query.type || "";
   const angkatan = req.query.angkatan || "%";
   const currentBill = req.query.current_bill || "";
   const jurusanId = req.query.jurusanId || "%";
@@ -23,6 +23,14 @@ export const getSiswa = async (req, res) => {
   const subKelas = req.query.sub_kelas || "%";
   const status = req.query.status || "%";
   const offside = limit * page;
+  const hasAccess = await permissionAccess({
+    token: req.headers.authorization.replace("Bearer ", ""),
+    permission: type,
+  });
+  if (hasAccess)
+    return res
+      .status(403)
+      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
   try {
     const totalData = await siswaAuth.count();
     const totalRows = await siswaAuth.count({

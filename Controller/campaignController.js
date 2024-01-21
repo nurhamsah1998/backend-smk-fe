@@ -1,5 +1,8 @@
 import { Op } from "sequelize";
-import { getUserInfoToken } from "../Configuration/supportFunction.js";
+import {
+  getUserInfoToken,
+  permissionAccess,
+} from "../Configuration/supportFunction.js";
 import { campaign } from "../Models/campaign.js";
 import { jurusan } from "../Models/jurusan.js";
 import { responseCampaign } from "../Models/responseCampaign.js";
@@ -19,6 +22,14 @@ export const postCampaign = async (req, res) => {
   } = req.body;
 
   try {
+    const hasAccess = await permissionAccess({
+      token: req.headers.authorization.replace("Bearer ", ""),
+      permission: "pengumuman",
+    });
+    if (hasAccess)
+      return res
+        .status(403)
+        .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
     const staffProfile = getUserInfoToken(
       req.headers.authorization.replace("Bearer ", "")
     );
@@ -60,6 +71,14 @@ export const patchCampaign = async (req, res) => {
     is_response,
   } = req.body;
   try {
+    const hasAccess = await permissionAccess({
+      token: req.headers.authorization.replace("Bearer ", ""),
+      permission: "pengumuman",
+    });
+    if (hasAccess)
+      return res
+        .status(403)
+        .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
     await campaign.update(
       {
         text,
@@ -84,6 +103,14 @@ export const patchCampaign = async (req, res) => {
   }
 };
 export const getAllCampaign = async (req, res) => {
+  const hasAccess = await permissionAccess({
+    token: req.headers.authorization.replace("Bearer ", ""),
+    permission: "pengumuman",
+  });
+  if (hasAccess)
+    return res
+      .status(403)
+      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
   const staffProfile = getUserInfoToken(
     req.headers.authorization.replace("Bearer ", "")
   );
@@ -143,6 +170,14 @@ export const getCampaign = async (req, res) => {
   }
 };
 export const deleteCampaign = async (req, res) => {
+  const hasAccess = await permissionAccess({
+    token: req.headers.authorization.replace("Bearer ", ""),
+    permission: "pengumuman",
+  });
+  if (hasAccess)
+    return res
+      .status(403)
+      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
   try {
     const findCampaign = await campaign.findOne({
       where: {

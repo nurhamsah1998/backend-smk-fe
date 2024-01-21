@@ -2,11 +2,20 @@ import { siswaAuth } from "../Models/siswa.js";
 import { tagihanFix } from "../Models/tagihanFix.js";
 import {
   getUserInfoToken,
+  permissionAccess,
   recordActivity,
 } from "../Configuration/supportFunction.js";
 import { Op } from "sequelize";
 
 export const getTagihanFix = async (req, res) => {
+  const hasAccess = await permissionAccess({
+    token: req.headers.authorization.replace("Bearer ", ""),
+    permission: "tagihan",
+  });
+  if (hasAccess)
+    return res
+      .status(403)
+      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
   const limit = parseInt(req.query.limit) || 3;
   const page = parseInt(req.query.page) - 1 || 0;
   try {
@@ -117,6 +126,14 @@ export const getTahunAngkatan = async (req, res) => {
 };
 
 export const updateTagihanFix = async (req, res) => {
+  const hasAccess = await permissionAccess({
+    token: req.headers.authorization.replace("Bearer ", ""),
+    permission: "tagihan",
+  });
+  if (hasAccess)
+    return res
+      .status(403)
+      .json({ msg: "Perubahan Ditolak, Anda tidak memiliki akses!" });
   try {
     await siswaAuth.increment(
       { current_bill: req.body.extra.freq_bill },

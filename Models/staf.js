@@ -26,7 +26,15 @@ export const stafAuth = database.define(
     },
     permissions: {
       type: DataTypes.JSON,
-      defaultValue: [],
+      defaultValue: [
+        "tagihan",
+        "daftar_siswa",
+        "laporan_transaksi",
+        "student_bill_letter",
+        "pembayaran",
+        "transaksi",
+        "pengumuman",
+      ],
     },
     role: {
       type: DataTypes.STRING,

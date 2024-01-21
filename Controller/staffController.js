@@ -3,9 +3,7 @@ import bcrypt from "bcrypt";
 import { invoice } from "../Models/invoice.js";
 import jwt from "jsonwebtoken";
 import moment from "moment/moment.js";
-import { Op, Sequelize } from "sequelize";
-import { siswaAuth } from "../Models/siswa.js";
-import { jurusan } from "../Models/jurusan.js";
+import { Op } from "sequelize";
 import { tagihanFix } from "../Models/tagihanFix.js";
 
 export const dashboardStaffReport = async (req, res) => {
@@ -141,6 +139,9 @@ export const getStaff = async (req, res) => {
             },
           },
         ],
+        role: {
+          [Op.not]: "DEV",
+        },
       },
       attributes: { exclude: ["password"] },
       limit,
@@ -177,10 +178,10 @@ export const getStaffProfile = async (req, res) => {
   }
 };
 export const staffProfileUpdate = async (req, res) => {
-  const { role } = req.body;
+  const { role, permissions } = req.body;
   try {
     await stafAuth.update(
-      { role },
+      { role, permissions },
       {
         where: {
           id: req.params.id,
