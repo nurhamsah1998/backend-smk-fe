@@ -150,14 +150,16 @@ export const updateTagihanFix = async (req, res) => {
         id: req.params.id,
       },
     });
+    if (req.body.history.length > 0) {
+      recordActivity({
+        action: "Mengubah Tagihan",
+        author: getUserInfoToken(
+          req.headers.authorization.replace("Bearer ", "")
+        ),
+        data: req.body.history,
+      });
+    }
 
-    recordActivity({
-      action: "Mengubah Tagihan",
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
-      data: req.body.history,
-    });
     res.status(200).json({ msg: "Tagihan berhasil diubah" });
   } catch (error) {
     console.log(error);
