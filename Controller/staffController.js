@@ -212,22 +212,7 @@ export const staffRegister = async (req, res) => {
     });
     if (uniqueUsername)
       return res.status(403).json({ msg: "Username / email sudah terdaftar" });
-    // const NISN = await stafAuth.findAll({
-    //   attributes: ["nisn"],
-    // });
-    // const toStringify = JSON.stringify(NISN);
-    // const toArray = JSON.parse(toStringify);
-    // const decrypt = toArray.map((i) => {
-    //   const DecryptNISN = CryptoJS.AES.decrypt(
-    //     i.nisn,
-    //     process.env.SECRET_ENCRYPT
-    //   );
-    //   const originalText = DecryptNISN.toString(CryptoJS.enc.Utf8);
-    //   return { nisn: originalText };
-    // });
-    // const isNisinHasRegister = decrypt.find((i) => i.nisn === req.body.nisn);
-    // if (isNisinHasRegister)
-    //   return res.status(400).json({ msg: "NISN telah terdaftar" });
+
     await stafAuth.create({
       nama: nama,
       username: username,
