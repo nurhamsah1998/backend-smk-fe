@@ -15,6 +15,7 @@ export const getSiswa = async (req, res) => {
   const page = parseInt(req.query.page) - 1 || 0;
   const limit = parseInt(req.query.limit) || 40;
   const search = req.query.search || "";
+  const type = req.query.type || "not_access";
   const angkatan = req.query.angkatan || "%";
   const currentBill = req.query.current_bill || "";
   const jurusanId = req.query.jurusanId || "%";
@@ -24,7 +25,7 @@ export const getSiswa = async (req, res) => {
   const offside = limit * page;
   const isNotAccess = await permissionAccess({
     token: req.headers.authorization.replace("Bearer ", ""),
-    permission: "daftar_siswa",
+    permission: type,
   });
   if (isNotAccess)
     return res
