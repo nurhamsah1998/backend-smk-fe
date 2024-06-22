@@ -21,11 +21,11 @@ export const postInvoice = async (req, res) => {
     sub_kelas,
     tahun_angkatan,
   } = req.body;
-  const hasAccess = await permissionAccess({
+  const isNotAccess = await permissionAccess({
     token: req.headers.authorization.replace("Bearer ", ""),
     permission: "transaksi",
   });
-  if (hasAccess)
+  if (isNotAccess)
     return res
       .status(400)
       .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
@@ -93,17 +93,18 @@ export const getInvoice = async (req, res) => {
   }
 };
 export const getAllInvoice = async (req, res) => {
-  const hasAccess = await permissionAccess({
+  const isNotAccess = await permissionAccess({
     token: req.headers.authorization.replace("Bearer ", ""),
     permission: "laporan_transaksi",
   });
-  if (hasAccess)
+  if (isNotAccess)
     return res
       .status(403)
       .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
+
   try {
     const page = parseInt(req.query.page) - 1 || 0;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 40;
     const startDate = req.query.startDate;
     const endDate = req.query.endDate;
     const offside = limit * page;

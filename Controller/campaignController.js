@@ -22,11 +22,11 @@ export const postCampaign = async (req, res) => {
   } = req.body;
 
   try {
-    const hasAccess = await permissionAccess({
+    const isNotAccess = await permissionAccess({
       token: req.headers.authorization.replace("Bearer ", ""),
       permission: "pengumuman",
     });
-    if (hasAccess)
+    if (isNotAccess)
       return res
         .status(403)
         .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
@@ -71,11 +71,11 @@ export const patchCampaign = async (req, res) => {
     is_response,
   } = req.body;
   try {
-    const hasAccess = await permissionAccess({
+    const isNotAccess = await permissionAccess({
       token: req.headers.authorization.replace("Bearer ", ""),
       permission: "pengumuman",
     });
-    if (hasAccess)
+    if (isNotAccess)
       return res
         .status(403)
         .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
@@ -103,11 +103,11 @@ export const patchCampaign = async (req, res) => {
   }
 };
 export const getAllCampaign = async (req, res) => {
-  const hasAccess = await permissionAccess({
+  const isNotAccess = await permissionAccess({
     token: req.headers.authorization.replace("Bearer ", ""),
     permission: "pengumuman",
   });
-  if (hasAccess)
+  if (isNotAccess)
     return res
       .status(403)
       .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
@@ -170,11 +170,11 @@ export const getCampaign = async (req, res) => {
   }
 };
 export const deleteCampaign = async (req, res) => {
-  const hasAccess = await permissionAccess({
+  const isNotAccess = await permissionAccess({
     token: req.headers.authorization.replace("Bearer ", ""),
     permission: "pengumuman",
   });
-  if (hasAccess)
+  if (isNotAccess)
     return res
       .status(403)
       .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });

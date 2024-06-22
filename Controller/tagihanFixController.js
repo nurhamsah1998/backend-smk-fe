@@ -8,11 +8,11 @@ import {
 import { Op } from "sequelize";
 
 export const getTagihanFix = async (req, res) => {
-  const hasAccess = await permissionAccess({
+  const isNotAccess = await permissionAccess({
     token: req.headers.authorization.replace("Bearer ", ""),
     permission: "tagihan",
   });
-  if (hasAccess)
+  if (isNotAccess)
     return res
       .status(403)
       .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
@@ -126,11 +126,11 @@ export const getTahunAngkatan = async (req, res) => {
 };
 
 export const updateTagihanFix = async (req, res) => {
-  const hasAccess = await permissionAccess({
+  const isNotAccess = await permissionAccess({
     token: req.headers.authorization.replace("Bearer ", ""),
     permission: "tagihan",
   });
-  if (hasAccess)
+  if (isNotAccess)
     return res
       .status(403)
       .json({ msg: "Perubahan Ditolak, Anda tidak memiliki akses!" });

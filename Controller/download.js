@@ -30,7 +30,7 @@ export const downloadFileExelTransaction = async (req, res) => {
 export const downloadTransaction = async (req, res) => {
   try {
     const page = parseInt(req.query.page) - 1 || 0;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 40;
     const startDate = req.query.startDate;
     const endDate = req.query.endDate;
     const type = req.query.type_file;
