@@ -1,8 +1,15 @@
 import { logActivity } from "../Models/logActivity.js";
 import moment from "moment";
 import { Op } from "sequelize";
+import { getUserInfoToken } from "../Configuration/supportFunction.js";
 
 export const getActivity = async (req, res) => {
+  const { roleStaff } =
+    getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+  if (roleStaff !== "DEV")
+    return res
+      .status(403)
+      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
   const page = parseInt(req.query.page) - 1 || 0;
   const limit = parseInt(req.query.limit) || 10;
   const startDate = req.query.startDate;
