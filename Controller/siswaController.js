@@ -389,11 +389,6 @@ export const importAccount = async (req, res) => {
         const totalRow = workSheet.actualRowCount;
         for (let indexColumn = 1; indexColumn < totalRow + 1; indexColumn++) {
           if (indexColumn !== 1) {
-            console.log(
-              `sub_kelas=${workSheet.getRow(indexColumn).values[5]}|kelas=${
-                workSheet.getRow(indexColumn).values[6]
-              }`
-            );
             injectDataToDB.push({
               nama: workSheet.getRow(indexColumn).values[1],
               username: workSheet.getRow(indexColumn).values[2],
