@@ -113,7 +113,7 @@ export const getAllInvoice = async (req, res) => {
     const subKelas = req.query.sub_kelas || "%";
     const totalData = await invoice.count();
     /// https://stackoverflow.com/a/43127894/18038473
-    const whereCondition = Boolean(endDate !== "null")
+    const whereCondition = Boolean(endDate)
       ? {
           createdAt: {
             [Op.between]: [
