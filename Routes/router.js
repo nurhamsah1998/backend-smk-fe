@@ -4,7 +4,10 @@ import {
   deleteJurusan,
   updateJurusan,
 } from "../Controller/jurusanController.js";
-import { getAllInvoice, getInvoice } from "../Controller/InvoiceController.js";
+import {
+  getAllInvoiceIn,
+  getInvoice,
+} from "../Controller/InvoiceInController.js";
 import {
   staffRegister,
   getStaff,
@@ -33,14 +36,15 @@ import {
   getTotalTagihanFix,
   updateTagihanFix,
 } from "../Controller/tagihanFixController.js";
-import { postInvoice } from "../Controller/InvoiceController.js";
+import { postInvoiceIn } from "../Controller/InvoiceInController.js";
 import { getActivity } from "../Controller/logActivity.js";
 import multer from "multer";
 import express from "express";
 import {
   downloadTemplateImportSiswa,
-  downloadTransaction,
+  downloadTransactionIn,
   downloadStudentBill,
+  downloadTransactionOut,
 } from "../Controller/download.js";
 import {
   deleteCampaign,
@@ -54,6 +58,10 @@ import {
   getResponseCampaign,
   postResponseCampaign,
 } from "../Controller/responseCampaignController.js";
+import {
+  getAllInvoiceOut,
+  postInvoiceOut,
+} from "../Controller/InvoiceOutController.js";
 
 const router = express.Router();
 const storage = multer.diskStorage({
@@ -121,13 +129,24 @@ router.get("/campaign-me", verifyToken, getCampaign);
 router.patch("/campaign/:id", verifyToken, patchCampaign);
 router.delete("/campaign/:id", verifyToken, deleteCampaign);
 /// INVOICE ///
-router.post("/invoice", verifyToken, postInvoice);
+router.post("/invoice-in", verifyToken, postInvoiceIn);
+router.get("/get-all-invoice-in", verifyToken, getAllInvoiceIn);
+router.post("/invoice-out", verifyToken, postInvoiceOut);
+router.get("/get-all-invoice-out", verifyToken, getAllInvoiceOut);
 router.get("/invoice", verifyToken, getInvoice);
-router.get("/get-all-invoice", verifyToken, getAllInvoice);
 
 /// DOWNLOAD
 router.get("/download/template-import-siswa", downloadTemplateImportSiswa);
-router.get("/download/report-transaction", verifyToken, downloadTransaction);
+router.get(
+  "/download/report-transaction-in",
+  verifyToken,
+  downloadTransactionIn
+);
+router.get(
+  "/download/report-transaction-out",
+  verifyToken,
+  downloadTransactionOut
+);
 router.get("/download/report-bill", verifyToken, downloadStudentBill);
 
 /// DASHBOARD REPOST

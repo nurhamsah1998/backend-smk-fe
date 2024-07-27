@@ -334,7 +334,7 @@ export const importAccount = async (req, res) => {
     if (Boolean(findDuplicate.length)) {
       res.status(406).json({
         code: "error_validation_no_data",
-        message: `Gagal upload file. Username harus unique/berbeda. Username ${findDuplicate.join()} telah banyak digunakan, coba cari yang lainnya`,
+        message: `Gagal upload file. Username harus unique/berbeda. Username ${findDuplicate.join()} telah banyak digunakan, coba ganti yang lainnya`,
       });
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
         console.log(error);

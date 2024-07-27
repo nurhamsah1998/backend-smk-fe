@@ -13,6 +13,23 @@ const recordActivity = async ({ action, data, author }) => {
     console.log(error);
   }
 };
+const getTotalTagihan = (data, year) => {
+  try {
+    let x = data.find((item) => item.tahun_angkatan === year);
+    delete x.tahun_angkatan;
+    return Object.values(x).reduce((a, b) => a + b, 0);
+  } catch (error) {
+    return 0;
+  }
+};
+const invoiceGenerator = (arg) => {
+  const date = new Date();
+  const codeTime = `${date.getFullYear()}${
+    date.getMonth() + 1
+  }${date.getDate()}`;
+  const total = "000".slice(0, 3 - String(arg).length);
+  return codeTime + total + String(arg);
+};
 
 const getUserInfoToken = (token) => {
   return jwt.decode(token);
@@ -32,4 +49,11 @@ const permissionAccess = async ({ token, permission = "" }) => {
   const permissions = userInfo ? JSON.parse(userInfo.permissions) : [];
   return !Boolean(permissions.find((item) => item === permission));
 };
-export { recordActivity, getUserInfoToken, FormatCurrency, permissionAccess };
+export {
+  recordActivity,
+  getUserInfoToken,
+  invoiceGenerator,
+  FormatCurrency,
+  permissionAccess,
+  getTotalTagihan,
+};

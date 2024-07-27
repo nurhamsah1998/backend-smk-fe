@@ -84,8 +84,7 @@ export const getTahunAngkatan = async (req, res) => {
   const totalData = await tagihanFix.count();
   try {
     const totalRows = await tagihanFix.count({
-      /// https://stackoverflow.com/a/49053066/18038473
-      attributes: ["tahun_angkatan"],
+      // attributes: ["tahun_angkatan"],
       where: {
         [Op.or]: {
           tahun_angkatan: {

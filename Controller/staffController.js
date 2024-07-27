@@ -5,7 +5,10 @@ import jwt from "jsonwebtoken";
 import moment from "moment/moment.js";
 import { Op } from "sequelize";
 import { tagihanFix } from "../Models/tagihanFix.js";
-import { getUserInfoToken } from "../Configuration/supportFunction.js";
+import {
+  getTotalTagihan,
+  getUserInfoToken,
+} from "../Configuration/supportFunction.js";
 
 export const dashboardStaffReport = async (req, res) => {
   try {
@@ -75,16 +78,21 @@ export const dashboardStaffReport = async (req, res) => {
         },
       },
     });
-    const bill = await tagihanFix.findOne({
+    const getYear = moment().format("YYYY");
+    const firstGrade = Number(getYear);
+    const secondGrade = Number(getYear) - 1;
+    const thirhGrade = Number(getYear) - 2;
+    const bill = await tagihanFix.findAll({
       raw: true,
       where: {
-        tahun_angkatan: Number(moment().format("YYYY")),
+        tahun_angkatan: {
+          [Op.in]: [thirhGrade, secondGrade, firstGrade],
+        },
       },
       attributes: {
-        exclude: ["tahun_angkatan", "id", "createdAt", "updatedAt"],
+        exclude: ["id", "createdAt", "updatedAt"],
       },
     });
-    const totalBill = Object.values(bill || {}).reduce((a, b) => a + b, 0);
     res.json({
       data: {
         profit: {
@@ -95,8 +103,10 @@ export const dashboardStaffReport = async (req, res) => {
           total_student_monthly: totalStudentHasPayMonthly || 0,
           total_student_annual: totalStudentHasPayAnnual || 0,
         },
-        bill: {
-          total_bill_annual: Number(totalBill),
+        total_bill: {
+          [firstGrade]: getTotalTagihan(bill, firstGrade),
+          [secondGrade]: getTotalTagihan(bill, secondGrade),
+          [thirhGrade]: getTotalTagihan(bill, thirhGrade),
         },
       },
     });

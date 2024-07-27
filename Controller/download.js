@@ -7,6 +7,7 @@ import { Op } from "sequelize";
 import exeljs from "exceljs";
 import { FormatCurrency } from "../Configuration/supportFunction.js";
 import { uid } from "uid";
+import { invoiceOut } from "../Models/invoiceOut.js";
 
 moment.locale("id");
 
@@ -27,7 +28,7 @@ export const downloadFileExelTransaction = async (req, res) => {
     console.log(error);
   }
 };
-export const downloadTransaction = async (req, res) => {
+export const downloadTransactionIn = async (req, res) => {
   try {
     const page = parseInt(req.query.page) - 1 || 0;
     const limit = parseInt(req.query.limit) || 40;
@@ -224,7 +225,181 @@ export const downloadTransaction = async (req, res) => {
       };
     }
 
-    const fileName = `transaksi-${moment().format(
+    const fileName = `transaksi-masuk-${moment().format(
+      "MMMM-Do-YYYY-h-mm-ss"
+    )}_${uid(7).toUpperCase()}.xlsx`;
+    const folderPlace = `./Assets/download/${fileName}`;
+    await Workbook.xlsx.writeFile(folderPlace);
+    await res.download(path.resolve(`./Assets/download/${fileName}`));
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const downloadTransactionOut = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) - 1 || 0;
+    const limit = parseInt(req.query.limit) || 40;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    const offside = limit * page;
+    /// https://stackoverflow.com/a/43127894/18038473
+    const whereCondition = Boolean(endDate !== "null")
+      ? {
+          createdAt: {
+            [Op.between]: [
+              /// https://stackoverflow.com/a/12970385/18038473
+              moment(startDate).startOf("day").format("YYYY-MM-DD H:mm:ss"),
+              moment(endDate).endOf("day").format("YYYY-MM-DD H:mm:ss"),
+            ],
+          },
+        }
+      : {};
+    const dataInvoice = await invoiceOut.findAll({
+      raw: true,
+      where: {
+        ...whereCondition,
+      },
+      limit: limit,
+      offset: offside,
+      order: [["id", "DESC"]],
+    });
+    const Workbook = new exeljs.Workbook();
+    const worksheet = Workbook.addWorksheet("My Sheet");
+    const columns = [
+      {
+        header: "No",
+        key: "no",
+        width: 6,
+        size: 13,
+        bold: true,
+        alphabet: "A",
+      },
+      {
+        header: "Nama",
+        key: "nama",
+        width: 35,
+        size: 13,
+        bold: true,
+        alphabet: "B",
+      },
+      {
+        header: "Uang keluar",
+        key: "uang_keluar",
+        width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "C",
+      },
+      {
+        header: "Invoice pengeluaran",
+        key: "invoice_pengeluaran",
+        width: 20,
+        size: 13,
+        bold: true,
+        alphabet: "D",
+      },
+      {
+        header: "Petugas",
+        key: "petugas",
+        width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "E",
+      },
+      {
+        header: "Note",
+        key: "note",
+        width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "F",
+      },
+      {
+        header: "Tanggal",
+        key: "createdAt",
+        width: 32,
+        size: 13,
+        bold: true,
+        alphabet: "G",
+      },
+    ];
+    const dateStart = new Date(startDate);
+    const dateEnd = new Date(endDate);
+    const isSingleDate =
+      dateStart.getDate() === dateEnd.getDate() &&
+      dateStart.getMonth() === dateEnd.getMonth();
+    /// https://stackoverflow.com/a/71738770/18038473
+    worksheet.mergeCells("A1:H1");
+    worksheet.getRow(1).height = 70;
+    worksheet.getCell("A1").value = `LAPORAN TRANSAKSI KELUAR \n Tanggal : ${
+      Boolean(startDate !== "null")
+        ? moment(startDate).format("DD MMMM YYYY")
+        : "-"
+    } ${
+      !Boolean(isSingleDate) && Boolean(startDate !== "null")
+        ? `- ${moment(endDate).format("DD MMMM YYYY")}`
+        : ""
+    }`;
+    worksheet.getCell("A1").alignment = {
+      vertical: "middle",
+      horizontal: "center",
+      wrapText: true,
+    };
+    worksheet.getCell(`A1`).font = {
+      size: 15,
+      bold: true,
+    };
+    worksheet.getRow(2).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "2980ba" },
+    };
+    let header = [];
+    let key = [];
+    for (let index = 0; index < columns.length; index++) {
+      key.push({ key: columns[index].key, width: columns[index].width });
+      header.push(columns[index].header);
+      worksheet.getCell(`${columns[index].alphabet}2`).font = {
+        size: 13,
+        bold: true,
+      };
+    }
+    worksheet.getRow(2).values = header;
+    worksheet.columns = key;
+    worksheet.getCell("A2").alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
+    for (let index = 0; index < columns.length; index++) {
+      worksheet.getCell(`${columns[index].alphabet}2`).font = {
+        size: columns[index].size,
+        bold: columns[index].bold,
+        color: { argb: "ffffff" },
+      };
+      worksheet.getCell(`${columns[index].alphabet}2`).alignment = {
+        vertical: "middle",
+      };
+    }
+    worksheet.getRow(2).height = 25;
+    for (let index = 0; index < dataInvoice.length; index++) {
+      worksheet.addRow({
+        no: index + 1,
+        nama: dataInvoice[index].nama,
+        uang_keluar: FormatCurrency(dataInvoice[index].uang_keluar),
+        invoice_pengeluaran: dataInvoice[index].invoice_pengeluaran,
+        petugas: dataInvoice[index].petugas,
+        note: dataInvoice[index].note,
+        createdAt: moment(dataInvoice[index].createdAt).format(
+          "Do MMMM YYYY H:mm"
+        ),
+      });
+      worksheet.getCell(`A${index + 3}`).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+    }
+
+    const fileName = `transaksi-keluar-${moment().format(
       "MMMM-Do-YYYY-h-mm-ss"
     )}_${uid(7).toUpperCase()}.xlsx`;
     const folderPlace = `./Assets/download/${fileName}`;

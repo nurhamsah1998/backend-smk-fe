@@ -3,11 +3,12 @@ import { Op } from "sequelize";
 import moment from "moment";
 import {
   getUserInfoToken,
+  invoiceGenerator,
   permissionAccess,
   recordActivity,
 } from "../Configuration/supportFunction.js";
 
-export const postInvoice = async (req, res) => {
+export const postInvoiceIn = async (req, res) => {
   const {
     nama,
     total,
@@ -23,13 +24,12 @@ export const postInvoice = async (req, res) => {
   } = req.body;
   const isNotAccess = await permissionAccess({
     token: req.headers.authorization.replace("Bearer ", ""),
-    permission: "transaksi",
+    permission: "transaksi_masuk",
   });
   if (isNotAccess)
     return res
       .status(400)
       .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
-  const date = new Date();
   const totalInvoice = await invoice.count({
     where: {
       createdAt: {
@@ -41,13 +41,7 @@ export const postInvoice = async (req, res) => {
       },
     },
   });
-  const invoiceGenerator = (arg) => {
-    const codeTime = `${date.getFullYear()}${
-      date.getMonth() + 1
-    }${date.getDate()}`;
-    const total = "000".slice(0, 3 - String(arg).length);
-    return codeTime + total + String(arg);
-  };
+
   try {
     const body = {
       nama: nama,
@@ -61,7 +55,7 @@ export const postInvoice = async (req, res) => {
       sub_kelas,
       kelas,
       tahun_angkatan,
-      invoice: invoiceGenerator(totalInvoice + 1),
+      invoice: `IN-${invoiceGenerator(totalInvoice + 1)}`,
     };
     const data = await invoice.create(body);
     recordActivity({
@@ -92,10 +86,10 @@ export const getInvoice = async (req, res) => {
     res.status(404).json({ msg: "Internal server error" });
   }
 };
-export const getAllInvoice = async (req, res) => {
+export const getAllInvoiceIn = async (req, res) => {
   const isNotAccess = await permissionAccess({
     token: req.headers.authorization.replace("Bearer ", ""),
-    permission: "laporan_transaksi",
+    permission: "laporan_transaksi_masuk",
   });
   if (isNotAccess)
     return res
@@ -175,7 +169,7 @@ export const getAllInvoice = async (req, res) => {
     res.status(404).json({ msg: "Internal server error" });
   }
 };
-export const getTotalInvoice = async (req, res) => {
+export const getTotalInvoiceIn = async (req, res) => {
   try {
     const responseInvoice = await invoice.findAll({
       where: {
