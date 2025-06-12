@@ -195,8 +195,8 @@ export const getStaffProfile = async (req, res) => {
   }
 };
 export const staffProfileUpdate = async (req, res) => {
-  const {role, permissions} = req.body;
   try {
+    const {role, permissions} = req.body;
     await stafAuth.update(
       {role, permissions},
       {

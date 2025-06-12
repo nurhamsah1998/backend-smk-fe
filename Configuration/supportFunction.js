@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
-import { logActivity } from "../Models/logActivity.js";
-import { stafAuth } from "../Models/staf.js";
+import {logActivity} from "../Models/logActivity.js";
+import {stafAuth} from "../Models/staf.js";
 
-const recordActivity = async ({ action, data, author }) => {
+const recordActivity = async ({action, data, author}) => {
   try {
     await logActivity.create({
       action,
@@ -43,10 +43,14 @@ const FormatCurrency = (params) => {
   return toRp;
 };
 
-const permissionAccess = async ({ token, permission = "" }) => {
-  const { idStaff } = getUserInfoToken(token) || {};
-  const userInfo = await stafAuth.findByPk(idStaff, { raw: true });
-  const permissions = userInfo ? JSON.parse(userInfo.permissions) : [];
+const permissionAccess = async ({token, permission = ""}) => {
+  const {idStaff} = getUserInfoToken(token) || {};
+  const userInfo = await stafAuth.findByPk(idStaff, {raw: true});
+  const permissions = userInfo
+    ? typeof userInfo.permissions === "string"
+      ? JSON.parse(userInfo.permissions)
+      : userInfo.permissions
+    : [];
   return !Boolean(permissions.find((item) => item === permission));
 };
 export {
