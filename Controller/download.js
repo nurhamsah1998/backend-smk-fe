@@ -1,28 +1,256 @@
-import path from "path";
-import { invoice } from "../Models/invoice.js";
-import { siswaAuth } from "../Models/siswa.js";
-import { jurusan } from "../Models/jurusan.js";
+import path, {join} from "path";
+import {invoice} from "../Models/invoice.js";
+import {siswaAuth} from "../Models/siswa.js";
+import {jurusan} from "../Models/jurusan.js";
 import moment from "moment";
-import { Op } from "sequelize";
+import {Op} from "sequelize";
 import exeljs from "exceljs";
-import { FormatCurrency } from "../Configuration/supportFunction.js";
-import { uid } from "uid";
-import { invoiceOut } from "../Models/invoiceOut.js";
+import {FormatCurrency} from "../Configuration/supportFunction.js";
+import {uid} from "uid";
+import {invoiceOut} from "../Models/invoiceOut.js";
 
 moment.locale("id");
 
 export const downloadTemplateImportSiswa = async (req, res) => {
   try {
-    await res.download(
-      path.resolve("./Assets/template/template_import_siswa.xlsx")
-    );
+    /// HOW TO
+    /// https://github.com/exceljs/exceljs/issues/765#issuecomment-472912688
+    // eslint-disable-next-line prefer-const
+    let workBook = new exeljs.Workbook();
+    // eslint-disable-next-line prefer-const
+    let sheet = workBook.addWorksheet("template_import_siswa");
+    sheet.columns = [
+      {
+        header: "Nama",
+        key: "name",
+        width: 40,
+      },
+      {
+        header: "Username",
+        key: "username",
+        width: 40,
+      },
+      {
+        header: "Password",
+        key: "password",
+        width: 40,
+      },
+      {
+        header: "Jurusan",
+        key: "kode_jurusan",
+        width: 20,
+      },
+      {
+        header: "Sub kelas",
+        key: "sub_kelas",
+        width: 20,
+      },
+      {
+        header: "Kelas",
+        key: "kelas",
+        width: 20,
+      },
+      {
+        header: "Kode siswa",
+        key: "kode_siswa",
+        width: 40,
+      },
+      {
+        header: "Nomor HP",
+        key: "noHP",
+        width: 25,
+      },
+      {
+        header: "Alamat siswa",
+        key: "alamat",
+        width: 75,
+      },
+      {
+        header: "Nama ayah siswa",
+        key: "nama_ayah",
+        width: 30,
+      },
+      {
+        header: "Nama ibu siswa",
+        key: "nama_ibu",
+        width: 30,
+      },
+      {
+        header: "Jenis kelamin siswa",
+        key: "gender",
+        width: 40,
+      },
+    ];
+    sheet.getCell("A1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "ff0000"},
+    };
+    sheet.getCell("B1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "ff0000"},
+    };
+    sheet.getCell("C1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "ff0000"},
+    };
+    sheet.getCell("D1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "ff0000"},
+    };
+    sheet.getCell("E1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "ff0000"},
+    };
+    sheet.getCell("F1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "ff0000"},
+    };
+    sheet.getCell("G1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "ff0000"},
+    };
+    sheet.getCell("H1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "00a933"},
+    };
+    sheet.getCell("I1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "00a933"},
+    };
+    sheet.getCell("J1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "00a933"},
+    };
+    sheet.getCell("K1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "00a933"},
+    };
+    sheet.getCell("L1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {argb: "00a933"},
+    };
+    ///
+    sheet.getCell("A1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("B1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("C1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("D1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("E1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("F1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("G1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("H1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("I1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("J1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("K1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    sheet.getCell("L1").font = {
+      color: {argb: "FFFFFFFF"},
+      size: 16,
+      name: "calibri",
+      bold: true,
+    };
+    /// OPTIONS
+    const dataJurusan = await jurusan.findAll({raw: true});
+    for (let index = 2; index < 2000; index += 1) {
+      sheet.getCell(`D${index}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [
+          `"${dataJurusan?.map((item) => item?.kode_jurusan)?.toString()}"`,
+        ],
+      };
+      sheet.getCell(`E${index}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [`"1","2","3","4","5","6"`],
+      };
+      sheet.getCell(`F${index}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [`"10","11","12"`],
+      };
+      sheet.getCell(`L${index}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [`"L","P"`],
+      };
+    }
+    const fileName = `./Assets/template/template_import_siswa_${new Date().getTime()}.xlsx`;
+    await workBook.xlsx.writeFile(join(process.cwd(), fileName));
+
+    await res.download(path.resolve(fileName));
   } catch (error) {
     console.log(error);
   }
 };
 export const downloadFileExelTransaction = async (req, res) => {
   try {
-    const { token } = req.params;
+    const {token} = req.params;
     await res.download(path.resolve(`./Assets/download/${token}`));
   } catch (error) {
     console.log(error);
@@ -177,12 +405,12 @@ export const downloadTransactionIn = async (req, res) => {
     worksheet.getRow(2).fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "2980ba" },
+      fgColor: {argb: "2980ba"},
     };
     let header = [];
     let key = [];
     for (let index = 0; index < columns.length; index++) {
-      key.push({ key: columns[index].key, width: columns[index].width });
+      key.push({key: columns[index].key, width: columns[index].width});
       header.push(columns[index].header);
       worksheet.getCell(`${columns[index].alphabet}2`).font = {
         size: 13,
@@ -199,7 +427,7 @@ export const downloadTransactionIn = async (req, res) => {
       worksheet.getCell(`${columns[index].alphabet}2`).font = {
         size: columns[index].size,
         bold: columns[index].bold,
-        color: { argb: "ffffff" },
+        color: {argb: "ffffff"},
       };
       worksheet.getCell(`${columns[index].alphabet}2`).alignment = {
         vertical: "middle",
@@ -352,12 +580,12 @@ export const downloadTransactionOut = async (req, res) => {
     worksheet.getRow(2).fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "2980ba" },
+      fgColor: {argb: "2980ba"},
     };
     let header = [];
     let key = [];
     for (let index = 0; index < columns.length; index++) {
-      key.push({ key: columns[index].key, width: columns[index].width });
+      key.push({key: columns[index].key, width: columns[index].width});
       header.push(columns[index].header);
       worksheet.getCell(`${columns[index].alphabet}2`).font = {
         size: 13,
@@ -374,7 +602,7 @@ export const downloadTransactionOut = async (req, res) => {
       worksheet.getCell(`${columns[index].alphabet}2`).font = {
         size: columns[index].size,
         bold: columns[index].bold,
-        color: { argb: "ffffff" },
+        color: {argb: "ffffff"},
       };
       worksheet.getCell(`${columns[index].alphabet}2`).alignment = {
         vertical: "middle",
@@ -490,7 +718,7 @@ export const downloadStudentBill = async (req, res) => {
       limit: limit,
       offset: offside,
       order: [["id", "DESC"]],
-      include: [{ model: jurusan }],
+      include: [{model: jurusan}],
     });
     const Workbook = new exeljs.Workbook();
     const worksheet = Workbook.addWorksheet("My Sheet");
@@ -636,12 +864,12 @@ export const downloadStudentBill = async (req, res) => {
     worksheet.getRow(2).fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "2980ba" },
+      fgColor: {argb: "2980ba"},
     };
     let header = [];
     let key = [];
     for (let index = 0; index < columns.length; index++) {
-      key.push({ key: columns[index].key, width: columns[index].width });
+      key.push({key: columns[index].key, width: columns[index].width});
       header.push(columns[index].header);
       worksheet.getCell(`${columns[index].alphabet}2`).font = {
         size: 13,
@@ -658,7 +886,7 @@ export const downloadStudentBill = async (req, res) => {
       worksheet.getCell(`${columns[index].alphabet}2`).font = {
         size: columns[index].size,
         bold: columns[index].bold,
-        color: { argb: "ffffff" },
+        color: {argb: "ffffff"},
       };
       worksheet.getCell(`${columns[index].alphabet}2`).alignment = {
         vertical: "middle",

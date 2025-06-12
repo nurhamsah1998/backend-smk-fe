@@ -1,10 +1,10 @@
-import { siswaAuth } from "../Models/siswa.js";
-import { jurusan } from "../Models/jurusan.js";
+import {siswaAuth} from "../Models/siswa.js";
+import {jurusan} from "../Models/jurusan.js";
 import jwt from "jsonwebtoken";
-import { Op } from "sequelize";
+import {Op} from "sequelize";
 import exeljs from "exceljs";
 import fs from "fs/promises";
-import { tagihanFix } from "../Models/tagihanFix.js";
+import {tagihanFix} from "../Models/tagihanFix.js";
 import {
   getUserInfoToken,
   permissionAccess,
@@ -30,7 +30,7 @@ export const getSiswa = async (req, res) => {
   if (isNotAccess)
     return res
       .status(403)
-      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
+      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
   try {
     const totalData = await siswaAuth.count();
     const totalRows = await siswaAuth.count({
@@ -178,7 +178,7 @@ export const getSiswa = async (req, res) => {
       limit: limit,
       offset: offside,
       order: [["id", "DESC"]],
-      include: [{ model: jurusan }],
+      include: [{model: jurusan}],
     });
 
     const response = {
@@ -197,7 +197,7 @@ export const getSiswa = async (req, res) => {
 export const getSiswaById = async (req, res) => {
   try {
     const response = await siswaAuth.findOne({
-      include: [{ model: jurusan }],
+      include: [{model: jurusan}],
       where: {
         id: req.params.id,
       },
@@ -209,8 +209,8 @@ export const getSiswaById = async (req, res) => {
 };
 export const importAccount = async (req, res) => {
   const currentYear = new Date().getFullYear();
-  const listSiswa = await siswaAuth.findAll({ raw: true });
-  const listJurusan = await jurusan.findAll({ raw: true });
+  const listSiswa = await siswaAuth.findAll({raw: true});
+  const listJurusan = await jurusan.findAll({raw: true});
   const response = await tagihanFix.findAll({
     raw: true,
     where: {
@@ -230,7 +230,7 @@ export const importAccount = async (req, res) => {
     let injectDataToDB = [];
     let duplicateSameUserName = [];
     let isNoData = false;
-    const { Workbook } = exeljs;
+    const {Workbook} = exeljs;
     const wb = new Workbook();
     await wb.xlsx
       .readFile("./Assets/upload/" + req.file.filename)
@@ -304,13 +304,8 @@ export const importAccount = async (req, res) => {
                     .getColumn(indexColumn)
                     .values[indexRow].toUpperCase()
               );
-              if (
-                !jurusanNotValid &&
-                Boolean(
-                  workSheet.getColumn(indexColumn).values[indexRow] !==
-                    "kode_jurusan"
-                )
-              ) {
+              console.log(jurusanNotValid, "<=======");
+              if (!jurusanNotValid) {
                 errorInjectJurusanToDB.push({
                   row: workSheet.getColumn(indexColumn).letter,
                   column: indexRow,
@@ -355,7 +350,7 @@ export const importAccount = async (req, res) => {
     if (Boolean(errorValidation.length)) {
       res
         .status(406)
-        .json({ code: "error_validation", message: errorValidation });
+        .json({code: "error_validation", message: errorValidation});
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
         console.log(error);
       });
@@ -416,7 +411,7 @@ export const importAccount = async (req, res) => {
         }
       });
     await siswaAuth.bulkCreate(injectDataToDB);
-    res.status(200).json({ massega: "Berhasil mengimport siswa" });
+    res.status(200).json({massega: "Berhasil mengimport siswa"});
   } catch (error) {
     console.log(error);
     res.status(406).json({
@@ -436,15 +431,15 @@ export const getSiswaProfile = async (req, res) => {
   );
   try {
     const response = await siswaAuth.findOne({
-      attributes: { exclude: ["password", "username"] },
-      include: [{ model: jurusan }],
+      attributes: {exclude: ["password", "username"]},
+      include: [{model: jurusan}],
       where: {
         id: decodedTokenFromClient.idSiswa,
       },
     });
     const toStringify = JSON.stringify(response);
     const toParse = JSON.parse(toStringify);
-    res.json({ ...toParse, username: decodedTokenFromClient.username });
+    res.json({...toParse, username: decodedTokenFromClient.username});
   } catch (error) {
     console.log(error);
   }
@@ -468,7 +463,7 @@ export const siswaRegister = async (req, res) => {
     angkatan,
   } = req.body;
   if (username === "" || password === "")
-    return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
+    return res.status(403).json({msg: "Form tidak boleh ada yang kosong"});
   try {
     const length = await siswaAuth.findAndCountAll({
       where: {
@@ -506,11 +501,11 @@ export const siswaRegister = async (req, res) => {
         ),
       });
     }
-    res.status(201).json({ msg: "Pendaftaran berhasil" });
+    res.status(201).json({msg: "Pendaftaran berhasil"});
   } catch (error) {
     console.log(error);
     if (error.name.includes("SequelizeUniqueConstraintError"))
-      return res.status(403).json({ msg: "Username sudah terdaftar" });
+      return res.status(403).json({msg: "Username sudah terdaftar"});
   }
 };
 
@@ -533,7 +528,7 @@ export const siswaLogin = async (req, res) => {
       },
     });
     if (!findSiswa[0].password.includes(req.body.password))
-      return res.status(400).json({ msg: "Periksa password anda" });
+      return res.status(400).json({msg: "Periksa password anda"});
 
     const findJurusan = await jurusan.findOne({
       where: {
@@ -543,7 +538,7 @@ export const siswaLogin = async (req, res) => {
     if (!findJurusan)
       return res
         .status(404)
-        .json({ msg: "Error 500. JurusanId tidak ditemukan" });
+        .json({msg: "Error 500. JurusanId tidak ditemukan"});
     const idSiswa = findSiswa[0].id;
     const namaSiswa = findSiswa[0].name;
     const username = findSiswa[0].username;
@@ -558,10 +553,10 @@ export const siswaLogin = async (req, res) => {
         expiresIn: "7d",
       }
     );
-    res.json({ msg: "Login berhasil", accessToken });
+    res.json({msg: "Login berhasil", accessToken});
   } catch (error) {
     console.log(error);
-    res.status(404).json({ msg: "Akun tidak ditemukan!" });
+    res.status(404).json({msg: "Akun tidak ditemukan!"});
   }
 };
 
@@ -572,9 +567,9 @@ export const siswaUpdate = async (req, res) => {
         id: req.params.id,
       },
     });
-    res.status(200).json({ msg: "Siswa berhasil diupdate" });
+    res.status(200).json({msg: "Siswa berhasil diupdate"});
   } catch (error) {
-    res.status(403).json({ msg: "Internal server error !" });
+    res.status(403).json({msg: "Internal server error !"});
   }
 };
 export const bulkStatusKelasSiswa = async (req, res) => {
@@ -602,13 +597,13 @@ export const bulkStatusKelasSiswa = async (req, res) => {
     if (Boolean(errorInject))
       return res
         .status(406)
-        .json({ msg: "Update Error", message: listErrorInject });
+        .json({msg: "Update Error", message: listErrorInject});
     res.status(200).json({
       msg: `${req.body.users.length} Siswa berhasil diupdate`,
       message: req.body.users,
     });
   } catch (error) {
-    res.status(500).json({ msg: "Server Error", reason: error });
+    res.status(500).json({msg: "Server Error", reason: error});
   }
 };
 export const bulkStatusSiswaUpdate = async (req, res) => {
@@ -634,12 +629,12 @@ export const bulkStatusSiswaUpdate = async (req, res) => {
     if (Boolean(errorInject))
       return res
         .status(406)
-        .json({ msg: "Update Error", message: listErrorInject });
+        .json({msg: "Update Error", message: listErrorInject});
     res.status(200).json({
       msg: `${req.body.users.length} Siswa berhasil diupdate`,
       message: req.body.users,
     });
   } catch (error) {
-    res.status(500).json({ msg: "Server Error", reason: error });
+    res.status(500).json({msg: "Server Error", reason: error});
   }
 };
