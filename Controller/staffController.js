@@ -1,10 +1,10 @@
-import { stafAuth } from "../Models/staf.js";
+import {stafAuth} from "../Models/staf.js";
 import bcrypt from "bcrypt";
-import { invoice } from "../Models/invoice.js";
+import {invoice} from "../Models/invoice.js";
 import jwt from "jsonwebtoken";
 import moment from "moment/moment.js";
-import { Op } from "sequelize";
-import { tagihanFix } from "../Models/tagihanFix.js";
+import {tagihanFix} from "../Models/tagihanFix.js";
+import {Op} from "sequelize";
 import {
   getTotalTagihan,
   getUserInfoToken,
@@ -115,12 +115,12 @@ export const dashboardStaffReport = async (req, res) => {
   }
 };
 export const getStaff = async (req, res) => {
-  const { roleStaff } =
+  const {roleStaff} =
     getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
   if (roleStaff !== "DEV")
     return res
       .status(403)
-      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
+      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
   const page = parseInt(req.query.page) - 1 || 0;
   const limit = parseInt(req.query.limit) || 10;
   const search = req.query.search || "";
@@ -160,7 +160,7 @@ export const getStaff = async (req, res) => {
           [Op.not]: "DEV",
         },
       },
-      attributes: { exclude: ["password"] },
+      attributes: {exclude: ["password"]},
       limit,
       offside,
       order: [["id", "DESC"]],
@@ -184,7 +184,7 @@ export const getStaffProfile = async (req, res) => {
   );
   try {
     const response = await stafAuth.findOne({
-      attributes: { exclude: ["password"] },
+      attributes: {exclude: ["password"]},
       where: {
         id: decodedTokenFromClient.idStaff,
       },
@@ -195,40 +195,49 @@ export const getStaffProfile = async (req, res) => {
   }
 };
 export const staffProfileUpdate = async (req, res) => {
-  const { role, permissions } = req.body;
   try {
+    const {role, permissions} = req.body;
     await stafAuth.update(
-      { role, permissions },
+      {role, permissions},
       {
         where: {
           id: req.params.id,
         },
       }
     );
-    res.status(200).json({ msg: "Staff berhasil diupdate" });
+    res.status(200).json({msg: "Staff berhasil diupdate"});
   } catch (error) {
     console.log(error);
   }
 };
 
 export const staffRegister = async (req, res) => {
-  const { nama, username, password, noHP, role } = req.body;
-  if (username === "" || password === "")
-    return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
-  const salt = await bcrypt.genSalt();
-  const securePassword = await bcrypt.hash(password, salt);
-  //   const EncryptNISN = CryptoJS.AES.encrypt(
-  //     nisn,
-  //     process.env.SECRET_ENCRYPT
-  //   ).toString();
   try {
+    const {nama, username, password, noHP, role} = req.body;
+    if (username?.includes(" ")) {
+      return res
+        .status(404)
+        .json({msg: "Username / email tidak boleh ada spasi"});
+    }
+    if (username === "" || password === "")
+      return res.status(403).json({msg: "Form tidak boleh ada yang kosong"});
+    if (password?.length < 6)
+      return res
+        .status(403)
+        .json({msg: "Password setidaknya lebih atau sama dengan 6 karakter"});
+    const salt = await bcrypt.genSalt();
+    const securePassword = await bcrypt.hash(password, salt);
+    //   const EncryptNISN = CryptoJS.AES.encrypt(
+    //     nisn,
+    //     process.env.SECRET_ENCRYPT
+    //   ).toString();
     const uniqueUsername = await stafAuth.findOne({
       where: {
         username: req.body.username,
       },
     });
     if (uniqueUsername)
-      return res.status(403).json({ msg: "Username / email sudah terdaftar" });
+      return res.status(403).json({msg: "Username / email sudah terdaftar"});
 
     await stafAuth.create({
       nama: nama,
@@ -237,11 +246,11 @@ export const staffRegister = async (req, res) => {
       noHP: noHP,
       role: role,
     });
-    res.status(201).json({ msg: "Pendaftaran berhasil" });
+    res.status(201).json({msg: "Pendaftaran berhasil"});
   } catch (error) {
     console.log(error);
     if (error.name.includes("SequelizeUniqueConstraintError"))
-      return res.status(403).json({ msg: "Username sudah terdaftar" });
+      return res.status(403).json({msg: "Username sudah terdaftar"});
   }
 };
 
@@ -257,7 +266,7 @@ export const staffLogin = async (req, res) => {
       staff[0].password
     );
     if (!isMatchPassword)
-      return res.status(400).json({ msg: "Periksa password anda" });
+      return res.status(400).json({msg: "Periksa password anda"});
     const idStaff = staff[0].id;
     const namaStaff = staff[0].nama;
     const usernameStaff = staff[0].username;
@@ -274,9 +283,9 @@ export const staffLogin = async (req, res) => {
         expiresIn: "7d",
       }
     );
-    res.json({ msg: "Login berhasil", accessToken });
+    res.json({msg: "Login berhasil", accessToken});
   } catch (error) {
     console.log(error);
-    res.status(404).json({ msg: "Akun tidak ditemukan" });
+    res.status(404).json({msg: "Akun tidak ditemukan"});
   }
 };

@@ -1,10 +1,10 @@
-import { siswaAuth } from "../Models/siswa.js";
-import { jurusan } from "../Models/jurusan.js";
+import {siswaAuth} from "../Models/siswa.js";
+import {jurusan} from "../Models/jurusan.js";
 import jwt from "jsonwebtoken";
-import { Op } from "sequelize";
+import {Op} from "sequelize";
 import exeljs from "exceljs";
 import fs from "fs/promises";
-import { tagihanFix } from "../Models/tagihanFix.js";
+import {tagihanFix} from "../Models/tagihanFix.js";
 import {
   getUserInfoToken,
   permissionAccess,
@@ -30,7 +30,7 @@ export const getSiswa = async (req, res) => {
   if (isNotAccess)
     return res
       .status(403)
-      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
+      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
   try {
     const totalData = await siswaAuth.count();
     const totalRows = await siswaAuth.count({
@@ -178,7 +178,7 @@ export const getSiswa = async (req, res) => {
       limit: limit,
       offset: offside,
       order: [["id", "DESC"]],
-      include: [{ model: jurusan }],
+      include: [{model: jurusan}],
     });
 
     const response = {
@@ -197,7 +197,7 @@ export const getSiswa = async (req, res) => {
 export const getSiswaById = async (req, res) => {
   try {
     const response = await siswaAuth.findOne({
-      include: [{ model: jurusan }],
+      include: [{model: jurusan}],
       where: {
         id: req.params.id,
       },
@@ -207,10 +207,42 @@ export const getSiswaById = async (req, res) => {
     console.log(error);
   }
 };
+
+const findDuplicateUsername = (listSiswa, username) => {
+  let result = false;
+  for (let index = 0; index < listSiswa.length; index++) {
+    const element = listSiswa[index];
+    if (String(element?.username) === String(username)) {
+      result = element?.username;
+      break;
+    }
+  }
+  return result;
+};
+const findDuplicateKodeSiswa = (listSiswa, kode_siswa) => {
+  let result = false;
+  for (let index = 0; index < listSiswa.length; index++) {
+    const element = listSiswa[index];
+    if (String(element?.kode_siswa) === String(kode_siswa)) {
+      result = element?.kode_siswa;
+      break;
+    }
+  }
+  return result;
+};
+
+const isEmpty = (text) => {
+  return !Boolean(String(text).match(/\S/g));
+};
+
+const isOnlyWhiteSpace = (text) => {
+  return isEmpty(text) && String(text) !== "";
+};
+
 export const importAccount = async (req, res) => {
   const currentYear = new Date().getFullYear();
-  const listSiswa = await siswaAuth.findAll({ raw: true });
-  const listJurusan = await jurusan.findAll({ raw: true });
+  const listSiswa = await siswaAuth.findAll({raw: true});
+  const listJurusan = await jurusan.findAll({raw: true});
   const response = await tagihanFix.findAll({
     raw: true,
     where: {
@@ -225,207 +257,179 @@ export const importAccount = async (req, res) => {
   try {
     /// https://github.com/exceljs/exceljs/issues/960#issuecomment-1698549072
     let errorValidation = [];
-    let errorInjectUsernameToDB = [];
-    let errorInjectJurusanToDB = [];
+    let duplicateName = {};
     let injectDataToDB = [];
-    let duplicateSameUserName = [];
-    let isNoData = false;
-    const { Workbook } = exeljs;
+    const sub_kelas_option = {
+      1: true,
+      2: true,
+      3: true,
+      4: true,
+      5: true,
+      6: true,
+    };
+    const kelas_option = {10: true, 11: true, 12: true};
+    const gender_option = {P: true, L: true};
+    const {Workbook} = exeljs;
     const wb = new Workbook();
-    await wb.xlsx
-      .readFile("./Assets/upload/" + req.file.filename)
-      .then((res) => {
-        const workSheet = wb.getWorksheet();
-        const totalColumn = workSheet.actualColumnCount;
-        const totalRow = workSheet.actualRowCount;
-        if (totalRow === 1) {
-          isNoData = true;
+    let isEmptyData = false;
+
+    await wb.xlsx.readFile("./Assets/upload/" + req.file.filename).then(() => {
+      const workSheet = wb.getWorksheet();
+      const totalRow = workSheet.actualRowCount;
+      if (totalRow === 1) {
+        isEmptyData = true;
+      }
+
+      for (let rowIndex = 2; rowIndex < totalRow + 1; rowIndex += 1) {
+        const name = workSheet.getRow(rowIndex).values[1];
+        const username = workSheet.getRow(rowIndex).values[2];
+        const password = workSheet.getRow(rowIndex).values[3];
+        const jurusan = workSheet.getRow(rowIndex).values[4];
+        const sub_kelas = workSheet.getRow(rowIndex).values[5];
+        const kelas = workSheet.getRow(rowIndex).values[6];
+        const kode_siswa = workSheet.getRow(rowIndex).values[7];
+        const noHP = workSheet.getRow(rowIndex).values[8];
+        const addressSiswa = workSheet.getRow(rowIndex).values[9];
+        const fatherName = workSheet.getRow(rowIndex).values[10];
+        const motherName = workSheet.getRow(rowIndex).values[11];
+        const gender = workSheet.getRow(rowIndex).values[12];
+        if (duplicateName[`${name}_${kelas}_${sub_kelas}`]) {
+          errorValidation.push(
+            `Terdapat nama yang duplikat berdasarkan kelas dan sub kelas`
+          );
+        } else {
+          duplicateName[`${name}_${kelas}_${sub_kelas}`] = true;
         }
-        for (
-          let indexColumn = 1;
-          indexColumn < totalColumn + 1;
-          indexColumn++
+        /// CELL MANDATORY
+        if (
+          isEmpty(name) ||
+          isEmpty(username) ||
+          isEmpty(password) ||
+          isEmpty(jurusan) ||
+          isEmpty(sub_kelas) ||
+          isEmpty(kelas) ||
+          isEmpty(kode_siswa)
         ) {
-          for (let indexRow = 1; indexRow < totalRow + 1; indexRow++) {
-            if (
-              workSheet.getColumn(indexColumn).letter === "A" ||
-              workSheet.getColumn(indexColumn).letter === "B" ||
-              workSheet.getColumn(indexColumn).letter === "C" ||
-              workSheet.getColumn(indexColumn).letter === "D" ||
-              workSheet.getColumn(indexColumn).letter === "E" ||
-              workSheet.getColumn(indexColumn).letter === "F" ||
-              workSheet.getColumn(indexColumn).letter === "G"
-            ) {
-              if (
-                workSheet
-                  .getColumn(indexColumn)
-                  .values.indexOf(
-                    workSheet.getColumn(indexColumn).values[indexRow]
-                  ) === -1
-              ) {
-                errorValidation.push({
-                  column: indexRow,
-                  row: workSheet.getColumn(indexColumn).letter,
-                });
-              }
-            }
-            /// VALIDATION USER NAME
-            if (workSheet.getColumn(indexColumn).letter === "B") {
-              if (indexRow !== 1) {
-                duplicateSameUserName.push(
-                  workSheet.getColumn(indexColumn).values[indexRow]
-                );
-              }
-              const isAlreadyExistAccount = listSiswa.find(
-                (username) =>
-                  username.username ===
-                  workSheet.getColumn(indexColumn).values[indexRow].toString()
-              );
-              if (
-                isAlreadyExistAccount &&
-                Boolean(
-                  workSheet.getColumn(indexColumn).values[indexRow] !==
-                    "username"
-                )
-              ) {
-                errorInjectUsernameToDB.push({
-                  row: workSheet.getColumn(indexColumn).letter,
-                  column: indexRow,
-                  username: isAlreadyExistAccount.username,
-                  reason: "Already exist",
-                });
-              }
-            }
-            if (workSheet.getColumn(indexColumn).letter === "D") {
-              const jurusanNotValid = listJurusan.find(
-                (jurusan) =>
-                  jurusan.kode_jurusan ===
-                  workSheet
-                    .getColumn(indexColumn)
-                    .values[indexRow].toUpperCase()
-              );
-              if (
-                !jurusanNotValid &&
-                Boolean(
-                  workSheet.getColumn(indexColumn).values[indexRow] !==
-                    "kode_jurusan"
-                )
-              ) {
-                errorInjectJurusanToDB.push({
-                  row: workSheet.getColumn(indexColumn).letter,
-                  column: indexRow,
-                  kode_jurusan:
-                    workSheet.getColumn(indexColumn).values[indexRow],
-                  reason: "Jurusan tidak valid",
-                });
-              }
-            }
-          }
+          errorValidation.push(`Kolom yang memiliki warna merah wajib diisi`);
         }
-      });
-    /// https://stackoverflow.com/a/49215411/18038473
-    let findDuplicate = [
-      ...new Set(
-        duplicateSameUserName.filter(
-          (item, index) => duplicateSameUserName.indexOf(item) !== index
-        )
-      ),
-    ];
-    if (Boolean(findDuplicate.length)) {
-      res.status(406).json({
-        code: "error_validation_no_data",
-        message: `Gagal upload file. Username harus unique/berbeda. Username ${findDuplicate.join()} telah banyak digunakan, coba ganti yang lainnya`,
-      });
+        /// VALIDATION TO MANY WHITE SPACE
+        if (
+          isOnlyWhiteSpace(noHP) ||
+          isOnlyWhiteSpace(addressSiswa) ||
+          isOnlyWhiteSpace(fatherName) ||
+          isOnlyWhiteSpace(motherName) ||
+          isOnlyWhiteSpace(gender)
+        ) {
+          errorValidation.push(`Tidak boleh terisi hanya spasi`);
+        }
+        /// SUB KELAS VALIDATION
+        if (!sub_kelas_option[sub_kelas]) {
+          errorValidation.push(
+            `Baris ${rowIndex} kolom sub kelas tidak valid, pilih antara 1 - 6`
+          );
+        }
+        /// KELAS VALIDATION
+        if (!kelas_option[kelas]) {
+          errorValidation.push(
+            `Baris ${rowIndex} kolom kelas tidak valid, pilih antara 10 - 12`
+          );
+        }
+        /// MAJOR VALIDATION
+        const matchMajor = listJurusan.find(
+          (item) => item?.kode_jurusan === jurusan
+        );
+        if (!matchMajor) {
+          errorValidation.push(
+            `Baris ${rowIndex} kolom jurusan tidak valid, pilih sesuai option yang ada. (${listJurusan
+              ?.map((item) => item?.kode_jurusan)
+              ?.join(", ")})`
+          );
+        }
+        /// DUPLICATE USERNAME
+        const duplicateUsername = findDuplicateUsername(listSiswa, username);
+        if (duplicateUsername) {
+          errorValidation.push(
+            `Baris ${rowIndex} username sudah terdaftar, gunakan yang lain.`
+          );
+        }
+        /// DUPLICATE KODESISWA
+        const duplicateKodeSiswa = findDuplicateKodeSiswa(
+          listSiswa,
+          kode_siswa
+        );
+        if (duplicateKodeSiswa) {
+          errorValidation.push(
+            `Baris ${rowIndex} kode siswa sudah terdaftar, gunakan yang lain.`
+          );
+        }
+        /// GENDER VALIDATION
+        if (gender && !gender_option[gender]) {
+          errorValidation.push(
+            `Baris ${rowIndex}, pilihan jenis kelamin hanya P (Perempuan), L (Laki Laki)`
+          );
+        }
+        /// PHONE VALIDATION
+        if (
+          (noHP && String(noHP)?.length >= 12) ||
+          (noHP && String(noHP)?.length <= 8)
+        ) {
+          errorValidation.push(
+            `Baris ${rowIndex}, No HP tidak valid, max digit 12 min digit 8`
+          );
+        }
+        injectDataToDB.push({
+          nama: name,
+          username,
+          password,
+          jurusanId: matchMajor?.id,
+          sub_kelas,
+          kelas,
+          kode_siswa,
+          noHP,
+          alamat: addressSiswa,
+          nama_ayah: fatherName,
+          nama_ibu: motherName,
+          gender,
+          current_bill: total,
+          status_bill: "not_paid_yet",
+          angkatan: currentYear,
+          status: "accepted",
+        });
+      }
+    });
+    if (isEmptyData) {
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
         console.log(error);
       });
-      return;
-    }
-    if (Boolean(isNoData)) {
-      res.status(406).json({
-        code: "error_validation_no_data",
-        message: "File tidak boleh kosong! setidaknya masukan 1 baris data!",
+      return res.status(406).json({
+        code: "error_validation",
+        message: ["File tidak boleh kosong! setidaknya masukan 1 baris data!"],
       });
-      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
-        console.log(error);
-      });
-      return;
     }
-
     if (Boolean(errorValidation.length)) {
-      res
+      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+        console.log(error);
+      });
+      return res
         .status(406)
-        .json({ code: "error_validation", message: errorValidation });
+        .json({code: "error_validation", message: errorValidation});
+    }
+    duplicateName = {};
+    await siswaAuth.bulkCreate(injectDataToDB).then(() => {
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
         console.log(error);
       });
-      return;
-    }
-    if (Boolean(errorInjectUsernameToDB.length)) {
-      res.status(406).json({
-        code: "error_inject_username",
-        message: errorInjectUsernameToDB,
-      });
-      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
-        console.log(error);
-      });
-      return;
-    }
-    if (Boolean(errorInjectJurusanToDB.length)) {
-      res.status(406).json({
-        code: "error_inject_jurusan",
-        message: errorInjectJurusanToDB,
-      });
-      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
-        console.log(error);
-      });
-      return;
-    }
-
-    await wb.xlsx
-      .readFile("./Assets/upload/" + req.file.filename)
-      .then((res) => {
-        const workSheet = wb.getWorksheet();
-        const totalRow = workSheet.actualRowCount;
-        for (let indexColumn = 1; indexColumn < totalRow + 1; indexColumn++) {
-          if (indexColumn !== 1) {
-            injectDataToDB.push({
-              nama: workSheet.getRow(indexColumn).values[1],
-              username: workSheet.getRow(indexColumn).values[2],
-              password: workSheet.getRow(indexColumn).values[3],
-              jurusanId: listJurusan.find(
-                (item) =>
-                  item.kode_jurusan ===
-                  workSheet.getRow(indexColumn).values[4].toUpperCase()
-              ).id,
-              sub_kelas:
-                workSheet.getRow(indexColumn).values[5].toString() || 1,
-              kelas: workSheet.getRow(indexColumn).values[6].toString() || 10,
-              kode_siswa: workSheet.getRow(indexColumn).values[7],
-              noHP: workSheet.getRow(indexColumn).values[8] || "",
-              alamat: workSheet.getRow(indexColumn).values[9] || "",
-              nama_ayah: workSheet.getRow(indexColumn).values[10] || "",
-              nama_ibu: workSheet.getRow(indexColumn).values[11] || "",
-              gender: workSheet.getRow(indexColumn).values[12] || "",
-              current_bill: total,
-              status_bill: "not_paid_yet",
-              angkatan: currentYear,
-              status: "accepted",
-            });
-          }
-        }
-      });
-    await siswaAuth.bulkCreate(injectDataToDB);
-    res.status(200).json({ massega: "Berhasil mengimport siswa" });
+    });
+    return res.status(200).json({message: "Berhasil mengimport siswa"});
   } catch (error) {
     console.log(error);
-    res.status(406).json({
+    fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+      console.log(error);
+    });
+    return res.status(406).json({
       message:
         "Internal server error periksa file anda dan pastikan list username dan kode siswa harus uniq/berbeda",
       code: "server",
-    });
-    fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
-      console.log(error);
     });
   }
 };
@@ -436,15 +440,15 @@ export const getSiswaProfile = async (req, res) => {
   );
   try {
     const response = await siswaAuth.findOne({
-      attributes: { exclude: ["password", "username"] },
-      include: [{ model: jurusan }],
+      attributes: {exclude: ["password", "username"]},
+      include: [{model: jurusan}],
       where: {
         id: decodedTokenFromClient.idSiswa,
       },
     });
     const toStringify = JSON.stringify(response);
     const toParse = JSON.parse(toStringify);
-    res.json({ ...toParse, username: decodedTokenFromClient.username });
+    res.json({...toParse, username: decodedTokenFromClient.username});
   } catch (error) {
     console.log(error);
   }
@@ -468,7 +472,7 @@ export const siswaRegister = async (req, res) => {
     angkatan,
   } = req.body;
   if (username === "" || password === "")
-    return res.status(403).json({ msg: "Form tidak boleh ada yang kosong" });
+    return res.status(403).json({msg: "Form tidak boleh ada yang kosong"});
   try {
     const length = await siswaAuth.findAndCountAll({
       where: {
@@ -506,11 +510,11 @@ export const siswaRegister = async (req, res) => {
         ),
       });
     }
-    res.status(201).json({ msg: "Pendaftaran berhasil" });
+    res.status(201).json({msg: "Pendaftaran berhasil"});
   } catch (error) {
     console.log(error);
     if (error.name.includes("SequelizeUniqueConstraintError"))
-      return res.status(403).json({ msg: "Username sudah terdaftar" });
+      return res.status(403).json({msg: "Username sudah terdaftar"});
   }
 };
 
@@ -533,7 +537,7 @@ export const siswaLogin = async (req, res) => {
       },
     });
     if (!findSiswa[0].password.includes(req.body.password))
-      return res.status(400).json({ msg: "Periksa password anda" });
+      return res.status(400).json({msg: "Periksa password anda"});
 
     const findJurusan = await jurusan.findOne({
       where: {
@@ -543,7 +547,7 @@ export const siswaLogin = async (req, res) => {
     if (!findJurusan)
       return res
         .status(404)
-        .json({ msg: "Error 500. JurusanId tidak ditemukan" });
+        .json({msg: "Error 500. JurusanId tidak ditemukan"});
     const idSiswa = findSiswa[0].id;
     const namaSiswa = findSiswa[0].name;
     const username = findSiswa[0].username;
@@ -558,10 +562,10 @@ export const siswaLogin = async (req, res) => {
         expiresIn: "7d",
       }
     );
-    res.json({ msg: "Login berhasil", accessToken });
+    res.json({msg: "Login berhasil", accessToken});
   } catch (error) {
     console.log(error);
-    res.status(404).json({ msg: "Akun tidak ditemukan!" });
+    res.status(404).json({msg: "Akun tidak ditemukan!"});
   }
 };
 
@@ -572,9 +576,9 @@ export const siswaUpdate = async (req, res) => {
         id: req.params.id,
       },
     });
-    res.status(200).json({ msg: "Siswa berhasil diupdate" });
+    res.status(200).json({msg: "Siswa berhasil diupdate"});
   } catch (error) {
-    res.status(403).json({ msg: "Internal server error !" });
+    res.status(403).json({msg: "Internal server error !"});
   }
 };
 export const bulkStatusKelasSiswa = async (req, res) => {
@@ -602,13 +606,13 @@ export const bulkStatusKelasSiswa = async (req, res) => {
     if (Boolean(errorInject))
       return res
         .status(406)
-        .json({ msg: "Update Error", message: listErrorInject });
+        .json({msg: "Update Error", message: listErrorInject});
     res.status(200).json({
       msg: `${req.body.users.length} Siswa berhasil diupdate`,
       message: req.body.users,
     });
   } catch (error) {
-    res.status(500).json({ msg: "Server Error", reason: error });
+    res.status(500).json({msg: "Server Error", reason: error});
   }
 };
 export const bulkStatusSiswaUpdate = async (req, res) => {
@@ -634,12 +638,12 @@ export const bulkStatusSiswaUpdate = async (req, res) => {
     if (Boolean(errorInject))
       return res
         .status(406)
-        .json({ msg: "Update Error", message: listErrorInject });
+        .json({msg: "Update Error", message: listErrorInject});
     res.status(200).json({
       msg: `${req.body.users.length} Siswa berhasil diupdate`,
       message: req.body.users,
     });
   } catch (error) {
-    res.status(500).json({ msg: "Server Error", reason: error });
+    res.status(500).json({msg: "Server Error", reason: error});
   }
 };

@@ -1,9 +1,18 @@
-import { Sequelize } from "sequelize";
+import {Sequelize} from "sequelize";
+import dotEnv from "dotenv";
 
-const database = new Sequelize("smk_kras", "root", "", {
-  host: "localhost",
-  dialect: "mysql",
-  timezone: "+07:00",
-});
+dotEnv.config();
+
+const database = new Sequelize(
+  process.env.DB_NAME,
+  "root",
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: "mysql",
+    timezone: "+07:00",
+    logging: false,
+  }
+);
 
 export default database;
