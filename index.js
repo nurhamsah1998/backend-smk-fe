@@ -3,7 +3,6 @@ import router from "./Routes/router.js";
 import database from "./Configuration/database.js";
 import dotEnv from "dotenv";
 import cors from "cors";
-import {invoiceOut} from "./Models/invoiceOut.js";
 
 dotEnv.config();
 const app = express();

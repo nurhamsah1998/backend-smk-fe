@@ -1,11 +1,11 @@
-import { siswaAuth } from "../Models/siswa.js";
-import { tagihanFix } from "../Models/tagihanFix.js";
+import {siswaAuth} from "../Models/siswa.js";
+import {tagihanFix} from "../Models/tagihanFix.js";
 import {
   getUserInfoToken,
   permissionAccess,
   recordActivity,
 } from "../Configuration/supportFunction.js";
-import { Op } from "sequelize";
+import {Op} from "sequelize";
 
 export const getTagihanFix = async (req, res) => {
   const isNotAccess = await permissionAccess({
@@ -15,7 +15,7 @@ export const getTagihanFix = async (req, res) => {
   if (isNotAccess)
     return res
       .status(403)
-      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
+      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
   const limit = parseInt(req.query.limit) || 3;
   const page = parseInt(req.query.page) - 1 || 0;
   try {
@@ -63,11 +63,26 @@ export const getTotalTagihanFix = async (req, res) => {
     console.log(error);
   }
 };
-export const getTagihanFixForStudent = async (req, res) => {
+export const getTagihanFixForTU = async (req, res) => {
   try {
     const response = await tagihanFix.findAll({
       where: {
         tahun_angkatan: req.query.tahun_angkatan,
+      },
+    });
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const getTagihanFixForStudent = async (req, res) => {
+  try {
+    const {angkatan} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    const response = await tagihanFix.findAll({
+      where: {
+        tahun_angkatan: angkatan,
       },
     });
 
@@ -132,10 +147,10 @@ export const updateTagihanFix = async (req, res) => {
   if (isNotAccess)
     return res
       .status(403)
-      .json({ msg: "Perubahan Ditolak, Anda tidak memiliki akses!" });
+      .json({msg: "Perubahan Ditolak, Anda tidak memiliki akses!"});
   try {
     await siswaAuth.increment(
-      { current_bill: req.body.extra.freq_bill },
+      {current_bill: req.body.extra.freq_bill},
       {
         where: {
           angkatan: req.body.tahun_angkatan,
@@ -159,7 +174,7 @@ export const updateTagihanFix = async (req, res) => {
       });
     }
 
-    res.status(200).json({ msg: "Tagihan berhasil diubah" });
+    res.status(200).json({msg: "Tagihan berhasil diubah"});
   } catch (error) {
     console.log(error);
   }
@@ -184,7 +199,7 @@ export const createTagihanFix = async (req, res) => {
       ),
       data: body,
     });
-    res.status(200).json({ msg: "Berhasil membuat tagihan baru" });
+    res.status(200).json({msg: "Berhasil membuat tagihan baru"});
   } catch (error) {
     console.log(error);
   }

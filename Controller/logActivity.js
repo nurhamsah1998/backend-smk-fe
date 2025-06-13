@@ -1,15 +1,15 @@
-import { logActivity } from "../Models/logActivity.js";
+import {logActivity} from "../Models/logActivity.js";
 import moment from "moment";
-import { Op } from "sequelize";
-import { getUserInfoToken } from "../Configuration/supportFunction.js";
+import {Op} from "sequelize";
+import {getUserInfoToken} from "../Configuration/supportFunction.js";
 
 export const getActivity = async (req, res) => {
-  const { roleStaff } =
+  const {roleStaff} =
     getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
   if (roleStaff !== "DEV")
     return res
       .status(403)
-      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
+      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
   const page = parseInt(req.query.page) - 1 || 0;
   const limit = parseInt(req.query.limit) || 10;
   const startDate = req.query.startDate;
@@ -22,17 +22,17 @@ export const getActivity = async (req, res) => {
           createdAt: {
             [Op.between]: [
               /// https://stackoverflow.com/a/12970385/18038473
-              moment(startDate).startOf("day").format("YYYY-MM-DD H:mm:ss"),
-              moment(endDate).endOf("day").format("YYYY-MM-DD H:mm:ss"),
+              moment(startDate).startOf("day").toISOString(),
+              moment(endDate).endOf("day").toISOString(),
             ],
           },
         }
       : {};
-    const totalRows = await logActivity.count({ where: { ...whereCondition } });
+    const totalRows = await logActivity.count({where: {...whereCondition}});
     const totalData = await logActivity.count();
     const totalPage = Math.ceil(totalRows / limit);
     const logList = await logActivity.findAll({
-      where: { ...whereCondition },
+      where: {...whereCondition},
       raw: true,
       limit,
       offset: offside,

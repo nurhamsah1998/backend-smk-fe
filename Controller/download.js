@@ -9,8 +9,6 @@ import {FormatCurrency} from "../Configuration/supportFunction.js";
 import {uid} from "uid";
 import {invoiceOut} from "../Models/invoiceOut.js";
 
-moment.locale("id");
-
 export const downloadTemplateImportSiswa = async (req, res) => {
   try {
     /// HOW TO
@@ -273,8 +271,8 @@ export const downloadTransactionIn = async (req, res) => {
           createdAt: {
             [Op.between]: [
               /// https://stackoverflow.com/a/12970385/18038473
-              moment(startDate).startOf("day").format("YYYY-MM-DD H:mm:ss"),
-              moment(endDate).endOf("day").format("YYYY-MM-DD H:mm:ss"),
+              moment(startDate).startOf("day").toISOString(),
+              moment(endDate).endOf("day").toISOString(),
             ],
           },
         }
@@ -476,8 +474,8 @@ export const downloadTransactionOut = async (req, res) => {
           createdAt: {
             [Op.between]: [
               /// https://stackoverflow.com/a/12970385/18038473
-              moment(startDate).startOf("day").format("YYYY-MM-DD H:mm:ss"),
-              moment(endDate).endOf("day").format("YYYY-MM-DD H:mm:ss"),
+              moment(startDate).startOf("day").toISOString(),
+              moment(endDate).endOf("day").toISOString(),
             ],
           },
         }

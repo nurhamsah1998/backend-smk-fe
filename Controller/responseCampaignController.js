@@ -1,13 +1,14 @@
-import { Op } from "sequelize";
-import { getUserInfoToken } from "../Configuration/supportFunction.js";
-import { campaign } from "../Models/campaign.js";
-import { jurusan } from "../Models/jurusan.js";
-import { responseCampaign } from "../Models/responseCampaign.js";
-import { stafAuth } from "../Models/staf.js";
-import { siswaAuth } from "../Models/siswa.js";
+import {
+  getUserInfoToken,
+  recordActivity,
+} from "../Configuration/supportFunction.js";
+import {campaign} from "../Models/campaign.js";
+import {jurusan} from "../Models/jurusan.js";
+import {responseCampaign} from "../Models/responseCampaign.js";
+import {siswaAuth} from "../Models/siswa.js";
 
 export const postResponseCampaign = async (req, res) => {
-  const { text, campaign_id } = req.body;
+  const {text, campaign_id} = req.body;
   try {
     const responseProfile = getUserInfoToken(
       req.headers.authorization.replace("Bearer ", "")
@@ -28,16 +29,16 @@ export const postResponseCampaign = async (req, res) => {
     if (isAlreadyResponse)
       return res
         .status(406)
-        .json({ msg: "Tidak dapat mengirim respon, max 1 respon" });
+        .json({msg: "Tidak dapat mengirim respon, max 1 respon"});
     await responseCampaign.create({
       text,
       siswa_id: responseProfile.idSiswa,
       campaign_id,
     });
-    res.status(201).json({ msg: "Respon terkirim" });
+    res.status(201).json({msg: "Respon terkirim"});
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "Internal server error" });
+    res.status(500).json({msg: "Internal server error"});
   }
 };
 // export const patchResponseCampaign = async (req, res) => {
@@ -78,10 +79,10 @@ export const getResponseCampaign = async (req, res) => {
         },
       ],
     });
-    res.status(200).json({ data });
+    res.status(200).json({data});
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "Internal server error" });
+    res.status(500).json({msg: "Internal server error"});
   }
 };
 export const deleteResponseCampaign = async (req, res) => {
@@ -92,7 +93,7 @@ export const deleteResponseCampaign = async (req, res) => {
       },
     });
     if (!findResponseCampaign) {
-      return res.status(404).json({ msg: "Gagal menghapus respon pengumuman" });
+      return res.status(404).json({msg: "Gagal menghapus respon pengumuman"});
     }
 
     await responseCampaign.destroy({
@@ -100,9 +101,17 @@ export const deleteResponseCampaign = async (req, res) => {
         id: findResponseCampaign.id,
       },
     });
-    res.status(200).json({ msg: "Berhasil menghapus respon pengumuman" });
+
+    recordActivity({
+      action: `Menghapus respon pengumuman`,
+      author: getUserInfoToken(
+        req.headers.authorization.replace("Bearer ", "")
+      ),
+      data: findResponseCampaign,
+    });
+    res.status(200).json({msg: "Berhasil menghapus respon pengumuman"});
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "Internal server error" });
+    res.status(500).json({msg: "Internal server error"});
   }
 };
