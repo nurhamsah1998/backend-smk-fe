@@ -1,7 +1,7 @@
-import { Sequelize } from "sequelize";
+import {Sequelize} from "sequelize";
 import database from "../Configuration/database.js";
 
-const { DataTypes } = Sequelize;
+const {DataTypes} = Sequelize;
 
 export const jurusan = database.define(
   "jurusan",
@@ -13,9 +13,11 @@ export const jurusan = database.define(
     },
     nama: {
       type: DataTypes.STRING,
+      unique: true,
     },
     kode_jurusan: {
       type: DataTypes.STRING,
+      unique: true,
     },
   },
   {

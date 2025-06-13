@@ -1,5 +1,5 @@
-import { invoice } from "../Models/invoice.js";
-import { Op } from "sequelize";
+import {invoice} from "../Models/invoice.js";
+import {Op} from "sequelize";
 import moment from "moment";
 import {
   getUserInfoToken,
@@ -29,14 +29,14 @@ export const postInvoiceIn = async (req, res) => {
   if (isNotAccess)
     return res
       .status(400)
-      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
+      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
   const totalInvoice = await invoice.count({
     where: {
       createdAt: {
         [Op.between]: [
           /// https://stackoverflow.com/a/12970385/18038473
-          moment().startOf("day").format("YYYY-MM-DD H:mm:ss"),
-          moment().endOf("day").format("YYYY-MM-DD H:mm:ss"),
+          moment().startOf("day").toISOString(),
+          moment().endOf("day").toISOString(),
         ],
       },
     },
@@ -65,10 +65,10 @@ export const postInvoiceIn = async (req, res) => {
       ),
       data,
     });
-    res.status(201).json({ msg: "Transaksi berhasil", data: data });
+    res.status(201).json({msg: "Transaksi berhasil", data: data});
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "Internal server error" });
+    res.status(500).json({msg: "Internal server error"});
   }
 };
 
@@ -83,7 +83,23 @@ export const getInvoice = async (req, res) => {
     res.status(200).json(responseInvoice);
   } catch (error) {
     console.log(error);
-    res.status(404).json({ msg: "Internal server error" });
+    res.status(404).json({msg: "Internal server error"});
+  }
+};
+export const getInvoiceMe = async (req, res) => {
+  try {
+    const {kode_siswa} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    const responseInvoice = await invoice.findAll({
+      where: {
+        kode_tagihan: kode_siswa,
+      },
+      order: [["updatedAt", "DESC"]],
+    });
+    res.status(200).json(responseInvoice);
+  } catch (error) {
+    console.log(error);
+    res.status(404).json({msg: "Internal server error"});
   }
 };
 export const getAllInvoiceIn = async (req, res) => {
@@ -94,7 +110,7 @@ export const getAllInvoiceIn = async (req, res) => {
   if (isNotAccess)
     return res
       .status(403)
-      .json({ msg: "Akses Ditolak, Anda tidak memiliki akses!" });
+      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
 
   try {
     const page = parseInt(req.query.page) - 1 || 0;
@@ -112,8 +128,8 @@ export const getAllInvoiceIn = async (req, res) => {
           createdAt: {
             [Op.between]: [
               /// https://stackoverflow.com/a/12970385/18038473
-              moment(startDate).startOf("day").format("YYYY-MM-DD H:mm:ss"),
-              moment(endDate).endOf("day").format("YYYY-MM-DD H:mm:ss"),
+              moment(startDate).startOf("day").toISOString(),
+              moment(endDate).endOf("day").toISOString(),
             ],
           },
         }
@@ -166,7 +182,7 @@ export const getAllInvoiceIn = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(404).json({ msg: "Internal server error" });
+    res.status(404).json({msg: "Internal server error"});
   }
 };
 export const getTotalInvoiceIn = async (req, res) => {

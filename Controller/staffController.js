@@ -2,7 +2,7 @@ import {stafAuth} from "../Models/staf.js";
 import bcrypt from "bcrypt";
 import {invoice} from "../Models/invoice.js";
 import jwt from "jsonwebtoken";
-import moment from "moment/moment.js";
+import moment from "moment";
 import {tagihanFix} from "../Models/tagihanFix.js";
 import {Op} from "sequelize";
 import {
@@ -17,8 +17,8 @@ export const dashboardStaffReport = async (req, res) => {
         createdAt: {
           [Op.between]: [
             /// https://stackoverflow.com/a/12970385/18038473
-            moment().startOf("day").format("YYYY-MM-DD H:mm:ss"),
-            moment().endOf("day").format("YYYY-MM-DD H:mm:ss"),
+            moment().startOf("day").toISOString(),
+            moment().endOf("day").toISOString(),
           ],
         },
       },
@@ -28,8 +28,8 @@ export const dashboardStaffReport = async (req, res) => {
         createdAt: {
           [Op.between]: [
             /// https://stackoverflow.com/a/12970385/18038473
-            moment().startOf("month").format("YYYY-MM-DD H:mm:ss"),
-            moment().endOf("month").format("YYYY-MM-DD H:mm:ss"),
+            moment().startOf("month").toISOString(),
+            moment().endOf("month").toISOString(),
           ],
         },
       },
@@ -39,8 +39,8 @@ export const dashboardStaffReport = async (req, res) => {
         createdAt: {
           [Op.between]: [
             /// https://stackoverflow.com/a/12970385/18038473
-            moment().startOf("year").format("YYYY-MM-DD H:mm:ss"),
-            moment().endOf("year").format("YYYY-MM-DD H:mm:ss"),
+            moment().startOf("year").toISOString(),
+            moment().endOf("year").toISOString(),
           ],
         },
       },
@@ -50,8 +50,8 @@ export const dashboardStaffReport = async (req, res) => {
         createdAt: {
           [Op.between]: [
             /// https://stackoverflow.com/a/12970385/18038473
-            moment().startOf("day").format("YYYY-MM-DD H:mm:ss"),
-            moment().endOf("day").format("YYYY-MM-DD H:mm:ss"),
+            moment().startOf("day").toISOString(),
+            moment().endOf("day").toISOString(),
           ],
         },
       },
@@ -61,8 +61,8 @@ export const dashboardStaffReport = async (req, res) => {
         createdAt: {
           [Op.between]: [
             /// https://stackoverflow.com/a/12970385/18038473
-            moment().startOf("month").format("YYYY-MM-DD H:mm:ss"),
-            moment().endOf("month").format("YYYY-MM-DD H:mm:ss"),
+            moment().startOf("month").toISOString(),
+            moment().endOf("month").toISOString(),
           ],
         },
       },
@@ -72,8 +72,8 @@ export const dashboardStaffReport = async (req, res) => {
         createdAt: {
           [Op.between]: [
             /// https://stackoverflow.com/a/12970385/18038473
-            moment().startOf("year").format("YYYY-MM-DD H:mm:ss"),
-            moment().endOf("year").format("YYYY-MM-DD H:mm:ss"),
+            moment().startOf("year").toISOString(),
+            moment().endOf("year").toISOString(),
           ],
         },
       },
@@ -114,6 +114,7 @@ export const dashboardStaffReport = async (req, res) => {
     console.log(error);
   }
 };
+
 export const getStaff = async (req, res) => {
   const {roleStaff} =
     getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
@@ -213,7 +214,7 @@ export const staffProfileUpdate = async (req, res) => {
 
 export const staffRegister = async (req, res) => {
   try {
-    const {nama, username, password, noHP, role} = req.body;
+    const {nama, username, password, noHP} = req.body;
     if (username?.includes(" ")) {
       return res
         .status(404)
@@ -223,8 +224,17 @@ export const staffRegister = async (req, res) => {
       return res.status(403).json({msg: "Form tidak boleh ada yang kosong"});
     if (password?.length < 6)
       return res
-        .status(403)
+        .status(404)
         .json({msg: "Password setidaknya lebih atau sama dengan 6 karakter"});
+
+    if (
+      (noHP && String(noHP)?.length >= 12) ||
+      (noHP && String(noHP)?.length <= 8)
+    ) {
+      return res
+        .status(404)
+        .json({msg: "No HP tidak valid, max digit 12 min digit 8"});
+    }
     const salt = await bcrypt.genSalt();
     const securePassword = await bcrypt.hash(password, salt);
     //   const EncryptNISN = CryptoJS.AES.encrypt(
@@ -244,7 +254,6 @@ export const staffRegister = async (req, res) => {
       username: username,
       password: securePassword,
       noHP: noHP,
-      role: role,
     });
     res.status(201).json({msg: "Pendaftaran berhasil"});
   } catch (error) {

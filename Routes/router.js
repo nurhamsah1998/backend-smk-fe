@@ -7,6 +7,7 @@ import {
 import {
   getAllInvoiceIn,
   getInvoice,
+  getInvoiceMe,
 } from "../Controller/InvoiceInController.js";
 import {
   staffRegister,
@@ -16,7 +17,7 @@ import {
   dashboardStaffReport,
   staffProfileUpdate,
 } from "../Controller/staffController.js";
-import { verifyToken } from "../middleWare/verifyToken.js";
+import {verifyToken} from "../middleWare/verifyToken.js";
 import {
   getSiswa,
   getSiswaProfile,
@@ -32,12 +33,13 @@ import {
   createTagihanFix,
   getTagihanFix,
   getTagihanFixForStudent,
+  getTagihanFixForTU,
   getTahunAngkatan,
   getTotalTagihanFix,
   updateTagihanFix,
 } from "../Controller/tagihanFixController.js";
-import { postInvoiceIn } from "../Controller/InvoiceInController.js";
-import { getActivity } from "../Controller/logActivity.js";
+import {postInvoiceIn} from "../Controller/InvoiceInController.js";
+import {getActivity} from "../Controller/logActivity.js";
 import multer from "multer";
 import express from "express";
 import {
@@ -74,7 +76,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({storage});
 /// SISWA
 router.get("/siswa", verifyToken, getSiswa);
 router.get("/siswa/:id", verifyToken, getSiswaById);
@@ -112,7 +114,8 @@ router.patch("/tagihan-permanent/:id", verifyToken, updateTagihanFix);
 router.post("/tagihan-permanent", verifyToken, createTagihanFix);
 router.get("/tagihan-permanent", verifyToken, getTagihanFix);
 router.get("/total-tagihan-permanent", verifyToken, getTotalTagihanFix);
-router.get("/tagihan-permanent-siswa", verifyToken, getTagihanFixForStudent);
+router.get("/tagihan-permanent-siswa", verifyToken, getTagihanFixForTU);
+router.get("/tagihan-permanent-siswa-me", verifyToken, getTagihanFixForStudent);
 router.get("/tahun-angkatan", verifyToken, getTahunAngkatan);
 /// STAF ///
 router.post("/staff-register", staffRegister);
@@ -134,6 +137,7 @@ router.get("/get-all-invoice-in", verifyToken, getAllInvoiceIn);
 router.post("/invoice-out", verifyToken, postInvoiceOut);
 router.get("/get-all-invoice-out", verifyToken, getAllInvoiceOut);
 router.get("/invoice", verifyToken, getInvoice);
+router.get("/invoice-me", verifyToken, getInvoiceMe);
 
 /// DOWNLOAD
 router.get("/download/template-import-siswa", downloadTemplateImportSiswa);

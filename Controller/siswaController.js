@@ -420,6 +420,14 @@ export const importAccount = async (req, res) => {
         console.log(error);
       });
     });
+    recordActivity({
+      action: `Import siswa, ${injectDataToDB.length} siswa ditambahkan`,
+      author: getUserInfoToken(
+        req.headers.authorization.replace("Bearer ", "")
+      ),
+      data: [],
+    });
+    injectDataToDB = [];
     return res.status(200).json({message: "Berhasil mengimport siswa"});
   } catch (error) {
     console.log(error);
@@ -435,45 +443,52 @@ export const importAccount = async (req, res) => {
 };
 
 export const getSiswaProfile = async (req, res) => {
-  const decodedTokenFromClient = jwt.decode(
-    req.headers.authorization.replace("Bearer ", "")
-  );
   try {
+    const {idSiswa, username} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
     const response = await siswaAuth.findOne({
       attributes: {exclude: ["password", "username"]},
       include: [{model: jurusan}],
       where: {
-        id: decodedTokenFromClient.idSiswa,
+        id: idSiswa,
       },
     });
     const toStringify = JSON.stringify(response);
     const toParse = JSON.parse(toStringify);
-    res.json({...toParse, username: decodedTokenFromClient.username});
+    res.json({...toParse, username});
   } catch (error) {
     console.log(error);
   }
 };
 
 export const siswaRegister = async (req, res) => {
-  const {
-    nama,
-    username,
-    password,
-    noHP,
-    jurusanId,
-    kelas,
-    alamat,
-    nama_ayah,
-    nama_ibu,
-    gender,
-    status_bill,
-    current_bill,
-    isAdminCreation,
-    angkatan,
-  } = req.body;
-  if (username === "" || password === "")
-    return res.status(403).json({msg: "Form tidak boleh ada yang kosong"});
   try {
+    const {
+      nama,
+      username,
+      password,
+      noHP,
+      jurusanId,
+      kelas,
+      alamat,
+      nama_ayah,
+      nama_ibu,
+      gender,
+      status_bill,
+      current_bill,
+      isAdminCreation,
+      angkatan,
+    } = req.body;
+    if (username === "" || password === "")
+      return res.status(403).json({msg: "Form tidak boleh ada yang kosong"});
+    if (
+      (noHP && String(noHP)?.length >= 12) ||
+      (noHP && String(noHP)?.length <= 8)
+    )
+      return res
+        .status(403)
+        .json({msg: "No HP tidak valid, max digit 12 min digit 8"});
+
     const length = await siswaAuth.findAndCountAll({
       where: {
         angkatan: angkatan || new Date().getFullYear(),
@@ -520,42 +535,33 @@ export const siswaRegister = async (req, res) => {
 
 export const siswaLogin = async (req, res) => {
   try {
-    const findSiswa = await siswaAuth.findAll({
+    const findSiswa = await siswaAuth.findOne({
       where: {
-        [Op.or]: [
-          {
-            username: {
-              [Op.like]: req.body.username,
-            },
-          },
-          {
-            kode_siswa: {
-              [Op.like]: req.body.username,
-            },
-          },
-        ],
+        username: req.body.username,
       },
+      raw: true,
     });
-    if (!findSiswa[0].password.includes(req.body.password))
+    if (findSiswa.password !== req.body.password)
       return res.status(400).json({msg: "Periksa password anda"});
 
-    const findJurusan = await jurusan.findOne({
-      where: {
-        id: findSiswa[0].jurusanId,
-      },
-    });
-    if (!findJurusan)
-      return res
-        .status(404)
-        .json({msg: "Error 500. JurusanId tidak ditemukan"});
-    const idSiswa = findSiswa[0].id;
-    const namaSiswa = findSiswa[0].name;
-    const username = findSiswa[0].username;
+    const idSiswa = findSiswa.id;
+    const namaSiswa = findSiswa.name;
+    const username = findSiswa.username;
+    const angkatan = findSiswa.angkatan;
+    const kelas = findSiswa.kelas;
+    const sub_kelas = findSiswa.sub_kelas;
+    const jurusanId = findSiswa.jurusanId;
+    const kode_siswa = findSiswa.kode_siswa;
     const accessToken = jwt.sign(
       {
         idSiswa,
         namaSiswa,
         username,
+        angkatan,
+        kelas,
+        sub_kelas,
+        jurusanId,
+        kode_siswa,
       },
       process.env.ACCESS_TOKEN,
       {
@@ -571,11 +577,33 @@ export const siswaLogin = async (req, res) => {
 
 export const siswaUpdate = async (req, res) => {
   try {
+    const {noHP} = req.body;
+    if (
+      (noHP && String(noHP)?.length >= 12) ||
+      (noHP && String(noHP)?.length <= 8)
+    ) {
+      return res
+        .status(404)
+        .json({msg: "No HP tidak valid, max digit 12 min digit 8"});
+    }
     await siswaAuth.update(req.body, {
       where: {
         id: req.params.id,
       },
+      fields: "",
+      returning: true,
     });
+    const {roleStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (roleStaff === "ADMINISTRASI") {
+      recordActivity({
+        action: `Mengupdate siswa`,
+        author: getUserInfoToken(
+          req.headers.authorization.replace("Bearer ", "")
+        ),
+        data: req.body,
+      });
+    }
     res.status(200).json({msg: "Siswa berhasil diupdate"});
   } catch (error) {
     res.status(403).json({msg: "Internal server error !"});
@@ -607,6 +635,14 @@ export const bulkStatusKelasSiswa = async (req, res) => {
       return res
         .status(406)
         .json({msg: "Update Error", message: listErrorInject});
+
+    recordActivity({
+      action: `Mengubah status kelas siswa secara masal`,
+      author: getUserInfoToken(
+        req.headers.authorization.replace("Bearer ", "")
+      ),
+      data: [],
+    });
     res.status(200).json({
       msg: `${req.body.users.length} Siswa berhasil diupdate`,
       message: req.body.users,
@@ -639,6 +675,14 @@ export const bulkStatusSiswaUpdate = async (req, res) => {
       return res
         .status(406)
         .json({msg: "Update Error", message: listErrorInject});
+
+    recordActivity({
+      action: `Mengubah status siswa secara masal`,
+      author: getUserInfoToken(
+        req.headers.authorization.replace("Bearer ", "")
+      ),
+      data: [],
+    });
     res.status(200).json({
       msg: `${req.body.users.length} Siswa berhasil diupdate`,
       message: req.body.users,
