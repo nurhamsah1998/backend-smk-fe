@@ -2,10 +2,13 @@ import path, {join} from "path";
 import {invoice} from "../Models/invoice.js";
 import {siswaAuth} from "../Models/siswa.js";
 import {jurusan} from "../Models/jurusan.js";
+import fs from "fs";
 import moment from "moment";
 import {Op} from "sequelize";
 import exeljs from "exceljs";
-import {FormatCurrency} from "../Configuration/supportFunction.js";
+import {jsPDF as JSPDF} from "jspdf";
+import autoTable from "jspdf-autotable";
+import {FormatCurrency, KopPdf} from "../Configuration/supportFunction.js";
 import {uid} from "uid";
 import {invoiceOut} from "../Models/invoiceOut.js";
 
@@ -16,7 +19,9 @@ export const downloadTemplateImportSiswa = async (req, res) => {
     // eslint-disable-next-line prefer-const
     let workBook = new exeljs.Workbook();
     // eslint-disable-next-line prefer-const
-    let sheet = workBook.addWorksheet("template_import_siswa");
+    let sheet = workBook.addWorksheet("template_import_siswa", {
+      views: [{state: "frozen", ySplit: 1}],
+    });
     sheet.columns = [
       {
         header: "Nama",
@@ -639,6 +644,7 @@ export const downloadStudentBill = async (req, res) => {
   const page = parseInt(req.query.page) - 1 || 0;
   const limit = parseInt(req.query.limit) || 10;
   const search = req.query.search || "";
+  const fileType = req.query.type || "";
   const angkatan = req.query.angkatan || "%";
   const currentBill = req.query.current_bill || "";
   const jurusanId = req.query.jurusanId || "%";
@@ -646,6 +652,72 @@ export const downloadStudentBill = async (req, res) => {
   const subKelas = req.query.sub_kelas || "%";
   const status = req.query.status || "%";
   const offside = limit * page;
+  const tableHead = [
+    {
+      id: "nama",
+      label: "Nama siswa",
+    },
+    {
+      id: "kelas_student",
+      label: "Kelas",
+    },
+    {
+      id: "angkatan",
+      label: "Angkatan",
+    },
+    {
+      id: "status_bill",
+      label: "Status",
+      variantStatusColor: [
+        {
+          variant: "success",
+          label: "Lunas",
+          value: "paid",
+        },
+        {
+          variant: "error",
+          label: "Belum Lunas",
+          value: "not_paid",
+        },
+        {
+          variant: "grey",
+          label: "Belum Ada Tagihan",
+          value: "not_paid_yet",
+        },
+        {
+          variant: "warning",
+          label: "Deposit",
+          value: "deposit",
+        },
+      ],
+    },
+    {
+      id: "current_bill",
+      label: "Kekurangan",
+      isCurrency: true,
+    },
+  ];
+  const billStatus = [
+    {
+      name: "deposit",
+      title: "DEPOSIT",
+    },
+    {
+      name: "not_paid_yet",
+      title: "BELUM ADA TAGIHAN",
+    },
+    {
+      name: "paid",
+      title: "LUNAS",
+    },
+    {
+      name: "not_paid",
+      title: "BELUM LUNAS",
+    },
+  ];
+  if (!fileType) {
+    return await res.status(400).json({msg: "invalid file type"});
+  }
   try {
     const jurusanById = await jurusan.findOne({
       raw: true,
@@ -718,215 +790,317 @@ export const downloadStudentBill = async (req, res) => {
       order: [["id", "DESC"]],
       include: [{model: jurusan}],
     });
-    const Workbook = new exeljs.Workbook();
-    const worksheet = Workbook.addWorksheet("My Sheet");
-
-    const columns = [
-      {
-        header: "No",
-        key: "no",
-        width: 6,
-        size: 13,
-        bold: true,
-        alphabet: "A",
-      },
-      {
-        header: "Nama siswa",
-        key: "nama",
-        width: 35,
-        size: 13,
-        bold: true,
-        alphabet: "B",
-      },
-      {
-        header: "Gender",
-        key: "gender",
-        width: 10,
-        size: 13,
-        bold: true,
-        alphabet: "C",
-      },
-      {
-        header: "Kelas",
-        key: "kelas",
-        width: 32,
-        size: 13,
-        bold: true,
-        alphabet: "D",
-      },
-      {
-        header: "Angkatan",
-        key: "angkatan",
-        width: 15,
-        size: 13,
-        bold: true,
-        alphabet: "E",
-      },
-      {
-        header: "Tagihan terbayar",
-        key: "total_payment",
-        width: 32,
-        size: 13,
-        bold: true,
-        alphabet: "F",
-      },
-      {
-        header: "Status",
-        key: "status_bill",
-        width: 32,
-        size: 13,
-        bold: true,
-        alphabet: "G",
-      },
-      {
-        header: "Kekurangan tagihan",
-        key: "current_bill",
-        width: 32,
-        size: 13,
-        bold: true,
-        alphabet: "H",
-      },
-      {
-        header: "Nama Ayah",
-        key: "nama_ayah",
-        width: 32,
-        size: 13,
-        bold: true,
-        alphabet: "I",
-      },
-      {
-        header: "Nama Ibu",
-        key: "nama_ibu",
-        width: 32,
-        size: 13,
-        bold: true,
-        alphabet: "J",
-      },
-      {
-        header: "No. HP",
-        key: "noHP",
-        width: 32,
-        size: 13,
-        bold: true,
-        alphabet: "K",
-      },
-      {
-        header: "Alamat",
-        key: "alamat",
-        width: 32,
-        size: 13,
-        bold: true,
-        alphabet: "L",
-      },
-    ];
-    const billStatus = [
-      {
-        name: "deposit",
-        title: "DEPOSIT",
-      },
-      {
-        name: "not_paid_yet",
-        title: "BELUM ADA TAGIHAN",
-      },
-      {
-        name: "paid",
-        title: "LUNAS",
-      },
-      {
-        name: "not_paid",
-        title: "BELUM LUNAS",
-      },
-    ];
-    /// https://stackoverflow.com/a/71738770/18038473
-    worksheet.mergeCells("A1:H1");
-    worksheet.getRow(1).height = 70;
-    worksheet.getCell("A1").value = `LAPORAN TAGIHAN SISWA \n Kelas : ${
-      Boolean(req.query.kelas) ? req.query.kelas : "-"
-    } ${Boolean(jurusanById?.nama) ? jurusanById?.kode_jurusan : ""} ${
-      Boolean(req.query.sub_kelas) ? req.query.sub_kelas : ""
-    } ${
-      Boolean(req.query.angkatan) ? ` ${req.query.angkatan}` : ""
-    } \n Status pembayaran : ${
-      Boolean(req.query.current_bill)
-        ? billStatus.find((item) => item.name === currentBill).title
-        : "-"
-    }`;
-    worksheet.getCell("A1").alignment = {
-      vertical: "middle",
-      horizontal: "center",
-    };
-    worksheet.getCell(`A1`).font = {
-      size: 15,
-      bold: true,
-    };
-    worksheet.getRow(2).fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: {argb: "2980ba"},
-    };
-    let header = [];
-    let key = [];
-    for (let index = 0; index < columns.length; index++) {
-      key.push({key: columns[index].key, width: columns[index].width});
-      header.push(columns[index].header);
-      worksheet.getCell(`${columns[index].alphabet}2`).font = {
-        size: 13,
-        bold: true,
-      };
-    }
-    worksheet.getRow(2).values = header;
-    worksheet.columns = key;
-    worksheet.getCell("A2").alignment = {
-      vertical: "middle",
-      horizontal: "center",
-    };
-    for (let index = 0; index < columns.length; index++) {
-      worksheet.getCell(`${columns[index].alphabet}2`).font = {
-        size: columns[index].size,
-        bold: columns[index].bold,
-        color: {argb: "ffffff"},
-      };
-      worksheet.getCell(`${columns[index].alphabet}2`).alignment = {
-        vertical: "middle",
-      };
-    }
-    worksheet.getRow(2).height = 25;
-    for (let index = 0; index < data.length; index++) {
-      worksheet.addRow({
-        no: index + 1,
-        nama: data[index].nama,
-        kelas: `${data[index].kelas} ${data[index]["jurusan.kode_jurusan"]} ${data[index].sub_kelas}`,
-        angkatan: data[index].angkatan,
-        gender: data[index].gender,
-        total_payment: FormatCurrency(data[index].total_payment),
-        current_bill:
-          data[index].current_bill < 0
-            ? "-"
-            : FormatCurrency(data[index].current_bill),
-        status_bill:
-          data[index].current_bill < 0
-            ? "DEPOSIT"
-            : data[index].current_bill > 0
-            ? "BELUM LUNAS"
-            : data[index].status_bill?.includes("BELUM ADA TAGIHAN")
-            ? "BELUM ADA TAGIHAN"
-            : "LUNAS",
-        nama_ayah: data[index].nama_ayah,
-        nama_ibu: data[index].nama_ibu,
-        noHP: data[index].noHP,
-        alamat: data[index].alamat,
+    if (fileType === "pdf") {
+      const dataFIlePDF = data
+        ?.map((item) => ({
+          nama: item?.nama,
+          kelas_student: `${item?.kelas} ${item?.["jurusan.kode_jurusan"]} ${item?.sub_kelas}`,
+          angkatan: item?.angkatan,
+          status_bill:
+            item?.current_bill < 0
+              ? "DEPOSIT"
+              : item?.current_bill > 0
+              ? "BELUM LUNAS"
+              : item?.status_bill?.includes("BELUM ADA TAGIHAN")
+              ? "BELUM ADA TAGIHAN"
+              : "LUNAS",
+          /// https://stackoverflow.com/a/4652112/18038473
+          current_bill:
+            item?.current_bill < 0
+              ? `+ ${FormatCurrency(Math.abs(item?.current_bill))}`
+              : FormatCurrency(item?.current_bill),
+        }))
+        ?.map((item) => {
+          return Object.values(item);
+        });
+      const doc = new JSPDF({
+        orientation: "p",
+        unit: "mm",
+        format: "legal",
       });
-      worksheet.getCell(`A${index + 3}`).alignment = {
+      autoTable(doc, {
+        html: "#my-table",
+        margin: {top: 70},
+      });
+      KopPdf(doc);
+      doc.setFontSize(14);
+      doc.setFont("", "", 700);
+      doc.text(`Laporan Tagihan`, 10, 60, {
+        align: "left",
+      });
+      doc.setFont("", "", "");
+      doc.setFontSize(12);
+      doc.setFontSize(10);
+      doc.setFont("", "", "");
+      doc.text(
+        `Kelas : ${
+          Boolean(kelas !== "%") &&
+          Boolean(jurusan) &&
+          Boolean(subKelas !== "%")
+            ? `${kelas} ${jurusanById?.kode_jurusan} ${subKelas} ${
+                Boolean(angkatan !== "%") ? `/ ${angkatan}` : ""
+              }`
+            : "-"
+        }`,
+        10,
+        65,
+        {
+          align: "left",
+        }
+      );
+      doc.setFontSize(10);
+      doc.text(
+        `Status pembayaran : ${
+          Boolean(currentBill)
+            ? billStatus?.find((item) => item.name === currentBill)?.title
+            : "-"
+        }`,
+        10,
+        69,
+        {
+          align: "left",
+        }
+      );
+      doc.text(
+        `Tanggal dibuat : ${moment().format("Do MMM YYYY H:mm")}`,
+        10,
+        73,
+        {
+          align: "left",
+        }
+      );
+      autoTable(doc, {
+        margin: {horizontal: 10},
+        head: [tableHead?.map((item) => item?.label)],
+        body: dataFIlePDF,
+      });
+      doc.text(
+        `SMK PGRI KRAS`,
+        doc.internal.pageSize.width / 2,
+        doc.internal.pageSize.height - 7,
+        {
+          align: "center",
+        }
+      );
+      const fileName = `tagihan-${moment().format(
+        "MMMM-Do-YYYY-h-mm-ss"
+      )}_${uid(7).toUpperCase()}.${fileType}`;
+      const filePath = path.resolve(`./Assets/download/${fileName}`);
+      const bufferFile = doc.output("arraybuffer");
+      fs.writeFileSync(filePath, Buffer.from(bufferFile));
+      return await res.download(filePath);
+    }
+    if (fileType === "xlsx") {
+      const Workbook = new exeljs.Workbook();
+      const worksheet = Workbook.addWorksheet("My Sheet");
+
+      const columns = [
+        {
+          header: "No",
+          key: "no",
+          width: 6,
+          size: 13,
+          bold: true,
+          alphabet: "A",
+        },
+        {
+          header: "Nama siswa",
+          key: "nama",
+          width: 35,
+          size: 13,
+          bold: true,
+          alphabet: "B",
+        },
+        {
+          header: "Gender",
+          key: "gender",
+          width: 10,
+          size: 13,
+          bold: true,
+          alphabet: "C",
+        },
+        {
+          header: "Kelas",
+          key: "kelas",
+          width: 32,
+          size: 13,
+          bold: true,
+          alphabet: "D",
+        },
+        {
+          header: "Angkatan",
+          key: "angkatan",
+          width: 15,
+          size: 13,
+          bold: true,
+          alphabet: "E",
+        },
+        {
+          header: "Tagihan terbayar",
+          key: "total_payment",
+          width: 32,
+          size: 13,
+          bold: true,
+          alphabet: "F",
+        },
+        {
+          header: "Status",
+          key: "status_bill",
+          width: 32,
+          size: 13,
+          bold: true,
+          alphabet: "G",
+        },
+        {
+          header: "Kekurangan tagihan",
+          key: "current_bill",
+          width: 32,
+          size: 13,
+          bold: true,
+          alphabet: "H",
+        },
+        {
+          header: "Nama Ayah",
+          key: "nama_ayah",
+          width: 32,
+          size: 13,
+          bold: true,
+          alphabet: "I",
+        },
+        {
+          header: "Nama Ibu",
+          key: "nama_ibu",
+          width: 32,
+          size: 13,
+          bold: true,
+          alphabet: "J",
+        },
+        {
+          header: "No. HP",
+          key: "noHP",
+          width: 32,
+          size: 13,
+          bold: true,
+          alphabet: "K",
+        },
+        {
+          header: "Alamat",
+          key: "alamat",
+          width: 32,
+          size: 13,
+          bold: true,
+          alphabet: "L",
+        },
+      ];
+      const billStatus = [
+        {
+          name: "deposit",
+          title: "DEPOSIT",
+        },
+        {
+          name: "not_paid_yet",
+          title: "BELUM ADA TAGIHAN",
+        },
+        {
+          name: "paid",
+          title: "LUNAS",
+        },
+        {
+          name: "not_paid",
+          title: "BELUM LUNAS",
+        },
+      ];
+      /// https://stackoverflow.com/a/71738770/18038473
+      worksheet.mergeCells("A1:H1");
+      worksheet.getRow(1).height = 70;
+      worksheet.getCell("A1").value = `LAPORAN TAGIHAN SISWA \n Kelas : ${
+        Boolean(req.query.kelas) ? req.query.kelas : "-"
+      } ${Boolean(jurusanById?.nama) ? jurusanById?.kode_jurusan : ""} ${
+        Boolean(req.query.sub_kelas) ? req.query.sub_kelas : ""
+      } ${
+        Boolean(req.query.angkatan) ? ` ${req.query.angkatan}` : ""
+      } \n Status pembayaran : ${
+        Boolean(req.query.current_bill)
+          ? billStatus.find((item) => item.name === currentBill).title
+          : "-"
+      }`;
+      worksheet.getCell("A1").alignment = {
         vertical: "middle",
         horizontal: "center",
       };
+      worksheet.getCell(`A1`).font = {
+        size: 15,
+        bold: true,
+      };
+      worksheet.getRow(2).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: {argb: "2980ba"},
+      };
+      let header = [];
+      let key = [];
+      for (let index = 0; index < columns.length; index++) {
+        key.push({key: columns[index].key, width: columns[index].width});
+        header.push(columns[index].header);
+        worksheet.getCell(`${columns[index].alphabet}2`).font = {
+          size: 13,
+          bold: true,
+        };
+      }
+      worksheet.getRow(2).values = header;
+      worksheet.columns = key;
+      worksheet.getCell("A2").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      for (let index = 0; index < columns.length; index++) {
+        worksheet.getCell(`${columns[index].alphabet}2`).font = {
+          size: columns[index].size,
+          bold: columns[index].bold,
+          color: {argb: "ffffff"},
+        };
+        worksheet.getCell(`${columns[index].alphabet}2`).alignment = {
+          vertical: "middle",
+        };
+      }
+      worksheet.getRow(2).height = 25;
+      for (let index = 0; index < data.length; index++) {
+        worksheet.addRow({
+          no: index + 1,
+          nama: data[index].nama,
+          kelas: `${data[index].kelas} ${data[index]["jurusan.kode_jurusan"]} ${data[index].sub_kelas}`,
+          angkatan: data[index].angkatan,
+          gender: data[index].gender,
+          total_payment: FormatCurrency(data[index].total_payment),
+          current_bill:
+            data[index].current_bill < 0
+              ? "-"
+              : FormatCurrency(data[index].current_bill),
+          status_bill:
+            data[index].current_bill < 0
+              ? "DEPOSIT"
+              : data[index].current_bill > 0
+              ? "BELUM LUNAS"
+              : data[index].status_bill?.includes("BELUM ADA TAGIHAN")
+              ? "BELUM ADA TAGIHAN"
+              : "LUNAS",
+          nama_ayah: data[index].nama_ayah,
+          nama_ibu: data[index].nama_ibu,
+          noHP: data[index].noHP,
+          alamat: data[index].alamat,
+        });
+        worksheet.getCell(`A${index + 3}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+      }
+      const fileName = `tagihan-${moment().format(
+        "MMMM-Do-YYYY-h-mm-ss"
+      )}_${uid(7).toUpperCase()}.${fileType}`;
+      const folderPlace = `./Assets/download/${fileName}`;
+      await Workbook.xlsx.writeFile(folderPlace);
+      return await res.download(path.resolve(`./Assets/download/${fileName}`));
     }
-    const fileName = `tagihan-${moment().format("MMMM-Do-YYYY-h-mm-ss")}_${uid(
-      7
-    ).toUpperCase()}.xlsx`;
-    const folderPlace = `./Assets/download/${fileName}`;
-    await Workbook.xlsx.writeFile(folderPlace);
-    await res.download(path.resolve(`./Assets/download/${fileName}`));
   } catch (error) {
     console.log(error);
   }

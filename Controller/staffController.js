@@ -9,6 +9,8 @@ import {
   getTotalTagihan,
   getUserInfoToken,
 } from "../Configuration/supportFunction.js";
+import database from "../Configuration/database.js";
+import {jurusan} from "../Models/jurusan.js";
 
 export const dashboardStaffReport = async (req, res) => {
   try {
@@ -112,6 +114,54 @@ export const dashboardStaffReport = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+  }
+};
+export const dashboardDevReport = async (req, res) => {
+  try {
+    const major = await jurusan.findAll({raw: true});
+    const [tahun_angkatan] = await database.query(
+      `select distinct(angkatan) from siswa order by angkatan asc`
+    );
+    let data = {};
+    const [totalAnualMajor] = await database.query(
+      `select count(s.jurusanId) as total, j.nama, s.angkatan, j.kode_jurusan 
+       from siswa s 
+       right join jurusan j 
+       on s.jurusanId = j.id 
+       GROUP by s.jurusanId, s.angkatan 
+       order by s.angkatan asc`
+    );
+    for (let x = 0; x < major.length; x++) {
+      /// ASSIGN JURUSAN
+      const elementMajor = major[x];
+      /// DEFINE VALUE JURUSAN
+      data[elementMajor?.kode_jurusan] = [];
+      /// PUSHING TAHUN ANGKATAN
+      for (let z = 0; z < tahun_angkatan.length; z++) {
+        const elementAngkatan = tahun_angkatan[z]?.angkatan;
+        let totalStudentByMajor = 0;
+        for (let y = 0; y < totalAnualMajor.length; y++) {
+          const elementDB = totalAnualMajor[y];
+          /// MERGING TOTAL STUDENT BY ANGKATAN AND KODE JURUSAN
+          if (
+            elementMajor?.kode_jurusan === elementDB?.kode_jurusan &&
+            elementAngkatan === elementDB?.angkatan
+          ) {
+            totalStudentByMajor = elementDB?.total;
+          }
+        }
+        data[elementMajor?.kode_jurusan].push(totalStudentByMajor);
+      }
+    }
+    res.status(200).json({
+      data: {
+        tahun_angkatan: tahun_angkatan?.map((item) => item?.angkatan),
+        analytics: data,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({msg: "Internal server error"});
   }
 };
 

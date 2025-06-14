@@ -232,32 +232,58 @@ const findDuplicateKodeSiswa = (listSiswa, kode_siswa) => {
 };
 
 const isEmpty = (text) => {
+  if (typeof text === "undefined") return true;
   return !Boolean(String(text).match(/\S/g));
 };
 
 const isOnlyWhiteSpace = (text) => {
-  return isEmpty(text) && String(text) !== "";
+  return isEmpty(text) && String(text) !== "" && typeof text !== "undefined";
 };
 
 export const importAccount = async (req, res) => {
-  const currentYear = new Date().getFullYear();
-  const listSiswa = await siswaAuth.findAll({raw: true});
-  const listJurusan = await jurusan.findAll({raw: true});
-  const response = await tagihanFix.findAll({
-    raw: true,
-    where: {
-      tahun_angkatan: currentYear,
-    },
-    attributes: {
-      exclude: ["tahun_angkatan", "createdAt", "updatedAt", "id"],
-    },
-  });
-  const total = Object.values(response[0] || {}).reduce((a, b) => a + b, 0);
-
   try {
+    if (
+      !Boolean(req.body?.tahun_angkatan) ||
+      req.body?.tahun_angkatan === "undefined" ||
+      req.body?.tahun_angkatan === "null"
+    ) {
+      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+        console.log(error);
+      });
+      return res.status(404).json({
+        code: "error_validation",
+        message: ["Siswa untuk angkatan tidak boleh kosong"],
+      });
+    }
+    const tahun_angkatan = Number(req.body?.tahun_angkatan);
+    if (String(tahun_angkatan) === "NaN") {
+      fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
+        console.log(error);
+      });
+      return res.status(404).json({
+        code: "error_validation",
+        message: ["Invalid tahun angkatan"],
+      });
+    }
+
+    const listSiswa = await siswaAuth.findAll({raw: true});
+    const listJurusan = await jurusan.findAll({raw: true});
+    const response = await tagihanFix.findAll({
+      raw: true,
+      where: {
+        tahun_angkatan,
+      },
+      attributes: {
+        exclude: ["tahun_angkatan", "createdAt", "updatedAt", "id"],
+      },
+    });
+    const total = Object.values(response[0] || {}).reduce((a, b) => a + b, 0);
+
     /// https://github.com/exceljs/exceljs/issues/960#issuecomment-1698549072
     let errorValidation = [];
     let duplicateName = {};
+    let duplicateKodeSiswaFromFile = {};
+    let duplicateUsernameFromFile = {};
     let injectDataToDB = [];
     const sub_kelas_option = {
       1: true,
@@ -272,14 +298,54 @@ export const importAccount = async (req, res) => {
     const {Workbook} = exeljs;
     const wb = new Workbook();
     let isEmptyData = false;
+    let isBreakFromValidate = false;
 
     await wb.xlsx.readFile("./Assets/upload/" + req.file.filename).then(() => {
       const workSheet = wb.getWorksheet();
       const totalRow = workSheet.actualRowCount;
-      if (totalRow === 1) {
-        isEmptyData = true;
+      const header = [
+        "Nama",
+        "Username",
+        "Password",
+        "Jurusan",
+        "Sub kelas",
+        "Kelas",
+        "Kode siswa",
+        "Nomor HP",
+        "Alamat siswa",
+        "Nama ayah siswa",
+        "Nama ibu siswa",
+        "Jenis kelamin siswa",
+      ];
+      if (header.length !== workSheet.getRow(1).values.length - 1) {
+        errorValidation.push(`Invalid jumlah header`);
+        isBreakFromValidate = true;
       }
 
+      for (
+        let clientHeader = 1;
+        clientHeader < workSheet.getRow(1).values.length;
+        clientHeader++
+      ) {
+        const clientElement = workSheet.getRow(1).values[clientHeader];
+        const isInvalidHeaderName = header.find(
+          (item) => item === clientElement
+        );
+        if (!isInvalidHeaderName) {
+          errorValidation.push(
+            `Nama header ${clientElement} tidak valid. silahkan download template.`
+          );
+          isBreakFromValidate = true;
+        }
+      }
+
+      if (totalRow === 1) {
+        isEmptyData = true;
+        isBreakFromValidate = true;
+      }
+      if (isBreakFromValidate) {
+        return;
+      }
       for (let rowIndex = 2; rowIndex < totalRow + 1; rowIndex += 1) {
         const name = workSheet.getRow(rowIndex).values[1];
         const username = workSheet.getRow(rowIndex).values[2];
@@ -293,13 +359,25 @@ export const importAccount = async (req, res) => {
         const fatherName = workSheet.getRow(rowIndex).values[10];
         const motherName = workSheet.getRow(rowIndex).values[11];
         const gender = workSheet.getRow(rowIndex).values[12];
+
         if (duplicateName[`${name}_${kelas}_${sub_kelas}`]) {
           errorValidation.push(
-            `Terdapat nama yang duplikat berdasarkan kelas dan sub kelas`
+            `Terdapat nama yang duplikat berdasarkan kelas dan sub kelas. periksa ${name} apakah ada yang sama`
           );
-        } else {
-          duplicateName[`${name}_${kelas}_${sub_kelas}`] = true;
         }
+        if (duplicateKodeSiswaFromFile[kode_siswa]) {
+          errorValidation.push(
+            `Terdapat kode siswa yang duplikat. periksa ${kode_siswa} apakah ada yang sama`
+          );
+        }
+        if (duplicateUsernameFromFile[username]) {
+          errorValidation.push(
+            `Terdapat username yang duplikat. periksa ${username} apakah ada yang sama`
+          );
+        }
+        duplicateName[`${name}_${kelas}_${sub_kelas}`] = true;
+        duplicateKodeSiswaFromFile[kode_siswa] = true;
+        duplicateUsernameFromFile[username] = true;
         /// CELL MANDATORY
         if (
           isEmpty(name) ||
@@ -320,7 +398,9 @@ export const importAccount = async (req, res) => {
           isOnlyWhiteSpace(motherName) ||
           isOnlyWhiteSpace(gender)
         ) {
-          errorValidation.push(`Tidak boleh terisi hanya spasi`);
+          errorValidation.push(
+            `Kolom yang memiliki warna hijau tidak boleh hanya berisi spasi, kosongkan jika tidak ingin mengisi.`
+          );
         }
         /// SUB KELAS VALIDATION
         if (!sub_kelas_option[sub_kelas]) {
@@ -392,7 +472,7 @@ export const importAccount = async (req, res) => {
           gender,
           current_bill: total,
           status_bill: "not_paid_yet",
-          angkatan: currentYear,
+          angkatan: tahun_angkatan,
           status: "accepted",
         });
       }
@@ -415,6 +495,8 @@ export const importAccount = async (req, res) => {
         .json({code: "error_validation", message: errorValidation});
     }
     duplicateName = {};
+    duplicateUsernameFromFile = {};
+    duplicateKodeSiswaFromFile = {};
     await siswaAuth.bulkCreate(injectDataToDB).then(() => {
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
         console.log(error);
