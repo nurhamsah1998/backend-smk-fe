@@ -17,6 +17,7 @@ import {
   dashboardStaffReport,
   staffProfileUpdate,
   dashboardDevReport,
+  staffProfileMeUpdate,
 } from "../Controller/staffController.js";
 import {verifyToken} from "../middleWare/verifyToken.js";
 import {
@@ -124,6 +125,7 @@ router.post("/staff-login", staffLogin);
 router.get("/staff", verifyToken, getStaff);
 router.patch("/staff/:id", verifyToken, staffProfileUpdate);
 router.get("/staff-profile", verifyToken, getStaffProfile);
+router.patch("/staff-profile/:id", verifyToken, staffProfileMeUpdate);
 router.post("/campaign", verifyToken, postCampaign);
 router.post("/response-campaign", verifyToken, postResponseCampaign);
 router.delete("/response-campaign/:id", verifyToken, deleteResponseCampaign);

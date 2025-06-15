@@ -8,6 +8,8 @@ import {Op} from "sequelize";
 import {
   getTotalTagihan,
   getUserInfoToken,
+  isEmptyString,
+  recordActivity,
 } from "../Configuration/supportFunction.js";
 import database from "../Configuration/database.js";
 import {jurusan} from "../Models/jurusan.js";
@@ -245,9 +247,43 @@ export const getStaffProfile = async (req, res) => {
     throw error;
   }
 };
+export const staffProfileMeUpdate = async (req, res) => {
+  try {
+    const {namaStaff, idStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    const {nama} = req.body;
+    if (req.params.id !== idStaff) {
+      return res.status(404).json({msg: "Id staff tidak sama"});
+    }
+    if (String(nama).length >= 35) {
+      return res.status(404).json({msg: "Nama terlalu panjang"});
+    }
+    if (isEmptyString(nama)) {
+      return res.status(404).json({msg: "Nama tidak boleh kosong"});
+    }
+    await stafAuth.update(
+      {nama},
+      {
+        where: {
+          id: idStaff,
+        },
+      }
+    );
+    recordActivity({
+      action: "Mengubah Profile",
+      author: getUserInfoToken(
+        req.headers.authorization.replace("Bearer ", "")
+      ),
+      data: {nama_lama: namaStaff, nama_baru: nama},
+    });
+    res.status(200).json({msg: "Staff berhasil diupdate"});
+  } catch (error) {
+    console.log(error);
+  }
+};
 export const staffProfileUpdate = async (req, res) => {
   try {
-    const {role, permissions} = req.body;
+    const {role, permissions, name} = req.body;
     await stafAuth.update(
       {role, permissions},
       {
@@ -287,10 +323,6 @@ export const staffRegister = async (req, res) => {
     }
     const salt = await bcrypt.genSalt();
     const securePassword = await bcrypt.hash(password, salt);
-    //   const EncryptNISN = CryptoJS.AES.encrypt(
-    //     nisn,
-    //     process.env.SECRET_ENCRYPT
-    //   ).toString();
     const uniqueUsername = await stafAuth.findOne({
       where: {
         username: req.body.username,

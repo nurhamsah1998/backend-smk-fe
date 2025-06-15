@@ -7,6 +7,7 @@ import fs from "fs/promises";
 import {tagihanFix} from "../Models/tagihanFix.js";
 import {
   getUserInfoToken,
+  isEmptyString,
   permissionAccess,
   recordActivity,
 } from "../Configuration/supportFunction.js";
@@ -231,13 +232,10 @@ const findDuplicateKodeSiswa = (listSiswa, kode_siswa) => {
   return result;
 };
 
-const isEmpty = (text) => {
-  if (typeof text === "undefined") return true;
-  return !Boolean(String(text).match(/\S/g));
-};
-
 const isOnlyWhiteSpace = (text) => {
-  return isEmpty(text) && String(text) !== "" && typeof text !== "undefined";
+  return (
+    isEmptyString(text) && String(text) !== "" && typeof text !== "undefined"
+  );
 };
 
 export const importAccount = async (req, res) => {
@@ -380,13 +378,13 @@ export const importAccount = async (req, res) => {
         duplicateUsernameFromFile[username] = true;
         /// CELL MANDATORY
         if (
-          isEmpty(name) ||
-          isEmpty(username) ||
-          isEmpty(password) ||
-          isEmpty(jurusan) ||
-          isEmpty(sub_kelas) ||
-          isEmpty(kelas) ||
-          isEmpty(kode_siswa)
+          isEmptyString(name) ||
+          isEmptyString(username) ||
+          isEmptyString(password) ||
+          isEmptyString(jurusan) ||
+          isEmptyString(sub_kelas) ||
+          isEmptyString(kelas) ||
+          isEmptyString(kode_siswa)
         ) {
           errorValidation.push(`Kolom yang memiliki warna merah wajib diisi`);
         }

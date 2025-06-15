@@ -277,6 +277,11 @@ const getUserInfoToken = (token) => {
   return jwt.decode(token);
 };
 
+const isEmptyString = (text) => {
+  if (typeof text === "undefined") return true;
+  return !Boolean(String(text).match(/\S/g));
+};
+
 const permissionAccess = async ({token, permission = ""}) => {
   const {idStaff} = getUserInfoToken(token) || {};
   const userInfo = await stafAuth.findByPk(idStaff, {raw: true});
@@ -288,6 +293,7 @@ const permissionAccess = async ({token, permission = ""}) => {
   return !Boolean(permissions.find((item) => item === permission));
 };
 export {
+  isEmptyString,
   recordActivity,
   getUserInfoToken,
   invoiceGenerator,
