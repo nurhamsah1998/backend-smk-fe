@@ -18,6 +18,9 @@ import {
   staffProfileUpdate,
   dashboardDevReport,
   staffProfileMeUpdate,
+  getListFiles,
+  getFileByDownload,
+  deleteFile,
 } from "../Controller/staffController.js";
 import {verifyToken} from "../middleWare/verifyToken.js";
 import {
@@ -158,9 +161,12 @@ router.get("/download/report-bill", verifyToken, downloadStudentBill);
 
 /// DASHBOARD REPOST
 router.get("/dashboard-report", verifyToken, dashboardStaffReport);
-router.get("/dashboard-dev", verifyToken, dashboardDevReport);
 
 /// DEV
 router.get("/log", verifyToken, getActivity);
+router.get("/dashboard-dev", verifyToken, dashboardDevReport);
+router.get("/files", verifyToken, getListFiles);
+router.get("/download-files", verifyToken, getFileByDownload);
+router.get("/delete-files", verifyToken, deleteFile);
 
 export default router;

@@ -243,7 +243,7 @@ export const downloadTemplateImportSiswa = async (req, res) => {
         formulae: [`"L","P"`],
       };
     }
-    const fileName = `./Assets/template/template_import_siswa_${new Date().getTime()}.xlsx`;
+    const fileName = `./Assets/template/template-import-siswa-${new Date().getTime()}.xlsx`;
     await workBook.xlsx.writeFile(join(process.cwd(), fileName));
 
     await res.download(path.resolve(fileName));
@@ -458,7 +458,7 @@ export const downloadTransactionIn = async (req, res) => {
 
     const fileName = `transaksi-masuk-${moment().format(
       "MMMM-Do-YYYY-h-mm-ss"
-    )}_${uid(7).toUpperCase()}.xlsx`;
+    )}-${uid(7).toUpperCase()}.xlsx`;
     const folderPlace = `./Assets/download/${fileName}`;
     await Workbook.xlsx.writeFile(folderPlace);
     await res.download(path.resolve(`./Assets/download/${fileName}`));
@@ -632,7 +632,7 @@ export const downloadTransactionOut = async (req, res) => {
 
     const fileName = `transaksi-keluar-${moment().format(
       "MMMM-Do-YYYY-h-mm-ss"
-    )}_${uid(7).toUpperCase()}.xlsx`;
+    )}-${uid(7).toUpperCase()}.xlsx`;
     const folderPlace = `./Assets/download/${fileName}`;
     await Workbook.xlsx.writeFile(folderPlace);
     await res.download(path.resolve(`./Assets/download/${fileName}`));
@@ -884,7 +884,7 @@ export const downloadStudentBill = async (req, res) => {
       );
       const fileName = `tagihan-${moment().format(
         "MMMM-Do-YYYY-h-mm-ss"
-      )}_${uid(7).toUpperCase()}.${fileType}`;
+      )}-${uid(7).toUpperCase()}.${fileType}`;
       const filePath = path.resolve(`./Assets/download/${fileName}`);
       const bufferFile = doc.output("arraybuffer");
       fs.writeFileSync(filePath, Buffer.from(bufferFile));
@@ -1096,7 +1096,7 @@ export const downloadStudentBill = async (req, res) => {
       }
       const fileName = `tagihan-${moment().format(
         "MMMM-Do-YYYY-h-mm-ss"
-      )}_${uid(7).toUpperCase()}.${fileType}`;
+      )}-${uid(7).toUpperCase()}.${fileType}`;
       const folderPlace = `./Assets/download/${fileName}`;
       await Workbook.xlsx.writeFile(folderPlace);
       return await res.download(path.resolve(`./Assets/download/${fileName}`));

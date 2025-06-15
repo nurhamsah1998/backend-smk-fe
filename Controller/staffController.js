@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import moment from "moment";
 import {tagihanFix} from "../Models/tagihanFix.js";
 import {Op} from "sequelize";
+import fs from "fs";
 import {
   getTotalTagihan,
   getUserInfoToken,
@@ -13,6 +14,8 @@ import {
 } from "../Configuration/supportFunction.js";
 import database from "../Configuration/database.js";
 import {jurusan} from "../Models/jurusan.js";
+import path, {dirname} from "path";
+import {fileURLToPath} from "url";
 
 export const dashboardStaffReport = async (req, res) => {
   try {
@@ -167,6 +170,75 @@ export const dashboardDevReport = async (req, res) => {
   }
 };
 
+export const getListFiles = async (req, res) => {
+  try {
+    const {roleStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (roleStaff !== "DEV")
+      return res
+        .status(403)
+        .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
+
+    const fileName = fileURLToPath(import.meta.url);
+    const __dirname = dirname(fileName);
+    const listFolders = ["download", "template", "upload"];
+    ///
+    let listFiles = [];
+    for (let index = 0; index < listFolders.length; index++) {
+      const folder = listFolders[index];
+      const fileLocation = `../Assets/${folder}`;
+      const folderPath = path.join(__dirname, fileLocation);
+      try {
+        const files = await fs.promises.readdir(folderPath);
+        listFiles = listFiles.concat(
+          files?.map((item) => ({
+            fileName: item,
+            fileLocation: `${folder}/${item}`,
+          }))
+        );
+      } catch (error) {
+        return res.status(500).json({msg: "Internal server error"});
+      }
+    }
+    res.status(200).json({files: listFiles});
+    ///
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getFileByDownload = async (req, res) => {
+  try {
+    const {roleStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (roleStaff !== "DEV")
+      return res
+        .status(403)
+        .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
+    await res.download(path.resolve(`./Assets/${req.query.path}`));
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deleteFile = async (req, res) => {
+  try {
+    const {roleStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (roleStaff !== "DEV") {
+      res.status(403).json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
+    }
+
+    fs.unlink(`./Assets/${req.query.path}`, (error) => {
+      console.log(error);
+    });
+    res.status(200).json({msg: `File berhasil dihapus`});
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({msg: `File gagal dihapus`});
+  }
+};
+
 export const getStaff = async (req, res) => {
   const {roleStaff} =
     getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
@@ -270,11 +342,11 @@ export const staffProfileMeUpdate = async (req, res) => {
       }
     );
     recordActivity({
-      action: "Mengubah Profile",
+      action: "Mengubah nama profile",
       author: getUserInfoToken(
         req.headers.authorization.replace("Bearer ", "")
       ),
-      data: {nama_lama: namaStaff, nama_baru: nama},
+      data: {nama_lama_pertama: namaStaff, nama_baru: nama},
     });
     res.status(200).json({msg: "Staff berhasil diupdate"});
   } catch (error) {
