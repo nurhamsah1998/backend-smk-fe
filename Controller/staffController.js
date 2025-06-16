@@ -387,18 +387,39 @@ export const staffProfileMeUpdate = async (req, res) => {
   try {
     const {namaStaff, idStaff} =
       getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
-    const {nama} = req.body;
+    const {nama, username, noHP} = req.body;
     if (req.params.id !== idStaff) {
       return res.status(404).json({msg: "Id staff tidak sama"});
+    }
+    if (username?.includes(" ")) {
+      return res
+        .status(404)
+        .json({msg: "Username / email tidak boleh ada spasi"});
     }
     if (String(nama).length >= 35) {
       return res.status(404).json({msg: "Nama terlalu panjang"});
     }
-    if (isEmptyString(nama)) {
-      return res.status(404).json({msg: "Nama tidak boleh kosong"});
+    if (String(username).length > 35) {
+      return res
+        .status(404)
+        .json({msg: "username terlalu panjang. max 35 karakter"});
+    }
+    if (isEmptyString(nama) || isEmptyString(username)) {
+      return res.status(404).json({msg: "Nama / Username tidak boleh kosong"});
+    }
+    if (!isEmptyString(noHP) && String(Number(noHP)) === "NaN") {
+      return res.status(404).json({msg: "Nomor hp harus berupa angka"});
+    }
+    if (
+      !isEmptyString(noHP) &&
+      (String(noHP).length < 8 || String(noHP).length > 12)
+    ) {
+      return res
+        .status(404)
+        .json({msg: "No HP tidak valid, max digit 12 min digit 8"});
     }
     await stafAuth.update(
-      {nama},
+      {nama, noHP, username},
       {
         where: {
           id: idStaff,
@@ -442,6 +463,11 @@ export const staffRegister = async (req, res) => {
         .status(404)
         .json({msg: "Username / email tidak boleh ada spasi"});
     }
+    if (String(username).length > 35) {
+      return res
+        .status(404)
+        .json({msg: "username terlalu panjang. max 35 karakter"});
+    }
     if (username === "" || password === "")
       return res.status(403).json({msg: "Form tidak boleh ada yang kosong"});
     if (password?.length < 6)
@@ -450,8 +476,8 @@ export const staffRegister = async (req, res) => {
         .json({msg: "Password setidaknya lebih atau sama dengan 6 karakter"});
 
     if (
-      (noHP && String(noHP)?.length >= 12) ||
-      (noHP && String(noHP)?.length <= 8)
+      (noHP && String(noHP)?.length > 12) ||
+      (noHP && String(noHP)?.length < 8)
     ) {
       return res
         .status(404)

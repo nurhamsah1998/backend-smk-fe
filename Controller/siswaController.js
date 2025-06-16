@@ -448,11 +448,16 @@ export const importAccount = async (req, res) => {
         }
         /// PHONE VALIDATION
         if (
-          (noHP && String(noHP)?.length >= 12) ||
-          (noHP && String(noHP)?.length <= 8)
+          (noHP && String(noHP)?.length > 12) ||
+          (noHP && String(noHP)?.length < 8)
         ) {
           errorValidation.push(
             `Baris ${rowIndex}, No HP tidak valid, max digit 12 min digit 8`
+          );
+        }
+        if (String(Number(noHP)) === "NaN" && !isEmptyString(noHP)) {
+          errorValidation.push(
+            `Baris ${rowIndex}, No HP tidak valid. Nomor hp harus berupa angka`
           );
         }
         injectDataToDB.push({
@@ -659,12 +664,17 @@ export const siswaUpdate = async (req, res) => {
   try {
     const {noHP} = req.body;
     if (
-      (noHP && String(noHP)?.length >= 12) ||
-      (noHP && String(noHP)?.length <= 8)
+      (noHP && String(noHP)?.length > 12) ||
+      (noHP && String(noHP)?.length < 8)
     ) {
       return res
         .status(404)
         .json({msg: "No HP tidak valid, max digit 12 min digit 8"});
+    }
+    if (String(Number(noHP)) === "NaN" && !isEmptyString(noHP)) {
+      errorValidation.push(
+        `Baris ${rowIndex}, No HP tidak valid. Nomor hp harus berupa angka`
+      );
     }
     await siswaAuth.update(req.body, {
       where: {
