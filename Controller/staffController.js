@@ -250,10 +250,11 @@ export const databaseBackup = async (req, res) => {
     if (roleStaff !== "DEV") {
       res.status(403).json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
     }
+    const timeStamp = new Date();
     const filePath = path.resolve(
-      `./Assets/backup/backup-smk-payment-app-${new Date()
+      `./Assets/backup/backup-smk-payment-app-${timeStamp
         .toLocaleDateString()
-        ?.replaceAll("/", "_")}.sql`
+        ?.replaceAll("/", "_")}_${timeStamp.getSeconds()}.sql`
     );
     let dbPass = "";
     if (process.env.DB_PASSWORD) {
