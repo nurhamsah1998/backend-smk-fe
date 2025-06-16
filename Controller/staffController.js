@@ -11,6 +11,7 @@ import {
   getUserInfoToken,
   isEmptyString,
   recordActivity,
+  upTimeFormatter,
 } from "../Configuration/supportFunction.js";
 import database from "../Configuration/database.js";
 import {jurusan} from "../Models/jurusan.js";
@@ -18,6 +19,8 @@ import path, {dirname} from "path";
 import {fileURLToPath} from "url";
 import {exec} from "child_process";
 import dotEnv from "dotenv";
+import sys from "systeminformation";
+import os from "os";
 
 dotEnv.config();
 
@@ -122,7 +125,7 @@ export const dashboardStaffReport = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const dashboardDevReport = async (req, res) => {
@@ -169,7 +172,6 @@ export const dashboardDevReport = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({msg: "Internal server error"});
   }
 };
@@ -207,7 +209,7 @@ export const getListFiles = async (req, res) => {
     res.status(200).json({files: listFiles});
     ///
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 
@@ -221,7 +223,7 @@ export const getFileByDownload = async (req, res) => {
         .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
     await res.download(path.resolve(`./Assets/${req.query.path}`));
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 
@@ -234,11 +236,11 @@ export const deleteFile = async (req, res) => {
     }
 
     fs.unlink(`./Assets/${req.query.path}`, (error) => {
-      console.log(error);
+      throw error;
     });
     res.status(200).json({msg: `File berhasil dihapus`});
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
     res.status(400).json({msg: `File gagal dihapus`});
   }
 };
@@ -264,7 +266,7 @@ export const databaseBackup = async (req, res) => {
       `mysqldump -u root ${dbPass}${process.env.DB_NAME} > "${filePath}"`,
       (error) => {
         if (error) {
-          console.log(error);
+          throw error;
           return res.status(400).json({msg: "Gagal backup database!"});
         }
 
@@ -272,7 +274,31 @@ export const databaseBackup = async (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error);
+    res.status(400).json({msg: error?.message || "Internal server error"});
+  }
+};
+
+export const serverInfo = async (req, res) => {
+  try {
+    const {roleStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (roleStaff !== "DEV") {
+      res.status(403).json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
+    }
+    const cpu = await sys.cpu();
+    const {total, free, used} = await sys.mem();
+    const up_time = os.uptime();
+
+    res.status(200).json({
+      cpu,
+      up_time: upTimeFormatter(up_time),
+      memory: {
+        total: `${(total / 1024 / 1024).toFixed(2)} MB`,
+        free: `${(free / 1024 / 1024).toFixed(2)} MB`,
+        used: `${(used / 1024 / 1024).toFixed(2)} MB`,
+      },
+    });
+  } catch (error) {
     res.status(400).json({msg: error?.message || "Internal server error"});
   }
 };
@@ -333,12 +359,12 @@ export const getStaff = async (req, res) => {
       totalPage: totalPage,
       limit: limit,
       totalRows: totalRows,
-      totalData,
+      totalData: totalData - 1,
       page: page + 1,
     };
     res.json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getStaffProfile = async (req, res) => {
@@ -354,7 +380,7 @@ export const getStaffProfile = async (req, res) => {
     });
     res.json(response);
   } catch (error) {
-    throw error;
+    res.status(500).json({msg: error?.message});
   }
 };
 export const staffProfileMeUpdate = async (req, res) => {
@@ -388,7 +414,7 @@ export const staffProfileMeUpdate = async (req, res) => {
     });
     res.status(200).json({msg: "Staff berhasil diupdate"});
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const staffProfileUpdate = async (req, res) => {
@@ -404,7 +430,7 @@ export const staffProfileUpdate = async (req, res) => {
     );
     res.status(200).json({msg: "Staff berhasil diupdate"});
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 
@@ -449,7 +475,7 @@ export const staffRegister = async (req, res) => {
     });
     res.status(201).json({msg: "Pendaftaran berhasil"});
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
     if (error.name.includes("SequelizeUniqueConstraintError"))
       return res.status(403).json({msg: "Username sudah terdaftar"});
   }
@@ -486,7 +512,6 @@ export const staffLogin = async (req, res) => {
     );
     res.json({msg: "Login berhasil", accessToken});
   } catch (error) {
-    console.log(error);
     res.status(404).json({msg: "Akun tidak ditemukan"});
   }
 };

@@ -22,6 +22,7 @@ import {
   getFileByDownload,
   deleteFile,
   databaseBackup,
+  serverInfo,
 } from "../Controller/staffController.js";
 import {verifyToken} from "../middleWare/verifyToken.js";
 import {
@@ -175,5 +176,6 @@ router.get("/files", verifyToken, getListFiles);
 router.get("/download-files", verifyToken, getFileByDownload);
 router.get("/delete-files", verifyToken, deleteFile);
 router.get("/database-backup", verifyToken, databaseBackup);
+router.get("/server-info", verifyToken, serverInfo);
 
 export default router;

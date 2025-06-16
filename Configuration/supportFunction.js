@@ -308,7 +308,19 @@ const permissionAccess = async ({token, permission = ""}) => {
     : [];
   return !Boolean(permissions.find((item) => item === permission));
 };
+
+const upTimeFormatter = (seconds) => {
+  try {
+    const duration = moment.duration(Math.floor(seconds), "seconds");
+    const jam = duration.hours();
+    const menit = duration.minutes();
+    return `${jam} Jam, ${menit} Menit`;
+  } catch (error) {
+    return `0 Jam, 0 Menit`;
+  }
+};
 export {
+  upTimeFormatter,
   isEmptyString,
   recordActivity,
   getUserInfoToken,

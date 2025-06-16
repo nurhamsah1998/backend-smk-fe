@@ -73,8 +73,7 @@ export const postCampaign = async (req, res) => {
     });
     res.status(201).json({msg: "Berhasil membuat pengumuman"});
   } catch (error) {
-    console.log(error);
-    res.status(500).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };
 export const patchCampaign = async (req, res) => {
@@ -132,8 +131,7 @@ export const patchCampaign = async (req, res) => {
     });
     res.status(201).json({msg: "Berhasil mengubah pengumuman"});
   } catch (error) {
-    console.log(error);
-    res.status(500).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getAllCampaign = async (req, res) => {
@@ -165,8 +163,7 @@ export const getAllCampaign = async (req, res) => {
     });
     res.status(200).json({data});
   } catch (error) {
-    console.log(error);
-    res.status(500).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getCampaign = async (req, res) => {
@@ -198,8 +195,7 @@ export const getCampaign = async (req, res) => {
     });
     res.status(200).json({data});
   } catch (error) {
-    console.log(error);
-    res.status(500).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };
 export const deleteCampaign = async (req, res) => {
@@ -235,7 +231,6 @@ export const deleteCampaign = async (req, res) => {
     });
     res.status(200).json({msg: "Berhasil menghapus pengumuman"});
   } catch (error) {
-    console.log(error);
-    res.status(500).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };

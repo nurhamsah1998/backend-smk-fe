@@ -1,8 +1,8 @@
-import { Sequelize } from "sequelize";
+import {Sequelize} from "sequelize";
 import database from "../Configuration/database.js";
-import { jurusan } from "./jurusan.js";
+import {jurusan} from "./jurusan.js";
 
-const { DataTypes } = Sequelize;
+const {DataTypes} = Sequelize;
 
 export const tagihan = database.define(
   "tagihan",
@@ -32,6 +32,9 @@ export const tagihan = database.define(
     },
     angkatan: {
       type: DataTypes.INTEGER,
+      validate: {
+        max: 5000,
+      },
     },
     total: {
       type: DataTypes.BIGINT,

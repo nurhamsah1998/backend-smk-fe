@@ -1,8 +1,8 @@
-import { Sequelize } from "sequelize";
+import {Sequelize} from "sequelize";
 import database from "../Configuration/database.js";
-import { jurusan } from "./jurusan.js";
+import {jurusan} from "./jurusan.js";
 
-const { DataTypes } = Sequelize;
+const {DataTypes} = Sequelize;
 
 export const siswaAuth = database.define(
   "siswa",
@@ -66,21 +66,30 @@ export const siswaAuth = database.define(
     current_bill: {
       type: DataTypes.BIGINT,
       defaultValue: 0,
-    },
-    total_bill: {
-      type: DataTypes.BIGINT,
-      defaultValue: 0,
-    },
-    total_payment: {
-      type: DataTypes.BIGINT,
-      defaultValue: 0,
+      validate: {
+        max: 100000000,
+      },
+      total_bill: {
+        type: DataTypes.BIGINT,
+        defaultValue: 0,
+        validate: {
+          max: 100000000,
+        },
+      },
+      total_payment: {
+        type: DataTypes.BIGINT,
+        defaultValue: 0,
+        validate: {
+          max: 100000000,
+        },
+      },
     },
     status_bill: {
       type: DataTypes.STRING,
       defaultValue: "not_paid_yet",
     },
     noHP: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.STRING(12),
     },
   },
   {

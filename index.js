@@ -12,7 +12,6 @@ const messageServerStart = `Server start on port ${port}.`;
 try {
   await database.authenticate();
   // await database.sync();
-  console.log("DATABASE CONNECTED");
   app.use(cors());
   app.use(express.json());
   app.use(router);
@@ -23,3 +22,4 @@ try {
 } catch (error) {
   console.log(error, "INTERNAL SERVER ERROR");
 }
+// ["dashboard", "log_activity", "account_staff", "major", "files", "server"]

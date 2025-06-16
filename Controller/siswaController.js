@@ -192,7 +192,7 @@ export const getSiswa = async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getSiswaById = async (req, res) => {
@@ -205,7 +205,7 @@ export const getSiswaById = async (req, res) => {
     });
     res.json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 
@@ -246,7 +246,7 @@ export const importAccount = async (req, res) => {
       req.body?.tahun_angkatan === "null"
     ) {
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
-        console.log(error);
+        throw error;
       });
       return res.status(404).json({
         code: "error_validation",
@@ -256,7 +256,7 @@ export const importAccount = async (req, res) => {
     const tahun_angkatan = Number(req.body?.tahun_angkatan);
     if (String(tahun_angkatan) === "NaN") {
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
-        console.log(error);
+        throw error;
       });
       return res.status(404).json({
         code: "error_validation",
@@ -477,7 +477,7 @@ export const importAccount = async (req, res) => {
     });
     if (isEmptyData) {
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
-        console.log(error);
+        throw error;
       });
       return res.status(406).json({
         code: "error_validation",
@@ -486,7 +486,7 @@ export const importAccount = async (req, res) => {
     }
     if (Boolean(errorValidation.length)) {
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
-        console.log(error);
+        throw error;
       });
       return res
         .status(406)
@@ -497,7 +497,7 @@ export const importAccount = async (req, res) => {
     duplicateKodeSiswaFromFile = {};
     await siswaAuth.bulkCreate(injectDataToDB).then(() => {
       fs.unlink("./Assets/upload/" + req.file.filename, (error) => {
-        console.log(error);
+        throw error;
       });
     });
     recordActivity({
@@ -537,7 +537,7 @@ export const getSiswaProfile = async (req, res) => {
     const toParse = JSON.parse(toStringify);
     res.json({...toParse, username});
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 
@@ -608,6 +608,7 @@ export const siswaRegister = async (req, res) => {
     res.status(201).json({msg: "Pendaftaran berhasil"});
   } catch (error) {
     console.log(error);
+    res.status(500).json({msg: error?.message});
     if (error.name.includes("SequelizeUniqueConstraintError"))
       return res.status(403).json({msg: "Username sudah terdaftar"});
   }
@@ -650,7 +651,6 @@ export const siswaLogin = async (req, res) => {
     );
     res.json({msg: "Login berhasil", accessToken});
   } catch (error) {
-    console.log(error);
     res.status(404).json({msg: "Akun tidak ditemukan!"});
   }
 };
@@ -686,7 +686,7 @@ export const siswaUpdate = async (req, res) => {
     }
     res.status(200).json({msg: "Siswa berhasil diupdate"});
   } catch (error) {
-    res.status(403).json({msg: "Internal server error !"});
+    res.status(500).json({msg: error?.message});
   }
 };
 export const bulkStatusKelasSiswa = async (req, res) => {

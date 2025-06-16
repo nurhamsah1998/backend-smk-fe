@@ -67,8 +67,7 @@ export const postInvoiceIn = async (req, res) => {
     });
     res.status(201).json({msg: "Transaksi berhasil", data: data});
   } catch (error) {
-    console.log(error);
-    res.status(500).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };
 
@@ -82,8 +81,7 @@ export const getInvoice = async (req, res) => {
     });
     res.status(200).json(responseInvoice);
   } catch (error) {
-    console.log(error);
-    res.status(404).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getInvoiceMe = async (req, res) => {
@@ -98,8 +96,7 @@ export const getInvoiceMe = async (req, res) => {
     });
     res.status(200).json(responseInvoice);
   } catch (error) {
-    console.log(error);
-    res.status(404).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getAllInvoiceIn = async (req, res) => {
@@ -181,8 +178,7 @@ export const getAllInvoiceIn = async (req, res) => {
       totalData,
     });
   } catch (error) {
-    console.log(error);
-    res.status(404).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getTotalInvoiceIn = async (req, res) => {
@@ -194,6 +190,6 @@ export const getTotalInvoiceIn = async (req, res) => {
     });
     res.status(200).json(responseInvoice);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };

@@ -12,11 +12,11 @@ export const jurusan = database.define(
       defaultValue: DataTypes.UUIDV4,
     },
     nama: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(200),
       unique: true,
     },
     kode_jurusan: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(10),
       unique: true,
     },
   },

@@ -254,7 +254,7 @@ export const downloadTemplateImportSiswa = async (req, res) => {
 
     await res.download(path.resolve(fileName));
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const downloadFileExelTransaction = async (req, res) => {
@@ -262,7 +262,7 @@ export const downloadFileExelTransaction = async (req, res) => {
     const {token} = req.params;
     await res.download(path.resolve(`./Assets/download/${token}`));
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const downloadTransactionIn = async (req, res) => {
@@ -469,7 +469,7 @@ export const downloadTransactionIn = async (req, res) => {
     await Workbook.xlsx.writeFile(folderPlace);
     await res.download(path.resolve(`./Assets/download/${fileName}`));
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const downloadTransactionOut = async (req, res) => {
@@ -643,7 +643,7 @@ export const downloadTransactionOut = async (req, res) => {
     await Workbook.xlsx.writeFile(folderPlace);
     await res.download(path.resolve(`./Assets/download/${fileName}`));
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const downloadStudentBill = async (req, res) => {
@@ -1108,7 +1108,7 @@ export const downloadStudentBill = async (req, res) => {
       return await res.download(path.resolve(`./Assets/download/${fileName}`));
     }
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 
@@ -1240,7 +1240,7 @@ export const downloadStudentBill = async (req, res) => {
 //     fs.writeFileSync(filePath, Buffer.from(bufferFile));
 //     return await res.download(filePath);
 //   } catch (error) {
-//     console.log(error);
+//    res.status(500).json({msg: error?.message});
 //     res.status(500).json({msg: "Internal server error"});
 //   }
 // };

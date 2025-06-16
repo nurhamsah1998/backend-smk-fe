@@ -43,7 +43,7 @@ export const getTagihanFix = async (req, res) => {
     };
     res.status(200).json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getTotalTagihanFix = async (req, res) => {
@@ -60,7 +60,7 @@ export const getTotalTagihanFix = async (req, res) => {
     const total = Object.values(response[0] || {}).reduce((a, b) => a + b, 0);
     res.status(200).json(total);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getTagihanFixForTU = async (req, res) => {
@@ -73,7 +73,7 @@ export const getTagihanFixForTU = async (req, res) => {
 
     res.status(200).json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getTagihanFixForStudent = async (req, res) => {
@@ -88,7 +88,7 @@ export const getTagihanFixForStudent = async (req, res) => {
 
     res.status(200).json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getTahunAngkatan = async (req, res) => {
@@ -135,7 +135,7 @@ export const getTahunAngkatan = async (req, res) => {
     };
     res.status(200).json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 
@@ -176,7 +176,7 @@ export const updateTagihanFix = async (req, res) => {
 
     res.status(200).json({msg: "Tagihan berhasil diubah"});
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 export const createTagihanFix = async (req, res) => {
@@ -189,7 +189,9 @@ export const createTagihanFix = async (req, res) => {
       .sort((a, b) => b.tahun_angkatan - a.tahun_angkatan)
       .shift();
     const body = {
-      tahun_angkatan: Number(findBigestYear.tahun_angkatan) + 1,
+      tahun_angkatan: findBigestYear?.tahun_angkatan
+        ? Number(findBigestYear.tahun_angkatan) + 1
+        : new Date().getFullYear(),
     };
     await tagihanFix.create(body);
     recordActivity({
@@ -201,6 +203,6 @@ export const createTagihanFix = async (req, res) => {
     });
     res.status(200).json({msg: "Berhasil membuat tagihan baru"});
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };

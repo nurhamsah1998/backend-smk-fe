@@ -7,7 +7,7 @@ export const getJurusan = async (req, res) => {
     const response = await jurusan.findAll();
     res.status(200).json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };
 
@@ -19,13 +19,20 @@ export const postJurusan = async (req, res) => {
       return res
         .status(403)
         .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
+
+    if (req.body.kode_jurusan?.length > 10)
+      return res
+        .status(400)
+        .json({msg: "Kode jurusan terlalu panjang. Max 10 karakter"});
     await jurusan.create({
       nama: req.body.nama,
-      kode_jurusan: req.body.kode_jurusan,
+      kode_jurusan: req.body.kode_jurusan?.toUpperCase(),
     });
     res.status(201).json({msg: "Jurusan berhasil dibuat."});
   } catch (error) {
-    console.log(error);
+    return res
+      .status(500)
+      .json({msg: error?.message || "Internal server error"});
   }
 };
 
@@ -46,16 +53,18 @@ export const deleteJurusan = async (req, res) => {
       return res.status(404).json({msg: "id tidak ditemukan"});
     res.status(201).json({msg: "Jurusan berhasil dihapus."});
   } catch (error) {
-    console.log(error);
     const relatedMajor = await siswaAuth.count({
       where: {
         jurusanId: req.params.id,
       },
     });
-
-    return res.status(404).json({
-      msg: `jurusan tidak bisa dihapus, karena sudah terhubung ke siswa. terdapat ${relatedMajor} siswa yang memiliki jurusan ini`,
-    });
+    if (relatedMajor) {
+      return res.status(404).json({
+        msg: `jurusan tidak bisa dihapus, karena sudah terhubung ke siswa. terdapat ${relatedMajor} siswa yang memiliki jurusan ini`,
+      });
+    } else {
+      res.status(500).json({msg: error?.message});
+    }
   }
 };
 
@@ -80,6 +89,6 @@ export const updateJurusan = async (req, res) => {
       return res.status(404).json({msg: "id tidak ditemukan"});
     res.status(201).json({msg: "Jurusan berhasil update."});
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };

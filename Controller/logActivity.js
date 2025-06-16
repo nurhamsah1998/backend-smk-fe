@@ -52,6 +52,6 @@ export const getActivity = async (req, res) => {
     };
     res.status(200).json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: error?.message});
   }
 };

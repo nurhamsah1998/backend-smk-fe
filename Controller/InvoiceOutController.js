@@ -51,8 +51,7 @@ export const postInvoiceOut = async (req, res) => {
     });
     res.status(201).json({msg: "Transaksi berhasil", data: data});
   } catch (error) {
-    console.log(error);
-    res.status(500).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };
 export const getAllInvoiceOut = async (req, res) => {
@@ -113,7 +112,6 @@ export const getAllInvoiceOut = async (req, res) => {
       totalData,
     });
   } catch (error) {
-    console.log(error);
-    res.status(404).json({msg: "Internal server error"});
+    res.status(500).json({msg: error?.message});
   }
 };

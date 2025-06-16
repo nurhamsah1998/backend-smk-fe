@@ -1,7 +1,7 @@
-import { Sequelize } from "sequelize";
+import {Sequelize} from "sequelize";
 import database from "../Configuration/database.js";
 
-const { DataTypes } = Sequelize;
+const {DataTypes} = Sequelize;
 
 export const stafAuth = database.define(
   "staf",
@@ -12,16 +12,16 @@ export const stafAuth = database.define(
       defaultValue: DataTypes.UUIDV4,
     },
     nama: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(200),
       defaultValue: "",
     },
     username: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(200),
       defaultValue: "",
       unique: true,
     },
     password: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(200),
       defaultValue: "",
     },
     permissions: {
@@ -41,7 +41,7 @@ export const stafAuth = database.define(
       defaultValue: "ANONIM",
     },
     noHP: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.STRING(12),
     },
   },
   {
