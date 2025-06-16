@@ -16,6 +16,10 @@ import database from "../Configuration/database.js";
 import {jurusan} from "../Models/jurusan.js";
 import path, {dirname} from "path";
 import {fileURLToPath} from "url";
+import {exec} from "child_process";
+import dotEnv from "dotenv";
+
+dotEnv.config();
 
 export const dashboardStaffReport = async (req, res) => {
   try {
@@ -181,7 +185,7 @@ export const getListFiles = async (req, res) => {
 
     const fileName = fileURLToPath(import.meta.url);
     const __dirname = dirname(fileName);
-    const listFolders = ["download", "template", "upload"];
+    const listFolders = ["download", "template", "upload", "backup"];
     ///
     let listFiles = [];
     for (let index = 0; index < listFolders.length; index++) {
@@ -236,6 +240,39 @@ export const deleteFile = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(400).json({msg: `File gagal dihapus`});
+  }
+};
+
+export const databaseBackup = async (req, res) => {
+  try {
+    const {roleStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (roleStaff !== "DEV") {
+      res.status(403).json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
+    }
+    const filePath = path.resolve(
+      `./Assets/backup/backup-smk-payment-app-${new Date()
+        .toLocaleDateString()
+        ?.replaceAll("/", "_")}.sql`
+    );
+    let dbPass = "";
+    if (process.env.DB_PASSWORD) {
+      dbPass = `-p${process.env.DB_PASSWORD} `;
+    }
+    exec(
+      `mysqldump -u root ${dbPass}${process.env.DB_NAME} > "${filePath}"`,
+      (error) => {
+        if (error) {
+          console.log(error);
+          return res.status(400).json({msg: "Gagal backup database!"});
+        }
+
+        res.download(filePath);
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({msg: error?.message || "Internal server error"});
   }
 };
 

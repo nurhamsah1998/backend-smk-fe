@@ -8,7 +8,13 @@ import {Op} from "sequelize";
 import exeljs from "exceljs";
 import {jsPDF as JSPDF} from "jspdf";
 import autoTable from "jspdf-autotable";
-import {FormatCurrency, KopPdf} from "../Configuration/supportFunction.js";
+import {
+  FormatCurrency,
+  isEmptyString,
+  KopPdf,
+  pdfSuratTagihan,
+  permissionAccess,
+} from "../Configuration/supportFunction.js";
 import {uid} from "uid";
 import {invoiceOut} from "../Models/invoiceOut.js";
 
@@ -644,7 +650,7 @@ export const downloadStudentBill = async (req, res) => {
   const page = parseInt(req.query.page) - 1 || 0;
   const limit = parseInt(req.query.limit) || 10;
   const search = req.query.search || "";
-  const fileType = req.query.type || "";
+  const fileType = req.query.type_file || "";
   const angkatan = req.query.angkatan || "%";
   const currentBill = req.query.current_bill || "";
   const jurusanId = req.query.jurusanId || "%";
@@ -1105,3 +1111,136 @@ export const downloadStudentBill = async (req, res) => {
     console.log(error);
   }
 };
+
+// export const bulkPrintSuratTagihanSiswa = async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) - 1 || 0;
+//     const limit = parseInt(req.query.limit) || 40;
+//     const search = req.query.search || "";
+//     const nomorRef = req.query.nomorRef || "";
+//     const startUjian = req.query.startUjian || "";
+//     const expiredDate = req.query.expiredDate || "";
+//     const angkatan = req.query.angkatan || "%";
+//     const currentBill = req.query.current_bill || "";
+//     const jurusanId = req.query.jurusanId || "%";
+//     const kelas = req.query.kelas || "%";
+//     const subKelas = req.query.sub_kelas || "%";
+//     const status = req.query.status || "%";
+//     const offside = limit * page;
+
+//     if (
+//       isEmptyString(nomorRef) ||
+//       isEmptyString(startUjian) ||
+//       isEmptyString(expiredDate)
+//     )
+//       return res.status(400).json({
+//         msg: "Nomor, tanggal ujian dan tanggal jatuh tempo tidak boleh kosong",
+//       });
+
+//     const isNotAccess = await permissionAccess({
+//       token: req.headers.authorization.replace("Bearer ", ""),
+//       permission: "student_bill_letter",
+//     });
+//     if (isNotAccess)
+//       return res
+//         .status(403)
+//         .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
+
+//     let data = await siswaAuth.findAll({
+//       raw: true,
+//       where: {
+//         current_bill: {
+//           [Op.or]: {
+//             [currentBill === "not_paid"
+//               ? Op.gt
+//               : currentBill === "paid" || currentBill === "not_paid_yet"
+//               ? Op.eq
+//               : currentBill === "deposit"
+//               ? Op.lt
+//               : Op.gt]: currentBill === "" ? -1 : 0,
+//             [currentBill === "" ||
+//             currentBill === "not_paid_yet" ||
+//             currentBill === "deposit"
+//               ? Op.lt
+//               : Op.gt]: 0,
+//           },
+//         },
+//         status_bill: {
+//           [Op.like]:
+//             currentBill === "not_paid_yet"
+//               ? "not_paid_yet"
+//               : currentBill === "paid"
+//               ? "paid"
+//               : "%",
+//         },
+//         angkatan: {
+//           [Op.like]: angkatan,
+//         },
+//         jurusanId: {
+//           [Op.like]: jurusanId,
+//         },
+//         kelas: {
+//           [Op.like]: kelas,
+//         },
+//         sub_kelas: {
+//           [Op.like]: subKelas,
+//         },
+//         status: {
+//           [Op.like]: status,
+//         },
+//         [Op.or]: [
+//           {
+//             nama: {
+//               [Op.like]: "%" + search + "%",
+//             },
+//           },
+//           {
+//             nama_ayah: {
+//               [Op.like]: "%" + search + "%",
+//             },
+//           },
+//           {
+//             nama_ibu: {
+//               [Op.like]: "%" + search + "%",
+//             },
+//           },
+//           {
+//             username: {
+//               [Op.like]: "%" + search + "%",
+//             },
+//           },
+//           {
+//             kode_siswa: {
+//               [Op.like]: "%" + search + "%",
+//             },
+//           },
+//         ],
+//       },
+//       limit: limit,
+//       offset: offside,
+//       order: [["id", "DESC"]],
+//       include: [{model: jurusan}],
+//     });
+//     const doc = new JSPDF({
+//       orientation: "p",
+//       unit: "mm",
+//       format: "legal",
+//     });
+//     for (let index = 0; index < data.length; index += 1) {
+//       pdfSuratTagihan(doc, data[index], nomorRef, startUjian, expiredDate);
+//       if (index < data?.length - 1) {
+//         doc.addPage();
+//       }
+//     }
+//     const fileName = `Surat tagihan masal ${moment().format(
+//       "Do-MMMM-YYYY"
+//     )}.pdf`;
+//     const filePath = path.resolve(`./Assets/download/${fileName}`);
+//     const bufferFile = doc.output("arraybuffer");
+//     fs.writeFileSync(filePath, Buffer.from(bufferFile));
+//     return await res.download(filePath);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({msg: "Internal server error"});
+//   }
+// };

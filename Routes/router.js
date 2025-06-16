@@ -21,6 +21,7 @@ import {
   getListFiles,
   getFileByDownload,
   deleteFile,
+  databaseBackup,
 } from "../Controller/staffController.js";
 import {verifyToken} from "../middleWare/verifyToken.js";
 import {
@@ -52,6 +53,7 @@ import {
   downloadTransactionIn,
   downloadStudentBill,
   downloadTransactionOut,
+  // bulkPrintSuratTagihanSiswa,
 } from "../Controller/download.js";
 import {
   deleteCampaign,
@@ -147,6 +149,10 @@ router.get("/invoice-me", verifyToken, getInvoiceMe);
 
 /// DOWNLOAD
 router.get("/download/template-import-siswa", downloadTemplateImportSiswa);
+// router.get(
+//   "/download/bulk-print-surat-tagihan-siswa",
+//   bulkPrintSuratTagihanSiswa
+// );
 router.get(
   "/download/report-transaction-in",
   verifyToken,
@@ -168,5 +174,6 @@ router.get("/dashboard-dev", verifyToken, dashboardDevReport);
 router.get("/files", verifyToken, getListFiles);
 router.get("/download-files", verifyToken, getFileByDownload);
 router.get("/delete-files", verifyToken, deleteFile);
+router.get("/database-backup", verifyToken, databaseBackup);
 
 export default router;
