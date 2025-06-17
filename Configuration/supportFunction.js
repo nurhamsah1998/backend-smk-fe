@@ -10,7 +10,7 @@ const recordActivity = async ({action, data, author}) => {
     await logActivity.create({
       action,
       data,
-      author,
+      authorId: author,
     });
   } catch (error) {
     console.log(error);

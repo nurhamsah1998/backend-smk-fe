@@ -44,9 +44,8 @@ export const postInvoiceOut = async (req, res) => {
     const data = await invoiceOut.create(body);
     recordActivity({
       action: "Transaksi keluar",
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data,
     });
     res.status(201).json({msg: "Transaksi berhasil", data: data});

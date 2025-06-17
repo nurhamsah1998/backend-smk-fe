@@ -21,6 +21,9 @@ import {exec} from "child_process";
 import dotEnv from "dotenv";
 import sys from "systeminformation";
 import os from "os";
+import {siswaAuth} from "../Models/siswa.js";
+import {logActivity} from "../Models/logActivity.js";
+import {campaign} from "../Models/campaign.js";
 
 dotEnv.config();
 
@@ -130,7 +133,37 @@ export const dashboardStaffReport = async (req, res) => {
 };
 export const dashboardDevReport = async (req, res) => {
   try {
+    const getFullYears = new Date().getFullYear();
+    const activeAngkatan = [getFullYears - 1, getFullYears, getFullYears + 1];
     const major = await jurusan.findAll({raw: true});
+    const totalActiveStudent = await siswaAuth.count({
+      where: {
+        angkatan: {
+          [Op.in]: activeAngkatan,
+        },
+      },
+    });
+    const totalAlumniStudent = await siswaAuth.count({
+      where: {
+        angkatan: {
+          [Op.notIn]: activeAngkatan,
+        },
+      },
+    });
+    const lastLogActivity = await logActivity.findAll({
+      attributes: ["action", "createdAt", "id"],
+      include: {model: stafAuth, attributes: ["nama"]},
+      limit: 5,
+      order: [["createdAt", "DESC"]],
+    });
+    const getCampaign = await campaign.findAll({
+      include: [
+        {model: stafAuth, attributes: ["nama"]},
+        {model: jurusan, attributes: ["kode_jurusan"]},
+      ],
+      limit: 3,
+      order: [["createdAt", "DESC"]],
+    });
     const [tahun_angkatan] = await database.query(
       `select distinct(angkatan) from siswa order by angkatan asc`
     );
@@ -169,10 +202,14 @@ export const dashboardDevReport = async (req, res) => {
       data: {
         tahun_angkatan: tahun_angkatan?.map((item) => item?.angkatan),
         analytics: data,
+        total_siswa_aktif: totalActiveStudent,
+        total_siswa_alumni: totalAlumniStudent,
+        log_activity: lastLogActivity,
+        latest_campaign: getCampaign,
       },
     });
   } catch (error) {
-    res.status(500).json({msg: "Internal server error"});
+    res.status(500).json({msg: "Internal server error", error: error?.message});
   }
 };
 
@@ -428,9 +465,8 @@ export const staffProfileMeUpdate = async (req, res) => {
     );
     recordActivity({
       action: "Mengubah nama profile",
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data: {nama_lama_pertama: namaStaff, nama_baru: nama},
     });
     res.status(200).json({msg: "Staff berhasil diupdate"});

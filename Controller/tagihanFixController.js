@@ -169,7 +169,7 @@ export const updateTagihanFix = async (req, res) => {
         action: "Mengubah Tagihan",
         author: getUserInfoToken(
           req.headers.authorization.replace("Bearer ", "")
-        ),
+        )?.idStaff,
         data: req.body.history,
       });
     }
@@ -196,9 +196,8 @@ export const createTagihanFix = async (req, res) => {
     await tagihanFix.create(body);
     recordActivity({
       action: "Menambah Tagihan",
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data: body,
     });
     res.status(200).json({msg: "Berhasil membuat tagihan baru"});

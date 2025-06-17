@@ -2,6 +2,7 @@ import {logActivity} from "../Models/logActivity.js";
 import moment from "moment";
 import {Op} from "sequelize";
 import {getUserInfoToken} from "../Configuration/supportFunction.js";
+import {stafAuth} from "../Models/staf.js";
 
 export const getActivity = async (req, res) => {
   const {roleStaff} =
@@ -36,12 +37,14 @@ export const getActivity = async (req, res) => {
       raw: true,
       limit,
       offset: offside,
+      include: {model: stafAuth, attributes: ["nama", "username"]},
       order: [["createdAt", "DESC"]],
     });
     const response = {
       data: logList.map((item) => ({
         ...item,
-        author: JSON.parse(item.author),
+        author_name: item?.["staf.nama"] || "-",
+        author_username: item?.["staf.username"] || "-",
         data: JSON.parse(item.data),
       })),
       totalPage,

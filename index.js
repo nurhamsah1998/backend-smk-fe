@@ -22,4 +22,4 @@ try {
 } catch (error) {
   console.log(error, "INTERNAL SERVER ERROR");
 }
-// ["dashboard", "log_activity", "account_staff", "major", "files", "server"]
+// ["dashboard", "log_activity", "account_staff", "major", "files", "server", "news"]

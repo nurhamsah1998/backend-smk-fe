@@ -102,9 +102,8 @@ export const deleteResponseCampaign = async (req, res) => {
 
     recordActivity({
       action: `Menghapus respon pengumuman`,
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data: findResponseCampaign,
     });
     res.status(200).json({msg: "Berhasil menghapus respon pengumuman"});

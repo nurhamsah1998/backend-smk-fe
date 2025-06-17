@@ -56,9 +56,8 @@ export const postCampaign = async (req, res) => {
     });
     recordActivity({
       action: `Membuat pengumuman`,
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data: {
         text,
         status,
@@ -115,9 +114,8 @@ export const patchCampaign = async (req, res) => {
     );
     recordActivity({
       action: `Mengedit pengumuman`,
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data: {
         text,
         status,
@@ -224,9 +222,8 @@ export const deleteCampaign = async (req, res) => {
     });
     recordActivity({
       action: `Menghapus pengumuman`,
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data: findCampaign,
     });
     res.status(200).json({msg: "Berhasil menghapus pengumuman"});

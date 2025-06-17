@@ -1,7 +1,8 @@
-import { Sequelize } from "sequelize";
+import {Sequelize} from "sequelize";
 import database from "../Configuration/database.js";
+import {stafAuth} from "./staf.js";
 
-const { DataTypes } = Sequelize;
+const {DataTypes} = Sequelize;
 
 export const logActivity = database.define(
   "log-activity",
@@ -19,12 +20,18 @@ export const logActivity = database.define(
       type: DataTypes.JSON,
       defaultValue: [],
     },
-    author: {
-      type: DataTypes.JSON,
-      defaultValue: [],
+    authorId: {
+      type: DataTypes.UUID,
+      defaultValue: null,
     },
   },
   {
     freezeTableName: true,
   }
 );
+
+logActivity.belongsTo(stafAuth, {
+  onDelete: "RESTRICT",
+  onUpdate: "RESTRICT",
+  foreignKey: "authorId",
+});

@@ -60,9 +60,8 @@ export const postInvoiceIn = async (req, res) => {
     const data = await invoice.create(body);
     recordActivity({
       action: "Transaksi",
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data,
     });
     res.status(201).json({msg: "Transaksi berhasil", data: data});

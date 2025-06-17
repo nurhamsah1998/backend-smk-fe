@@ -507,9 +507,8 @@ export const importAccount = async (req, res) => {
     });
     recordActivity({
       action: `Import siswa, ${injectDataToDB.length} siswa ditambahkan`,
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data: [],
     });
     injectDataToDB = [];
@@ -607,7 +606,7 @@ export const siswaRegister = async (req, res) => {
         data: body,
         author: getUserInfoToken(
           req.headers.authorization.replace("Bearer ", "")
-        ),
+        )?.idStaff,
       });
     }
     res.status(201).json({msg: "Pendaftaran berhasil"});
@@ -690,7 +689,7 @@ export const siswaUpdate = async (req, res) => {
         action: `Mengupdate siswa`,
         author: getUserInfoToken(
           req.headers.authorization.replace("Bearer ", "")
-        ),
+        )?.idStaff,
         data: req.body,
       });
     }
@@ -728,9 +727,8 @@ export const bulkStatusKelasSiswa = async (req, res) => {
 
     recordActivity({
       action: `Mengubah status kelas siswa secara masal`,
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data: [],
     });
     res.status(200).json({
@@ -768,9 +766,8 @@ export const bulkStatusSiswaUpdate = async (req, res) => {
 
     recordActivity({
       action: `Mengubah status siswa secara masal`,
-      author: getUserInfoToken(
-        req.headers.authorization.replace("Bearer ", "")
-      ),
+      author: getUserInfoToken(req.headers.authorization.replace("Bearer ", ""))
+        ?.idStaff,
       data: [],
     });
     res.status(200).json({
