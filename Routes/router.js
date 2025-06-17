@@ -69,12 +69,18 @@ import {
   postResponseCampaign,
 } from "../Controller/responseCampaignController.js";
 import {
+  getAllNews,
+  getNewsImage,
+  postNews,
+  storeNewsImage,
+} from "../Controller/newsController.js";
+import {
   getAllInvoiceOut,
   postInvoiceOut,
 } from "../Controller/InvoiceOutController.js";
 
 const router = express.Router();
-const storage = multer.diskStorage({
+const storageImportSiswa = multer.diskStorage({
   destination: (req, file, callback) => {
     /// https://stackoverflow.com/a/70855427/18038473
     callback(null, "./Assets/upload");
@@ -83,8 +89,18 @@ const storage = multer.diskStorage({
     callback(null, `${Date.now()}_${file.originalname}`);
   },
 });
+const storageImportImage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    /// https://stackoverflow.com/a/70855427/18038473
+    callback(null, "./Assets/image");
+  },
+  filename: (req, file, callback) => {
+    callback(null, `PRE_${Date.now()}_${file.originalname}`);
+  },
+});
 
-const upload = multer({storage});
+const uploadSiswa = multer({storage: storageImportSiswa});
+const uploadImage = multer({storage: storageImportImage});
 /// SISWA
 router.get("/siswa", verifyToken, getSiswa);
 router.get("/siswa/:id", verifyToken, getSiswaById);
@@ -92,7 +108,7 @@ router.get("/siswa-profile", verifyToken, getSiswaProfile);
 router.post("/register-siswa", siswaRegister);
 router.post(
   "/import-akun-siswa",
-  upload.single("xlsx"),
+  uploadSiswa.single("xlsx"),
   verifyToken,
   importAccount
 );
@@ -140,6 +156,15 @@ router.get("/campaign", verifyToken, getAllCampaign);
 router.get("/campaign-me", verifyToken, getCampaign);
 router.patch("/campaign/:id", verifyToken, patchCampaign);
 router.delete("/campaign/:id", verifyToken, deleteCampaign);
+router.post(
+  "/news-image",
+  uploadImage.single("img"),
+  verifyToken,
+  storeNewsImage
+);
+router.post("/news", verifyToken, postNews);
+router.get("/news", verifyToken, getAllNews);
+router.get("/news-image/:img", getNewsImage);
 /// INVOICE ///
 router.post("/invoice-in", verifyToken, postInvoiceIn);
 router.get("/get-all-invoice-in", verifyToken, getAllInvoiceIn);
