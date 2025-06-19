@@ -70,19 +70,20 @@ import {
 } from "../Controller/responseCampaignController.js";
 import {
   deleteNews,
-  getAllNews,
+  getNews,
   getMyNews,
   getMyNewsById,
   getNewsImage,
   getNewsThumbnailImage,
   getNewsById,
   getPublicNewsById,
-  getRecomendedPrivateNews,
+  getRecommendedNews,
   getRecomendedPublicNews,
   postNews,
   reactionNews,
   storeNewsImage,
   updateNews,
+  getPublicNews,
 } from "../Controller/newsController.js";
 import {
   getAllInvoiceOut,
@@ -191,10 +192,10 @@ router.post(
   verifyToken,
   storeNewsImage
 );
-router.get("/news", verifyToken, getAllNews);
+router.get("/news", verifyToken, getNews);
 router.delete("/news-comment/:id", verifyToken, deleteNewsComment);
 /// RECOMANDED NEWS
-router.get("/news-recommended/:id", verifyToken, getRecomendedPrivateNews);
+router.get("/news-recommended/:id", verifyToken, getRecommendedNews);
 router.get("/news-public-recommended/:id", getRecomendedPublicNews);
 
 /// REACTION
@@ -206,6 +207,7 @@ router.get(
 );
 router.post("/news-comment", verifyToken, postNewsComment);
 router.get("/public-news/:id", getPublicNewsById);
+router.get("/public-news", getPublicNews);
 router.get("/private-news/:id", verifyToken, getNewsById);
 router.get("/news-comment/:id", getCommentByNewsId);
 router.post(

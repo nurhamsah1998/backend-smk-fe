@@ -243,46 +243,72 @@ export const deleteNews = async (req, res) => {
   }
 };
 
-export const getAllNews = async (req, res) => {
+const newsGetter = async (req, type = "public") => {
   const page = parseInt(req.query.page) - 1 || 0;
   const limit = parseInt(req.query.limit) || 40;
   const search = req.query.search || "";
   const offside = limit * page;
+  const totalData = await news.count();
+  const totalRows = await news.count({
+    where: {
+      isPublish: 1,
+      ...(type === "public" && {isPrivate: 0}),
+      [Op.or]: [
+        {
+          title: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+      ],
+    },
+  });
+
+  const totalPage = Math.ceil(totalRows / limit);
+  let data = await news.findAll({
+    raw: true,
+    nest: true,
+    where: {
+      isPublish: 1,
+      [Op.or]: [
+        {
+          title: {
+            [Op.like]: "%" + search + "%",
+          },
+        },
+      ],
+    },
+    limit: limit,
+    offset: offside,
+    order: [["id", "DESC"]],
+    include: [{model: stafAuth, attributes: ["nama"]}],
+  });
+  return {data, totalData, totalPage, limit, totalRows, page};
+};
+
+export const getNews = async (req, res) => {
   try {
-    const totalData = await news.count();
-    const totalRows = await news.count({
-      where: {
-        isPublish: 1,
-        [Op.or]: [
-          {
-            title: {
-              [Op.like]: "%" + search + "%",
-            },
-          },
-        ],
-      },
-    });
-
-    const totalPage = Math.ceil(totalRows / limit);
-    let data = await news.findAll({
-      raw: true,
-      nest: true,
-      where: {
-        isPublish: 1,
-        [Op.or]: [
-          {
-            title: {
-              [Op.like]: "%" + search + "%",
-            },
-          },
-        ],
-      },
+    const {data, totalData, totalPage, limit, totalRows, page} =
+      await newsGetter(req, "private");
+    const response = {
+      data: data.map((item) => ({
+        ...item,
+        html: textEllipsis(striptags(item.html), 100),
+      })),
+      totalPage: totalPage,
       limit: limit,
-      offset: offside,
-      order: [["id", "DESC"]],
-      include: [{model: stafAuth, attributes: ["nama"]}],
-    });
-
+      totalRows: totalRows,
+      totalData,
+      page: page + 1,
+    };
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({msg: error?.message});
+  }
+};
+export const getPublicNews = async (req, res) => {
+  try {
+    const {data, totalData, totalPage, limit, totalRows, page} =
+      await newsGetter(req, "public");
     const response = {
       data: data.map((item) => ({
         ...item,
@@ -331,7 +357,7 @@ const recomendedNews = async (news_id, type = "public") => {
     html: textEllipsis(striptags(item.html), 50),
   }));
 };
-export const getRecomendedPrivateNews = async (req, res) => {
+export const getRecommendedNews = async (req, res) => {
   try {
     const data = await recomendedNews(req.params.id, "private");
     res.json({data});
@@ -472,6 +498,7 @@ export const getPublicNewsById = async (req, res) => {
       where: {
         id: req.params.id,
         isPrivate: 0,
+        isPublish: 1,
       },
       include: {model: stafAuth, attributes: ["nama"]},
     });
