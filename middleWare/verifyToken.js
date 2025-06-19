@@ -14,3 +14,15 @@ export const verifyToken = async (req, res, next) => {
     res.sendStatus(403);
   }
 };
+
+export const verifyManualToken = async (token, res) => {
+  try {
+    if (!token) return res.sendStatus(401);
+    jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+      if (err) return res.sendStatus(403);
+      return null;
+    });
+  } catch (error) {
+    return res.sendStatus(403);
+  }
+};

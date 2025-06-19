@@ -319,7 +319,14 @@ const upTimeFormatter = (seconds) => {
     return `0 Jam, 0 Menit`;
   }
 };
+
+const textEllipsis = (str, limit = 100) => {
+  if (typeof str !== "string") str = "";
+  return `${str.substring(0, limit)}${str?.length > limit ? ". . ." : ""}`;
+};
+
 export {
+  textEllipsis,
   upTimeFormatter,
   isEmptyString,
   recordActivity,

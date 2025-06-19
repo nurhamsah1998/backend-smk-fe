@@ -20,22 +20,30 @@ export const news = database.define(
       type: DataTypes.STRING(200),
       defaultValue: "",
     },
-    html: {
+    thumbnail: {
       type: DataTypes.STRING,
+      defaultValue: null,
+    },
+    html: {
+      type: DataTypes.TEXT,
       defaultValue: "",
     },
     isPublish: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    like: {
+    isPrivate: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    up_vote: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
       validate: {
         max: 100000000,
       },
     },
-    down_like: {
+    down_vote: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
       validate: {

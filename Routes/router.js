@@ -69,15 +69,31 @@ import {
   postResponseCampaign,
 } from "../Controller/responseCampaignController.js";
 import {
+  deleteNews,
   getAllNews,
+  getMyNews,
+  getMyNewsById,
   getNewsImage,
+  getNewsThumbnailImage,
+  getNewsById,
+  getPublicNewsById,
+  getRecomendedPrivateNews,
+  getRecomendedPublicNews,
   postNews,
+  reactionNews,
   storeNewsImage,
+  updateNews,
 } from "../Controller/newsController.js";
 import {
   getAllInvoiceOut,
   postInvoiceOut,
 } from "../Controller/InvoiceOutController.js";
+import {
+  deleteNewsComment,
+  getCommentByNewsId,
+  postNewsComment,
+  reactionComment,
+} from "../Controller/newsCommentController.js";
 
 const router = express.Router();
 const storageImportSiswa = multer.diskStorage({
@@ -89,18 +105,31 @@ const storageImportSiswa = multer.diskStorage({
     callback(null, `${Date.now()}_${file.originalname}`);
   },
 });
-const storageImportImage = multer.diskStorage({
+const storageNewsContentImage = multer.diskStorage({
   destination: (req, file, callback) => {
     /// https://stackoverflow.com/a/70855427/18038473
-    callback(null, "./Assets/image");
+    callback(null, "./Assets/news/content");
   },
   filename: (req, file, callback) => {
-    callback(null, `PRE_${Date.now()}_${file.originalname}`);
+    callback(
+      null,
+      `PRE_${Date.now()}_${file.originalname?.replaceAll(" ", "-")}`
+    );
+  },
+});
+const storagethumbnail = multer.diskStorage({
+  destination: (req, file, callback) => {
+    /// https://stackoverflow.com/a/70855427/18038473
+    callback(null, "./Assets/news/thumbnail");
+  },
+  filename: (req, file, callback) => {
+    callback(null, `${Date.now()}_${file.originalname?.replaceAll(" ", "-")}`);
   },
 });
 
 const uploadSiswa = multer({storage: storageImportSiswa});
-const uploadImage = multer({storage: storageImportImage});
+const newsImageImage = multer({storage: storageNewsContentImage});
+const thumbnailNews = multer({storage: storagethumbnail});
 /// SISWA
 router.get("/siswa", verifyToken, getSiswa);
 router.get("/siswa/:id", verifyToken, getSiswaById);
@@ -158,13 +187,44 @@ router.patch("/campaign/:id", verifyToken, patchCampaign);
 router.delete("/campaign/:id", verifyToken, deleteCampaign);
 router.post(
   "/news-image",
-  uploadImage.single("img"),
+  newsImageImage.single("img"),
   verifyToken,
   storeNewsImage
 );
-router.post("/news", verifyToken, postNews);
 router.get("/news", verifyToken, getAllNews);
+router.delete("/news-comment/:id", verifyToken, deleteNewsComment);
+/// RECOMANDED NEWS
+router.get("/news-recommended/:id", verifyToken, getRecomendedPrivateNews);
+router.get("/news-public-recommended/:id", getRecomendedPublicNews);
+
+/// REACTION
+router.get("/news-reaction/:news_id/:type_vote", verifyToken, reactionNews);
+router.get(
+  "/news-comment-reaction/:news_comment_id/:type_vote",
+  verifyToken,
+  reactionComment
+);
+router.post("/news-comment", verifyToken, postNewsComment);
+router.get("/public-news/:id", getPublicNewsById);
+router.get("/private-news/:id", verifyToken, getNewsById);
+router.get("/news-comment/:id", getCommentByNewsId);
+router.post(
+  "/my-news",
+  thumbnailNews.single("thumbnail"),
+  verifyToken,
+  postNews
+);
+router.delete("/my-news/:id", verifyToken, deleteNews);
+router.get("/my-news/:id", verifyToken, getMyNewsById);
+router.patch(
+  "/my-news/:id",
+  thumbnailNews.single("thumbnail"),
+  verifyToken,
+  updateNews
+);
+router.get("/my-news", verifyToken, getMyNews);
 router.get("/news-image/:img", getNewsImage);
+router.get("/news-thumbnail/:img", getNewsThumbnailImage);
 /// INVOICE ///
 router.post("/invoice-in", verifyToken, postInvoiceIn);
 router.get("/get-all-invoice-in", verifyToken, getAllInvoiceIn);

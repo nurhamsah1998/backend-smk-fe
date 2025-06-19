@@ -27,17 +27,17 @@ export const newsComment = database.define(
       defaultValue: null,
     },
     text: {
-      type: DataTypes.STRING(5000),
+      type: DataTypes.TEXT,
       defaultValue: "",
     },
-    like: {
+    up_vote: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
       validate: {
         max: 100000000,
       },
     },
-    down_like: {
+    down_vote: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
       validate: {

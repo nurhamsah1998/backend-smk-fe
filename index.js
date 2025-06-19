@@ -14,6 +14,8 @@ import {stafAuth} from "./Models/staf.js";
 import {tagihanFix} from "./Models/tagihanFix.js";
 import {news} from "./Models/news.js";
 import {newsComment} from "./Models/newsComment.js";
+import {newsCommentReaction} from "./Models/newsCommentReaction.js";
+import {newsReaction} from "./Models/newsReaction.js";
 
 dotEnv.config();
 const app = express();
@@ -33,6 +35,8 @@ try {
   // await logActivity.sync();
   // await campaign.sync();
   // await responseCampaign.sync();
+  // await newsCommentReaction.sync();
+  // await newsReaction.sync();
 
   app.use(cors());
   app.use(express.json());
