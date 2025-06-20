@@ -99,7 +99,9 @@ import {
 const router = express.Router();
 const storageImportSiswa = multer.diskStorage({
   destination: (req, file, callback) => {
-    /// https://stackoverflow.com/a/70855427/18038473
+    /// question : https://stackoverflow.com/questions/70855181/multer-is-grabbing-images-but-it-is-not-saving-my-files-in-the-correct-directory/70855427#70855427
+    /// base on answer : https://stackoverflow.com/a/70855427/18038473
+    // thanks to jmj0502 : https://stackoverflow.com/users/14083521/jmj0502
     callback(null, "./Assets/upload");
   },
   filename: (req, file, callback) => {
@@ -108,7 +110,9 @@ const storageImportSiswa = multer.diskStorage({
 });
 const storageNewsContentImage = multer.diskStorage({
   destination: (req, file, callback) => {
-    /// https://stackoverflow.com/a/70855427/18038473
+    /// question : https://stackoverflow.com/questions/70855181/multer-is-grabbing-images-but-it-is-not-saving-my-files-in-the-correct-directory/70855427#70855427
+    /// base on answer : https://stackoverflow.com/a/70855427/18038473
+    // thanks to jmj0502 : https://stackoverflow.com/users/14083521/jmj0502
     callback(null, "./Assets/news/content");
   },
   filename: (req, file, callback) => {
@@ -120,7 +124,9 @@ const storageNewsContentImage = multer.diskStorage({
 });
 const storagethumbnail = multer.diskStorage({
   destination: (req, file, callback) => {
-    /// https://stackoverflow.com/a/70855427/18038473
+    /// question : https://stackoverflow.com/questions/70855181/multer-is-grabbing-images-but-it-is-not-saving-my-files-in-the-correct-directory/70855427#70855427
+    /// base on answer : https://stackoverflow.com/a/70855427/18038473
+    // thanks to jmj0502 : https://stackoverflow.com/users/14083521/jmj0502
     callback(null, "./Assets/news/thumbnail");
   },
   filename: (req, file, callback) => {
