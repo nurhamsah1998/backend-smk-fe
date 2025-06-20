@@ -10,7 +10,6 @@ import {Op} from "sequelize";
 export const getTagihanFix = async (req, res) => {
   await permissionAccess({
     req,
-    res,
     permission: "tagihan",
   });
   const limit = parseInt(req.query.limit) || 3;
@@ -149,7 +148,6 @@ export const getTahunAngkatan = async (req, res) => {
 export const updateTagihanFix = async (req, res) => {
   await permissionAccess({
     req,
-    res,
     permission: "tagihan",
   });
   try {

@@ -26,7 +26,6 @@ export const getSiswa = async (req, res) => {
   const offside = limit * page;
   await permissionAccess({
     req,
-    res,
     permission: type,
   });
 
@@ -348,7 +347,7 @@ export const importAccount = async (req, res) => {
       }
       for (let rowIndex = 2; rowIndex < totalRow + 1; rowIndex += 1) {
         const name = workSheet.getRow(rowIndex).values[1];
-        const username = workSheet.getRow(rowIndex).values[2];
+        const username = String(workSheet.getRow(rowIndex).values[2]);
         const password = workSheet.getRow(rowIndex).values[3];
         const jurusan = workSheet.getRow(rowIndex).values[4];
         const sub_kelas = workSheet.getRow(rowIndex).values[5];
@@ -400,6 +399,12 @@ export const importAccount = async (req, res) => {
         ) {
           errorValidation.push(
             `Kolom yang memiliki warna hijau tidak boleh hanya berisi spasi, kosongkan jika tidak ingin mengisi.`
+          );
+        }
+        /// USERNAME FORMAT VALIDATION
+        if (username && username?.includes(" ")) {
+          errorValidation.push(
+            `Username ${username} pada baris ${rowIndex} tidak boleh ada spasi.`
           );
         }
         /// SUB KELAS VALIDATION
@@ -539,6 +544,7 @@ export const getSiswaProfile = async (req, res) => {
         id: idSiswa,
       },
     });
+    if (!response) throw {status: 403, msg: "Unauthorization"};
     const toStringify = JSON.stringify(response);
     const toParse = JSON.parse(toStringify);
     res.json({...toParse, username});

@@ -20,7 +20,6 @@ export const postNews = async (req, res) => {
   try {
     await permissionAccess({
       req,
-      res,
       permission: "cud_news",
     });
     const {idStaff} = getUserInfoToken(
@@ -76,7 +75,6 @@ export const storeNewsImage = async (req, res) => {
   try {
     await permissionAccess({
       req,
-      res,
       permission: "cud_news",
     });
     const pathUrl = req.file.filename;
@@ -136,7 +134,6 @@ export const updateNews = async (req, res) => {
   try {
     await permissionAccess({
       req,
-      res,
       permission: "cud_news",
     });
     const {idStaff} = getUserInfoToken(
@@ -218,7 +215,6 @@ export const deleteNews = async (req, res) => {
   try {
     await permissionAccess({
       req,
-      res,
       permission: "cud_news",
     });
     const {idStaff} = getUserInfoToken(
@@ -321,11 +317,14 @@ const newsGetter = async (req, type = "public") => {
 
 export const getNews = async (req, res) => {
   try {
-    await permissionAccess({
-      req,
-      res,
-      permission: "news",
-    });
+    const {idStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (idStaff) {
+      await permissionAccess({
+        req,
+        permission: "news",
+      });
+    }
     const {data, totalData, totalPage, limit, totalRows, page} =
       await newsGetter(req, "private");
     const response = {
@@ -404,11 +403,14 @@ export const recomendedNews = async (news_id, type = "public") => {
 };
 export const getRecommendedNews = async (req, res) => {
   try {
-    await permissionAccess({
-      req,
-      res,
-      permission: "news",
-    });
+    const {idStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (idStaff) {
+      await permissionAccess({
+        req,
+        permission: "news",
+      });
+    }
     const data = await recomendedNews(req.params.id, "all");
     res.json({data});
   } catch (error) {
@@ -430,23 +432,22 @@ export const getRecomendedPublicNews = async (req, res) => {
 
 export const getMyNews = async (req, res) => {
   try {
+    const {idStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (idStaff) {
+      await permissionAccess({
+        req,
+        permission: "news",
+      });
+    }
     await permissionAccess({
       req,
-      res,
-      permission: "news",
-    });
-    await permissionAccess({
-      req,
-      res,
       permission: "cud_news",
     });
     const page = parseInt(req.query.page) - 1 || 0;
     const limit = parseInt(req.query.limit) || 40;
     const search = req.query.search || "";
     const offside = limit * page;
-    const {idStaff} = getUserInfoToken(
-      req.headers.authorization.replace("Bearer ", "")
-    );
     const totalData = await news.count();
     const totalRows = await news.count({
       where: {
@@ -495,19 +496,18 @@ export const getMyNews = async (req, res) => {
 };
 export const getMyNewsById = async (req, res) => {
   try {
+    const {idStaff} =
+      getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (idStaff) {
+      await permissionAccess({
+        req,
+        permission: "news",
+      });
+    }
     await permissionAccess({
       req,
-      res,
-      permission: "news",
-    });
-    await permissionAccess({
-      req,
-      res,
       permission: "cud_news",
     });
-    const {idStaff} = getUserInfoToken(
-      req.headers.authorization.replace("Bearer ", "")
-    );
     let data = await news.findOne({
       where: {
         id: req.params.id,
@@ -525,13 +525,14 @@ export const getMyNewsById = async (req, res) => {
 
 export const getNewsById = async (req, res) => {
   try {
-    await permissionAccess({
-      req,
-      res,
-      permission: "news",
-    });
     const {idStaff, idSiswa} =
       getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+    if (idStaff) {
+      await permissionAccess({
+        req,
+        permission: "news",
+      });
+    }
     let data = await news.findOne({
       where: {
         id: req.params.id,

@@ -24,7 +24,6 @@ export const postInvoiceIn = async (req, res) => {
   } = req.body;
   await permissionAccess({
     req,
-    res,
     permission: "transaksi_masuk",
   });
   const totalInvoice = await invoice.count({
@@ -104,7 +103,6 @@ export const getInvoiceMe = async (req, res) => {
 export const getAllInvoiceIn = async (req, res) => {
   await permissionAccess({
     req,
-    res,
     permission: "laporan_transaksi_masuk",
   });
   try {

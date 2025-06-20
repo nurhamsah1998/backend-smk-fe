@@ -298,7 +298,7 @@ const isEmptyString = (text) => {
   return !Boolean(String(text).match(/\S/g));
 };
 
-const permissionAccess = async ({req, permission = "", res}) => {
+const permissionAccess = async ({req, permission = ""}) => {
   const token = req.headers.authorization.replace("Bearer ", "");
   const {idStaff} = getUserInfoToken(token) || {};
   const userInfo = await stafAuth.findByPk(idStaff, {raw: true});

@@ -14,7 +14,6 @@ export const postInvoiceOut = async (req, res) => {
     const token = req.headers.authorization.replace("Bearer ", "");
     await permissionAccess({
       req,
-      res,
       permission: "transaksi_keluar",
     });
     const {namaStaff} = getUserInfoToken(token) || {};
@@ -55,7 +54,6 @@ export const postInvoiceOut = async (req, res) => {
 export const getAllInvoiceOut = async (req, res) => {
   await permissionAccess({
     req,
-    res,
     permission: "laporan_transaksi_keluar",
   });
 
