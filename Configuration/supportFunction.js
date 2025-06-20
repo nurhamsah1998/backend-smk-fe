@@ -298,7 +298,8 @@ const isEmptyString = (text) => {
   return !Boolean(String(text).match(/\S/g));
 };
 
-const permissionAccess = async ({token, permission = ""}) => {
+const permissionAccess = async ({req, permission = "", res}) => {
+  const token = req.headers.authorization.replace("Bearer ", "");
   const {idStaff} = getUserInfoToken(token) || {};
   const userInfo = await stafAuth.findByPk(idStaff, {raw: true});
   const permissions = userInfo
@@ -306,7 +307,9 @@ const permissionAccess = async ({token, permission = ""}) => {
       ? JSON.parse(userInfo.permissions)
       : userInfo.permissions
     : [];
-  return !Boolean(permissions.find((item) => item === permission));
+  if (!Boolean(permissions.find((item) => item === permission))) {
+    throw {msg: "Akses Ditolak, Anda tidak memiliki akses!", status: 403};
+  }
 };
 
 const upTimeFormatter = (seconds) => {

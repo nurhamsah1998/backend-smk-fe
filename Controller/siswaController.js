@@ -24,14 +24,12 @@ export const getSiswa = async (req, res) => {
   const subKelas = req.query.sub_kelas || "%";
   const status = req.query.status || "%";
   const offside = limit * page;
-  const isNotAccess = await permissionAccess({
-    token: req.headers.authorization.replace("Bearer ", ""),
+  await permissionAccess({
+    req,
+    res,
     permission: type,
   });
-  if (isNotAccess)
-    return res
-      .status(403)
-      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
+
   try {
     const totalData = await siswaAuth.count();
     const totalRows = await siswaAuth.count({
@@ -192,7 +190,9 @@ export const getSiswa = async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getSiswaById = async (req, res) => {
@@ -205,7 +205,9 @@ export const getSiswaById = async (req, res) => {
     });
     res.json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -541,7 +543,9 @@ export const getSiswaProfile = async (req, res) => {
     const toParse = JSON.parse(toStringify);
     res.json({...toParse, username});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -612,7 +616,9 @@ export const siswaRegister = async (req, res) => {
     res.status(201).json({msg: "Pendaftaran berhasil"});
   } catch (error) {
     console.log(error);
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
     if (error.name.includes("SequelizeUniqueConstraintError"))
       return res.status(403).json({msg: "Username sudah terdaftar"});
   }
@@ -695,7 +701,9 @@ export const siswaUpdate = async (req, res) => {
     }
     res.status(200).json({msg: "Siswa berhasil diupdate"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const bulkStatusKelasSiswa = async (req, res) => {

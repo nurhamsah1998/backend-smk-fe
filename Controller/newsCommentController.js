@@ -58,7 +58,9 @@ export const postNewsComment = async (req, res) => {
     });
     res.status(201).json({msg: "Berhasil berkomentar"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -89,7 +91,9 @@ export const updateNewsComment = async (req, res) => {
     );
     res.status(201).json({msg: "Berhasil mengubah kabar berita"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -133,7 +137,9 @@ export const deleteNewsComment = async (req, res) => {
     });
     res.status(200).json({msg: "Berhasil menghapus komentar"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -187,7 +193,9 @@ export const getMyNewsComment = async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getCommentByNewsId = async (req, res) => {
@@ -282,7 +290,9 @@ export const getCommentByNewsId = async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -386,6 +396,8 @@ export const reactionComment = async (req, res) => {
     });
     return res.status(200).json({msg: "sukses"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };

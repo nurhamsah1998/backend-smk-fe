@@ -22,14 +22,11 @@ export const postInvoiceIn = async (req, res) => {
     sub_kelas,
     tahun_angkatan,
   } = req.body;
-  const isNotAccess = await permissionAccess({
-    token: req.headers.authorization.replace("Bearer ", ""),
+  await permissionAccess({
+    req,
+    res,
     permission: "transaksi_masuk",
   });
-  if (isNotAccess)
-    return res
-      .status(400)
-      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
   const totalInvoice = await invoice.count({
     where: {
       createdAt: {
@@ -66,7 +63,9 @@ export const postInvoiceIn = async (req, res) => {
     });
     res.status(201).json({msg: "Transaksi berhasil", data: data});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -80,7 +79,9 @@ export const getInvoice = async (req, res) => {
     });
     res.status(200).json(responseInvoice);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getInvoiceMe = async (req, res) => {
@@ -95,19 +96,17 @@ export const getInvoiceMe = async (req, res) => {
     });
     res.status(200).json(responseInvoice);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getAllInvoiceIn = async (req, res) => {
-  const isNotAccess = await permissionAccess({
-    token: req.headers.authorization.replace("Bearer ", ""),
+  await permissionAccess({
+    req,
+    res,
     permission: "laporan_transaksi_masuk",
   });
-  if (isNotAccess)
-    return res
-      .status(403)
-      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
-
   try {
     const page = parseInt(req.query.page) - 1 || 0;
     const limit = parseInt(req.query.limit) || 40;
@@ -177,7 +176,9 @@ export const getAllInvoiceIn = async (req, res) => {
       totalData,
     });
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getTotalInvoiceIn = async (req, res) => {
@@ -189,6 +190,8 @@ export const getTotalInvoiceIn = async (req, res) => {
     });
     res.status(200).json(responseInvoice);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };

@@ -23,14 +23,11 @@ export const postCampaign = async (req, res) => {
   } = req.body;
 
   try {
-    const isNotAccess = await permissionAccess({
-      token: req.headers.authorization.replace("Bearer ", ""),
+    await permissionAccess({
+      req,
+      res,
       permission: "pengumuman",
     });
-    if (isNotAccess)
-      return res
-        .status(403)
-        .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
     const staffProfile = getUserInfoToken(
       req.headers.authorization.replace("Bearer ", "")
     );
@@ -72,7 +69,9 @@ export const postCampaign = async (req, res) => {
     });
     res.status(201).json({msg: "Berhasil membuat pengumuman"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const patchCampaign = async (req, res) => {
@@ -129,7 +128,9 @@ export const patchCampaign = async (req, res) => {
     });
     res.status(201).json({msg: "Berhasil mengubah pengumuman"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getAllCampaign = async (req, res) => {
@@ -161,7 +162,9 @@ export const getAllCampaign = async (req, res) => {
     });
     res.status(200).json({data});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getCampaign = async (req, res) => {
@@ -193,7 +196,9 @@ export const getCampaign = async (req, res) => {
     });
     res.status(200).json({data});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const deleteCampaign = async (req, res) => {
@@ -228,6 +233,8 @@ export const deleteCampaign = async (req, res) => {
     });
     res.status(200).json({msg: "Berhasil menghapus pengumuman"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };

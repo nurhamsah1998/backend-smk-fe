@@ -8,14 +8,11 @@ import {
 import {Op} from "sequelize";
 
 export const getTagihanFix = async (req, res) => {
-  const isNotAccess = await permissionAccess({
-    token: req.headers.authorization.replace("Bearer ", ""),
+  await permissionAccess({
+    req,
+    res,
     permission: "tagihan",
   });
-  if (isNotAccess)
-    return res
-      .status(403)
-      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
   const limit = parseInt(req.query.limit) || 3;
   const page = parseInt(req.query.page) - 1 || 0;
   try {
@@ -43,7 +40,9 @@ export const getTagihanFix = async (req, res) => {
     };
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getTotalTagihanFix = async (req, res) => {
@@ -60,7 +59,9 @@ export const getTotalTagihanFix = async (req, res) => {
     const total = Object.values(response[0] || {}).reduce((a, b) => a + b, 0);
     res.status(200).json(total);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getTagihanFixForTU = async (req, res) => {
@@ -73,7 +74,9 @@ export const getTagihanFixForTU = async (req, res) => {
 
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getTagihanFixForStudent = async (req, res) => {
@@ -88,7 +91,9 @@ export const getTagihanFixForStudent = async (req, res) => {
 
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getTahunAngkatan = async (req, res) => {
@@ -135,19 +140,18 @@ export const getTahunAngkatan = async (req, res) => {
     };
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
 export const updateTagihanFix = async (req, res) => {
-  const isNotAccess = await permissionAccess({
-    token: req.headers.authorization.replace("Bearer ", ""),
+  await permissionAccess({
+    req,
+    res,
     permission: "tagihan",
   });
-  if (isNotAccess)
-    return res
-      .status(403)
-      .json({msg: "Perubahan Ditolak, Anda tidak memiliki akses!"});
   try {
     await siswaAuth.increment(
       {current_bill: req.body.extra.freq_bill},
@@ -176,7 +180,9 @@ export const updateTagihanFix = async (req, res) => {
 
     res.status(200).json({msg: "Tagihan berhasil diubah"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const createTagihanFix = async (req, res) => {
@@ -202,6 +208,8 @@ export const createTagihanFix = async (req, res) => {
     });
     res.status(200).json({msg: "Berhasil membuat tagihan baru"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };

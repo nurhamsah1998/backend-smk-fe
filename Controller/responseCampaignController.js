@@ -37,7 +37,9 @@ export const postResponseCampaign = async (req, res) => {
     });
     res.status(201).json({msg: "Respon terkirim"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 // export const patchResponseCampaign = async (req, res) => {
@@ -80,7 +82,9 @@ export const getResponseCampaign = async (req, res) => {
     });
     res.status(200).json({data});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const deleteResponseCampaign = async (req, res) => {
@@ -108,6 +112,8 @@ export const deleteResponseCampaign = async (req, res) => {
     });
     res.status(200).json({msg: "Berhasil menghapus respon pengumuman"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };

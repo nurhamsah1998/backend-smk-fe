@@ -7,7 +7,9 @@ export const getJurusan = async (req, res) => {
     const response = await jurusan.findAll();
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -63,7 +65,9 @@ export const deleteJurusan = async (req, res) => {
         msg: `jurusan tidak bisa dihapus, karena sudah terhubung ke siswa. terdapat ${relatedMajor} siswa yang memiliki jurusan ini`,
       });
     } else {
-      res.status(500).json({msg: error?.message});
+      return res
+        .status(error?.status || 500)
+        .json({msg: error?.msg || error?.message});
     }
   }
 };
@@ -89,6 +93,8 @@ export const updateJurusan = async (req, res) => {
       return res.status(404).json({msg: "id tidak ditemukan"});
     res.status(201).json({msg: "Jurusan berhasil update."});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };

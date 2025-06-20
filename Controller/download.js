@@ -8,13 +8,7 @@ import {Op} from "sequelize";
 import exeljs from "exceljs";
 import {jsPDF as JSPDF} from "jspdf";
 import autoTable from "jspdf-autotable";
-import {
-  FormatCurrency,
-  isEmptyString,
-  KopPdf,
-  pdfSuratTagihan,
-  permissionAccess,
-} from "../Configuration/supportFunction.js";
+import {FormatCurrency, KopPdf} from "../Configuration/supportFunction.js";
 import {uid} from "uid";
 import {invoiceOut} from "../Models/invoiceOut.js";
 
@@ -254,7 +248,9 @@ export const downloadTemplateImportSiswa = async (req, res) => {
 
     await res.download(path.resolve(fileName));
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const downloadFileExelTransaction = async (req, res) => {
@@ -262,7 +258,9 @@ export const downloadFileExelTransaction = async (req, res) => {
     const {token} = req.params;
     await res.download(path.resolve(`./Assets/download/${token}`));
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const downloadTransactionIn = async (req, res) => {
@@ -469,7 +467,9 @@ export const downloadTransactionIn = async (req, res) => {
     await Workbook.xlsx.writeFile(folderPlace);
     await res.download(path.resolve(`./Assets/download/${fileName}`));
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const downloadTransactionOut = async (req, res) => {
@@ -643,7 +643,9 @@ export const downloadTransactionOut = async (req, res) => {
     await Workbook.xlsx.writeFile(folderPlace);
     await res.download(path.resolve(`./Assets/download/${fileName}`));
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const downloadStudentBill = async (req, res) => {
@@ -1108,7 +1110,9 @@ export const downloadStudentBill = async (req, res) => {
       return await res.download(path.resolve(`./Assets/download/${fileName}`));
     }
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -1136,15 +1140,6 @@ export const downloadStudentBill = async (req, res) => {
 //       return res.status(400).json({
 //         msg: "Nomor, tanggal ujian dan tanggal jatuh tempo tidak boleh kosong",
 //       });
-
-//     const isNotAccess = await permissionAccess({
-//       token: req.headers.authorization.replace("Bearer ", ""),
-//       permission: "student_bill_letter",
-//     });
-//     if (isNotAccess)
-//       return res
-//         .status(403)
-//         .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
 
 //     let data = await siswaAuth.findAll({
 //       raw: true,
@@ -1240,7 +1235,7 @@ export const downloadStudentBill = async (req, res) => {
 //     fs.writeFileSync(filePath, Buffer.from(bufferFile));
 //     return await res.download(filePath);
 //   } catch (error) {
-//    res.status(500).json({msg: error?.message});
+//    return res.status(error?.status || 500).json({msg: error?.msg || error?.message});
 //     res.status(500).json({msg: "Internal server error"});
 //   }
 // };

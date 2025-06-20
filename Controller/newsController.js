@@ -2,6 +2,7 @@ import path from "path";
 import {
   getUserInfoToken,
   isEmptyString,
+  permissionAccess,
   textEllipsis,
 } from "../Configuration/supportFunction.js";
 import {news} from "../Models/news.js";
@@ -17,6 +18,11 @@ import striptags from "striptags";
 
 export const postNews = async (req, res) => {
   try {
+    await permissionAccess({
+      req,
+      res,
+      permission: "cud_news",
+    });
     const {idStaff} = getUserInfoToken(
       req.headers.authorization.replace("Bearer ", "")
     );
@@ -60,12 +66,19 @@ export const postNews = async (req, res) => {
     });
     res.status(201).json({msg: "Berhasil membuat kabar berita"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
 export const storeNewsImage = async (req, res) => {
   try {
+    await permissionAccess({
+      req,
+      res,
+      permission: "cud_news",
+    });
     const pathUrl = req.file.filename;
     const contentImagePath = `./Assets/news/content/${req.file.filename?.replaceAll(
       " ",
@@ -85,7 +98,9 @@ export const storeNewsImage = async (req, res) => {
       href: pathUrl,
     });
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -96,7 +111,9 @@ export const getNewsImage = async (req, res) => {
     res.setHeader("content-type", lookupMime);
     res.sendFile(readImage);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -109,12 +126,19 @@ export const getNewsThumbnailImage = async (req, res) => {
     res.setHeader("content-type", lookupMime);
     res.sendFile(readImage);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
 export const updateNews = async (req, res) => {
   try {
+    await permissionAccess({
+      req,
+      res,
+      permission: "cud_news",
+    });
     const {idStaff} = getUserInfoToken(
       req.headers.authorization.replace("Bearer ", "")
     );
@@ -184,12 +208,19 @@ export const updateNews = async (req, res) => {
     );
     res.status(201).json({msg: "Berhasil mengubah kabar berita"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
 export const deleteNews = async (req, res) => {
   try {
+    await permissionAccess({
+      req,
+      res,
+      permission: "cud_news",
+    });
     const {idStaff} = getUserInfoToken(
       req.headers.authorization.replace("Bearer ", "")
     );
@@ -239,7 +270,9 @@ export const deleteNews = async (req, res) => {
 
     return res.status(201).json({msg: "Berhasil menghapus kabar berita"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -269,6 +302,7 @@ const newsGetter = async (req, type = "public") => {
     nest: true,
     where: {
       isPublish: 1,
+      ...(type === "public" && {isPrivate: 0}),
       [Op.or]: [
         {
           title: {
@@ -287,6 +321,11 @@ const newsGetter = async (req, type = "public") => {
 
 export const getNews = async (req, res) => {
   try {
+    await permissionAccess({
+      req,
+      res,
+      permission: "news",
+    });
     const {data, totalData, totalPage, limit, totalRows, page} =
       await newsGetter(req, "private");
     const response = {
@@ -302,7 +341,9 @@ export const getNews = async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getPublicNews = async (req, res) => {
@@ -322,11 +363,13 @@ export const getPublicNews = async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
-const recomendedNews = async (news_id, type = "public") => {
+export const recomendedNews = async (news_id, type = "public") => {
   const typeOrder = ["DESC", "ASC", "DESC", "ASC"];
   const randomRecomended = [
     ["id", typeOrder[Math.ceil(Math.random() * typeOrder.length - 1)]],
@@ -341,9 +384,11 @@ const recomendedNews = async (news_id, type = "public") => {
     where: {
       isPublish: 1,
       ...(type === "public" && {isPrivate: 0}),
-      id: {
-        [Op.not]: news_id,
-      },
+      ...(news_id && {
+        id: {
+          [Op.not]: news_id,
+        },
+      }),
     },
     limit: 4,
     order: [
@@ -359,10 +404,17 @@ const recomendedNews = async (news_id, type = "public") => {
 };
 export const getRecommendedNews = async (req, res) => {
   try {
-    const data = await recomendedNews(req.params.id, "private");
+    await permissionAccess({
+      req,
+      res,
+      permission: "news",
+    });
+    const data = await recomendedNews(req.params.id, "all");
     res.json({data});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getRecomendedPublicNews = async (req, res) => {
@@ -370,19 +422,31 @@ export const getRecomendedPublicNews = async (req, res) => {
     const data = await recomendedNews(req.params.id, "public");
     res.json({data});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
 export const getMyNews = async (req, res) => {
-  const page = parseInt(req.query.page) - 1 || 0;
-  const limit = parseInt(req.query.limit) || 40;
-  const search = req.query.search || "";
-  const offside = limit * page;
-  const {idStaff} = getUserInfoToken(
-    req.headers.authorization.replace("Bearer ", "")
-  );
   try {
+    await permissionAccess({
+      req,
+      res,
+      permission: "news",
+    });
+    await permissionAccess({
+      req,
+      res,
+      permission: "cud_news",
+    });
+    const page = parseInt(req.query.page) - 1 || 0;
+    const limit = parseInt(req.query.limit) || 40;
+    const search = req.query.search || "";
+    const offside = limit * page;
+    const {idStaff} = getUserInfoToken(
+      req.headers.authorization.replace("Bearer ", "")
+    );
     const totalData = await news.count();
     const totalRows = await news.count({
       where: {
@@ -424,14 +488,26 @@ export const getMyNews = async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getMyNewsById = async (req, res) => {
-  const {idStaff} = getUserInfoToken(
-    req.headers.authorization.replace("Bearer ", "")
-  );
   try {
+    await permissionAccess({
+      req,
+      res,
+      permission: "news",
+    });
+    await permissionAccess({
+      req,
+      res,
+      permission: "cud_news",
+    });
+    const {idStaff} = getUserInfoToken(
+      req.headers.authorization.replace("Bearer ", "")
+    );
     let data = await news.findOne({
       where: {
         id: req.params.id,
@@ -441,12 +517,19 @@ export const getMyNewsById = async (req, res) => {
     if (!data) return res.status(404).json({msg: "Berita tidak ditemukan"});
     res.json({data});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
 export const getNewsById = async (req, res) => {
   try {
+    await permissionAccess({
+      req,
+      res,
+      permission: "news",
+    });
     const {idStaff, idSiswa} =
       getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
     let data = await news.findOne({
@@ -489,7 +572,9 @@ export const getNewsById = async (req, res) => {
       (siswa_id || staff_id) === (idSiswa || idStaff) ? type_vote : null;
     res.json({data, is_already_comment, is_reacted});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getPublicNewsById = async (req, res) => {
@@ -505,7 +590,9 @@ export const getPublicNewsById = async (req, res) => {
 
     res.json({data});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -609,6 +696,8 @@ export const reactionNews = async (req, res) => {
     });
     return res.status(200).json({msg: "sukses"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };

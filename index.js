@@ -49,4 +49,4 @@ try {
   console.log(error, "INTERNAL SERVER ERROR");
   // await database.dropAllSchemas();
 }
-// ["dashboard", "log_activity", "account_staff", "major", "files", "server", "news"]
+// ["dashboard", "log_activity", "account_staff", "major", "files", "server", "news", "cud_news"]

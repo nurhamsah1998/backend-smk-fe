@@ -12,15 +12,12 @@ export const postInvoiceOut = async (req, res) => {
   try {
     const {nama, uang_keluar, note} = req.body;
     const token = req.headers.authorization.replace("Bearer ", "");
-    const isNotAccess = await permissionAccess({
-      token,
+    await permissionAccess({
+      req,
+      res,
       permission: "transaksi_keluar",
     });
     const {namaStaff} = getUserInfoToken(token) || {};
-    if (isNotAccess)
-      return res
-        .status(400)
-        .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
 
     const totalInvoice = await invoiceOut.count({
       where: {
@@ -50,18 +47,17 @@ export const postInvoiceOut = async (req, res) => {
     });
     res.status(201).json({msg: "Transaksi berhasil", data: data});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getAllInvoiceOut = async (req, res) => {
-  const isNotAccess = await permissionAccess({
-    token: req.headers.authorization.replace("Bearer ", ""),
+  await permissionAccess({
+    req,
+    res,
     permission: "laporan_transaksi_keluar",
   });
-  if (isNotAccess)
-    return res
-      .status(403)
-      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
 
   try {
     const page = parseInt(req.query.page) - 1 || 0;
@@ -111,6 +107,8 @@ export const getAllInvoiceOut = async (req, res) => {
       totalData,
     });
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };

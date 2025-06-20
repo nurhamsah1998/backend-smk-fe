@@ -24,6 +24,7 @@ import os from "os";
 import {siswaAuth} from "../Models/siswa.js";
 import {logActivity} from "../Models/logActivity.js";
 import {campaign} from "../Models/campaign.js";
+import {recomendedNews} from "./newsController.js";
 
 dotEnv.config();
 
@@ -128,7 +129,9 @@ export const dashboardStaffReport = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const dashboardDevReport = async (req, res) => {
@@ -148,8 +151,10 @@ export const dashboardDevReport = async (req, res) => {
         angkatan: {
           [Op.notIn]: activeAngkatan,
         },
+        kelas: "12",
       },
     });
+    const newsData = await recomendedNews(req.params.id, "all");
     const lastLogActivity = await logActivity.findAll({
       attributes: ["action", "createdAt", "id"],
       include: {model: stafAuth, attributes: ["nama"]},
@@ -202,6 +207,7 @@ export const dashboardDevReport = async (req, res) => {
       data: {
         tahun_angkatan: tahun_angkatan?.map((item) => item?.angkatan),
         analytics: data,
+        news_data: newsData,
         total_siswa_aktif: totalActiveStudent,
         total_siswa_alumni: totalAlumniStudent,
         log_activity: lastLogActivity,
@@ -246,7 +252,9 @@ export const getListFiles = async (req, res) => {
     res.status(200).json({files: listFiles});
     ///
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -260,7 +268,9 @@ export const getFileByDownload = async (req, res) => {
         .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
     await res.download(path.resolve(`./Assets/${req.query.path}`));
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -277,7 +287,9 @@ export const deleteFile = async (req, res) => {
     });
     res.status(200).json({msg: `File berhasil dihapus`});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
     res.status(400).json({msg: `File gagal dihapus`});
   }
 };
@@ -401,7 +413,9 @@ export const getStaff = async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const getStaffProfile = async (req, res) => {
@@ -417,7 +431,9 @@ export const getStaffProfile = async (req, res) => {
     });
     res.json(response);
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const staffProfileMeUpdate = async (req, res) => {
@@ -471,7 +487,9 @@ export const staffProfileMeUpdate = async (req, res) => {
     });
     res.status(200).json({msg: "Staff berhasil diupdate"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 export const staffProfileUpdate = async (req, res) => {
@@ -487,7 +505,9 @@ export const staffProfileUpdate = async (req, res) => {
     );
     res.status(200).json({msg: "Staff berhasil diupdate"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
   }
 };
 
@@ -537,7 +557,9 @@ export const staffRegister = async (req, res) => {
     });
     res.status(201).json({msg: "Pendaftaran berhasil"});
   } catch (error) {
-    res.status(500).json({msg: error?.message});
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
     if (error.name.includes("SequelizeUniqueConstraintError"))
       return res.status(403).json({msg: "Username sudah terdaftar"});
   }
