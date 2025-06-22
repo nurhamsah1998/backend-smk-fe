@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import {logActivity} from "../Models/logActivity.js";
 import {stafAuth} from "../Models/staf.js";
-import autoTable from "jspdf-autotable";
 import fs from "fs";
 import moment from "moment";
 
@@ -30,7 +29,7 @@ export const KopPdf = (doc) => {
   const imgPath = "./Assets/image/logo_pgri.png";
   const fileImage = fs.readFileSync(imgPath);
   const dataURI = `data:image/png;base64,${fileImage?.toString("base64")}`;
-  doc.addImage(dataURI, "png", 10, 5, 30, 30);
+  doc.addImage(dataURI, "png", 10, 10, 35, 30);
   /// https://stackoverflow.com/a/64022128/18038473
   doc.setFontSize(14);
   doc.setFont("", "", 700);

@@ -50,3 +50,5 @@ try {
   // await database.dropAllSchemas();
 }
 // ["dashboard", "log_activity", "account_staff", "major", "files", "server", "news", "cud_news"]
+/// list of folder :
+/// backup, download, image, news(thumbnail, content), template, upload

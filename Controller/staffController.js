@@ -175,11 +175,11 @@ export const dashboardDevReport = async (req, res) => {
     let data = {};
     const [totalAnualMajor] = await database.query(
       `select count(s.jurusanId) as total, j.nama, s.angkatan, j.kode_jurusan 
-       from siswa s 
-       right join jurusan j 
-       on s.jurusanId = j.id 
-       GROUP by s.jurusanId, s.angkatan 
-       order by s.angkatan asc`
+     from siswa s 
+     right join jurusan j 
+     on s.jurusanId = j.id 
+     GROUP by s.jurusanId, s.angkatan, j.id, j.nama 
+     order by s.angkatan asc`
     );
     for (let x = 0; x < major.length; x++) {
       /// ASSIGN JURUSAN
@@ -215,6 +215,7 @@ export const dashboardDevReport = async (req, res) => {
       },
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({msg: "Internal server error", error: error?.message});
   }
 };

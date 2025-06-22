@@ -358,7 +358,6 @@ export const importAccount = async (req, res) => {
         const fatherName = workSheet.getRow(rowIndex).values[10];
         const motherName = workSheet.getRow(rowIndex).values[11];
         const gender = workSheet.getRow(rowIndex).values[12];
-
         if (duplicateName[`${name}_${kelas}_${sub_kelas}`]) {
           errorValidation.push(
             `Terdapat nama yang duplikat berdasarkan kelas dan sub kelas. periksa ${name} apakah ada yang sama`
@@ -387,7 +386,7 @@ export const importAccount = async (req, res) => {
           isEmptyString(kelas) ||
           isEmptyString(kode_siswa)
         ) {
-          errorValidation.push(`Kolom yang memiliki warna merah wajib diisi`);
+          errorValidation.push(`Kolom yang memiliki warna biru wajib diisi`);
         }
         /// VALIDATION TO MANY WHITE SPACE
         if (

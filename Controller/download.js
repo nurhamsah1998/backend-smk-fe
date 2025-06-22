@@ -11,9 +11,25 @@ import autoTable from "jspdf-autotable";
 import {FormatCurrency, KopPdf} from "../Configuration/supportFunction.js";
 import {uid} from "uid";
 import {invoiceOut} from "../Models/invoiceOut.js";
+import {stafAuth} from "../Models/staf.js";
 
 export const downloadTemplateImportSiswa = async (req, res) => {
   try {
+    const nosDataMajor = await jurusan.count();
+    if (!nosDataMajor) {
+      const dev = await stafAuth.findAll({
+        raw: true,
+        nest: true,
+        where: {role: "DEV"},
+      });
+      const {nama, noHP} = dev[0] || {};
+      throw {
+        status: 400,
+        msg: `Tidak bisa download template, belum ada jurusan tersedia. Hubungi ${nama}${
+          noHP ? ` (${noHP})` : ""
+        } untuk menambah jurusan`,
+      };
+    }
     /// HOW TO
     /// https://github.com/exceljs/exceljs/issues/765#issuecomment-472912688
     // eslint-disable-next-line prefer-const
@@ -87,37 +103,37 @@ export const downloadTemplateImportSiswa = async (req, res) => {
     sheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: {argb: "ff0000"},
+      fgColor: {argb: "3465a4"},
     };
     sheet.getCell("B1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: {argb: "ff0000"},
+      fgColor: {argb: "3465a4"},
     };
     sheet.getCell("C1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: {argb: "ff0000"},
+      fgColor: {argb: "3465a4"},
     };
     sheet.getCell("D1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: {argb: "ff0000"},
+      fgColor: {argb: "3465a4"},
     };
     sheet.getCell("E1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: {argb: "ff0000"},
+      fgColor: {argb: "3465a4"},
     };
     sheet.getCell("F1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: {argb: "ff0000"},
+      fgColor: {argb: "3465a4"},
     };
     sheet.getCell("G1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: {argb: "ff0000"},
+      fgColor: {argb: "3465a4"},
     };
     sheet.getCell("H1").fill = {
       type: "pattern",
@@ -219,6 +235,9 @@ export const downloadTemplateImportSiswa = async (req, res) => {
     };
     /// OPTIONS
     const dataJurusan = await jurusan.findAll({raw: true});
+    const subKelas = [1, 2, 3, 4, 5, 6];
+    const kelas = [10, 11, 12];
+    const gender = ["L", "P"];
     for (let index = 2; index < 2000; index += 1) {
       sheet.getCell(`D${index}`).dataValidation = {
         type: "list",
@@ -230,17 +249,17 @@ export const downloadTemplateImportSiswa = async (req, res) => {
       sheet.getCell(`E${index}`).dataValidation = {
         type: "list",
         allowBlank: true,
-        formulae: [`"1","2","3","4","5","6"`],
+        formulae: [`"${subKelas?.map((item) => item)?.toString()}"`],
       };
       sheet.getCell(`F${index}`).dataValidation = {
         type: "list",
         allowBlank: true,
-        formulae: [`"10","11","12"`],
+        formulae: [`"${kelas?.map((item) => item)?.toString()}"`],
       };
       sheet.getCell(`L${index}`).dataValidation = {
         type: "list",
         allowBlank: true,
-        formulae: [`"L","P"`],
+        formulae: [`"${gender?.map((item) => item)?.toString()}"`],
       };
     }
     const fileName = `./Assets/template/template-import-siswa-${new Date().getTime()}.xlsx`;

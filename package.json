@@ -6,7 +6,8 @@
   "main": "gate.js",
   "scripts": {
     "start": "nodemon gate.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "smk-app" : "npm install --legacy-peer-deps && npm start"
   },
   "author": "Nurhamsah",
   "license": "MIT",
