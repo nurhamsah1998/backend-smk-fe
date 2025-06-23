@@ -35,6 +35,7 @@ export const getActivity = async (req, res) => {
     const logList = await logActivity.findAll({
       where: {...whereCondition},
       raw: true,
+      nest: true,
       limit,
       offset: offside,
       include: {model: stafAuth, attributes: ["nama", "username"]},
@@ -43,9 +44,9 @@ export const getActivity = async (req, res) => {
     const response = {
       data: logList.map((item) => ({
         ...item,
-        author_name: item?.["staf.nama"] || "-",
-        author_username: item?.["staf.username"] || "-",
-        data: JSON.parse(item.data),
+        author_name: item?.staf.nama || "-",
+        author_username: item?.staf.username || "-",
+        data: item.data,
       })),
       totalPage,
       page: page + 1,
@@ -54,6 +55,28 @@ export const getActivity = async (req, res) => {
       totalData,
     };
     res.status(200).json(response);
+  } catch (error) {
+    return res
+      .status(error?.status || 500)
+      .json({msg: error?.msg || error?.message});
+  }
+};
+export const clearActivity = async (req, res) => {
+  const {roleStaff} =
+    getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
+  if (roleStaff !== "DEV")
+    return res
+      .status(403)
+      .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
+  try {
+    await logActivity.destroy({
+      where: {
+        id: {
+          [Op.not]: null,
+        },
+      },
+    });
+    res.status(200).json({msg: "Berhasil menghapus log aktivitas"});
   } catch (error) {
     return res
       .status(error?.status || 500)
