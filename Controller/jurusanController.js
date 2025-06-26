@@ -1,4 +1,7 @@
-import {getUserInfoToken} from "../Configuration/supportFunction.js";
+import {
+  getUserInfoToken,
+  isEmptyString,
+} from "../Configuration/supportFunction.js";
 import {jurusan} from "../Models/jurusan.js";
 import {siswaAuth} from "../Models/siswa.js";
 
@@ -15,20 +18,24 @@ export const getJurusan = async (req, res) => {
 
 export const postJurusan = async (req, res) => {
   try {
+    const {kode_jurusan, nama} = req.body || {};
     const {roleStaff} =
       getUserInfoToken(req.headers.authorization.replace("Bearer ", "")) || {};
     if (roleStaff !== "DEV")
       return res
         .status(403)
         .json({msg: "Akses Ditolak, Anda tidak memiliki akses!"});
-
-    if (req.body.kode_jurusan?.length > 10)
+    if (isEmptyString(nama))
+      return res.status(400).json({msg: "nama jurusan tidak boleh kosong"});
+    if (isEmptyString(kode_jurusan))
+      return res.status(400).json({msg: "Kode jurusan tidak boleh kosong"});
+    if (kode_jurusan?.length > 10)
       return res
         .status(400)
         .json({msg: "Kode jurusan terlalu panjang. Max 10 karakter"});
     await jurusan.create({
-      nama: req.body.nama,
-      kode_jurusan: req.body.kode_jurusan?.toUpperCase(),
+      nama: nama,
+      kode_jurusan: kode_jurusan?.toUpperCase(),
     });
     res.status(201).json({msg: "Jurusan berhasil dibuat."});
   } catch (error) {

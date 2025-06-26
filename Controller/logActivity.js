@@ -46,7 +46,7 @@ export const getActivity = async (req, res) => {
         ...item,
         author_name: item?.staf.nama || "-",
         author_username: item?.staf.username || "-",
-        data: item.data,
+        data: item?.data ? JSON.parse(item?.data) : [],
       })),
       totalPage,
       page: page + 1,

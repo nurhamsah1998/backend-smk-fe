@@ -472,6 +472,17 @@ export const staffProfileMeUpdate = async (req, res) => {
         .status(404)
         .json({msg: "No HP tidak valid, max digit 12 min digit 8"});
     }
+    const findDuplicate = await stafAuth.findOne({
+      where: {
+        username,
+      },
+      attributes: ["id"],
+    });
+    if (findDuplicate)
+      throw {
+        status: 400,
+        msg: `username "${username}", sudah terdaftar. coba yang lain.`,
+      };
     await stafAuth.update(
       {nama, noHP, username},
       {
@@ -488,6 +499,7 @@ export const staffProfileMeUpdate = async (req, res) => {
     });
     res.status(200).json({msg: "Staff berhasil diupdate"});
   } catch (error) {
+    console.log(error);
     return res
       .status(error?.status || 500)
       .json({msg: error?.msg || error?.message});

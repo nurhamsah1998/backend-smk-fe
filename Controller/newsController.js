@@ -17,6 +17,7 @@ import {newsCommentReaction} from "../Models/newsCommentReaction.js";
 import striptags from "striptags";
 
 export const postNews = async (req, res) => {
+  const hasFile = Boolean(req?.file);
   try {
     await permissionAccess({
       req,
@@ -26,7 +27,6 @@ export const postNews = async (req, res) => {
       req.headers.authorization.replace("Bearer ", "")
     );
 
-    const hasFile = Boolean(req.file);
     let thumbnailPath = null;
     if (hasFile) {
       thumbnailPath = `./Assets/news/thumbnail/${req.file.filename?.replaceAll(
@@ -65,6 +65,11 @@ export const postNews = async (req, res) => {
     });
     res.status(201).json({msg: "Berhasil membuat kabar berita"});
   } catch (error) {
+    if (hasFile) {
+      fs.unlink(path.resolve(thumbnailPath), (error) => {
+        if (error) throw error;
+      });
+    }
     return res
       .status(error?.status || 500)
       .json({msg: error?.msg || error?.message});
@@ -131,6 +136,10 @@ export const getNewsThumbnailImage = async (req, res) => {
 };
 
 export const updateNews = async (req, res) => {
+  const hasFile = Boolean(req?.file);
+  let reqFileName = "";
+  let newThumbnailPath = "";
+  let oldThumbnailPath = "";
   try {
     await permissionAccess({
       req,
@@ -146,14 +155,13 @@ export const updateNews = async (req, res) => {
       },
       attributes: ["id", "thumbnail"],
     });
-    const hasFile = Boolean(req.file);
-    let reqFileName = null;
-    let newThumbnailPath = null;
-    let oldThumbnailPath = null;
+
     if (hasFile) {
       reqFileName = req.file.filename?.replaceAll(" ", "-");
-      oldThumbnailPath =
-        "./Assets/news/thumbnail/" + findCurrentNews?.thumbnail;
+      if (findCurrentNews?.thumbnail) {
+        oldThumbnailPath =
+          "./Assets/news/thumbnail/" + findCurrentNews?.thumbnail;
+      }
       newThumbnailPath = "./Assets/news/thumbnail/" + reqFileName;
 
       if (req.file.size > 1731986) {
@@ -205,6 +213,18 @@ export const updateNews = async (req, res) => {
     );
     res.status(201).json({msg: "Berhasil mengubah kabar berita"});
   } catch (error) {
+    if (hasFile) {
+      if (fs.existsSync(path.resolve(oldThumbnailPath))) {
+        fs.unlink(path.resolve(oldThumbnailPath), (error) => {
+          if (error) throw error;
+        });
+      }
+      if (fs.existsSync(path.resolve(newThumbnailPath))) {
+        fs.unlink(path.resolve(newThumbnailPath), (error) => {
+          if (error) throw error;
+        });
+      }
+    }
     return res
       .status(error?.status || 500)
       .json({msg: error?.msg || error?.message});
